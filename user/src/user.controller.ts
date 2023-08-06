@@ -132,10 +132,14 @@ export class UserController {
   public async createUser(userParams: IUser): Promise<IUserCreateResponse> {
     let result: IUserCreateResponse;
 
+    console.log('userParams', userParams);
+
     if (userParams) {
       const usersWithEmail = await this.userService.searchUser({
         email: userParams.email,
       });
+
+      console.log('usersWithEmail', usersWithEmail);
 
       if (usersWithEmail && usersWithEmail.length > 0) {
         result = {
@@ -168,14 +172,17 @@ export class UserController {
               to: createdUser.email,
               subject: 'Email confirmation',
               html: `<center>
-              <b>Hi there, please confirm your email to use Smoothday.</b><br>
-              Use the following link for this.<br>
-              <a href="${this.userService.getConfirmationLink(
+            <b>Hi there, please confirm your email to use Smoothday.</b><br>
+            Use the following link for this.<br>
+            <a href="${this.userService.getConfirmationLink(
                 userLink.link,
               )}"><b>Confirm The Email</b></a>
-              </center>`,
+            </center>`,
             })
-            .toPromise();
+            .subscribe({
+              next: (response) => console.log('Email sent successfully.', response),
+              error: (error) => console.error('Failed to send email.', error)
+            });
         } catch (e) {
           result = {
             status: HttpStatus.PRECONDITION_FAILED,
@@ -193,6 +200,7 @@ export class UserController {
         errors: null,
       };
     }
+
 
     return result;
   }
