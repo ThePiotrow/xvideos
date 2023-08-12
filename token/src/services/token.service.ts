@@ -34,28 +34,48 @@ export class TokenService {
   }
 
   public async decodeToken(token: string) {
-    const tokenModel = await this.tokenModel.find({
-      token,
-    });
-    let result = null;
+    // const tokenModel = await this.tokenModel.find({
+    //   token,
+    // });
+    // let result = null;
 
-    if (tokenModel && tokenModel[0]) {
-      try {
-        const tokenData = this.jwtService.decode(tokenModel[0].token) as {
-          exp: number;
-          userId: any;
-        };
-        if (!tokenData || tokenData.exp <= Math.floor(+new Date() / 1000)) {
-          result = null;
-        } else {
-          result = {
-            userId: tokenData.userId,
-          };
-        }
-      } catch (e) {
-        result = null;
-      }
+    // if (tokenModel && tokenModel[0]) {
+    //   try {
+    //     const tokenData = this.jwtService.decode(tokenModel[0].token) as {
+    //       exp: number;
+    //       userId: any;
+    //     };
+    //     if (!tokenData || tokenData.exp <= Math.floor(+new Date() / 1000)) {
+    //       result = null;
+    //     } else {
+    //       result = {
+    //         userId: tokenData.userId,
+    //       };
+    //     }
+    //   } catch (e) {
+    //     result = null;
+    //   }
+    // }
+    // return result;
+    if (!token) {
+      return null;
     }
-    return result;
+    token = token.replace("Bearer ", ""); // Suppression du préfixe
+    const tokenModel = await this.tokenModel.findOne({ token });
+
+    if (!tokenModel) return null;
+
+    try {
+      const tokenData = this.jwtService.verify(tokenModel.token) as {
+        exp: number;
+        userId: any;
+      };
+
+      return {
+        userId: tokenData.userId,
+      };
+    } catch (e) {
+      return null;
+    }
   }
 }

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiTags, ApiOkResponse, ApiCreatedResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 import { Authorization } from './decorators/authorization.decorator';
 import { Permission } from './decorators/permission.decorator';
@@ -32,6 +32,7 @@ import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
 
 @Controller('medias')
+@ApiBearerAuth()
 @ApiTags('medias')
 export class MediasController {
   constructor(

@@ -28,11 +28,27 @@ export class AuthGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
+
+    //Vérifier le préfixe Bearer dans le header Authorization
+    const authHeader = request.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new HttpException('Token not provided.', 401);
+    }
+
+    const token = authHeader.split('Bearer ')[1];
+
     const userTokenInfo = await firstValueFrom(
       this.tokenServiceClient.send('token_decode', {
-        token: request.headers.authorization,
+        token: token,
       }),
     );
+
+    // const userTokenInfo = await firstValueFrom(
+    //   this.tokenServiceClient.send('token_decode', {
+    //     token: request.headers.authorization,
+    //   }),
+    // );
 
     if (!userTokenInfo || !userTokenInfo.data) {
       throw new HttpException(
