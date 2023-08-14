@@ -41,7 +41,7 @@ export class MediasController {
 
   @Get()
   @Authorization(true)
-  @Permission('media_search_by_user_id')
+  // @Permission('media_search_by_user_id')
   @ApiOkResponse({
     type: GetMediasResponseDto,
     description: 'List of medias for signed in user',

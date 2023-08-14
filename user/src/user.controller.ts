@@ -132,14 +132,10 @@ export class UserController {
   public async createUser(userParams: IUser): Promise<IUserCreateResponse> {
     let result: IUserCreateResponse;
 
-    console.log('userParams', userParams);
-
     if (userParams) {
       const usersWithEmail = await this.userService.searchUser({
         email: userParams.email,
       });
-
-      console.log('usersWithEmail', usersWithEmail);
 
       if (usersWithEmail && usersWithEmail.length > 0) {
         result = {

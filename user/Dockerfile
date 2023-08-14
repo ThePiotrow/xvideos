@@ -4,7 +4,7 @@ WORKDIR /var/www/user
 
 COPY package*.json ./
 
-#RUN npm install -g npm@9.8.1
+RUN npm install npm@latest -g
 RUN npm install
 
 COPY . .
