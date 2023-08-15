@@ -23,7 +23,7 @@ function Login() {
         console.log(token);
         localStorage.setItem("token", token);
         toast("Vous êtes connecté!");
-        navigate("/admin");
+        navigate("/");
       })
       .catch(error => {
         console.log(error);

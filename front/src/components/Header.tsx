@@ -25,7 +25,7 @@ export default function Header(): React.ReactElement {
 
   useEffect(() => {
     if (token) {
-      API.get("/auth/me", {
+      API.get("/users", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
