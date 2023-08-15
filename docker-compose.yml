@@ -90,6 +90,19 @@ services:
         networks:
             - backend
 
+    front:
+        build: ./front
+        restart: always
+        volumes:
+        - ./front:/var/www/front
+        - /var/www/front/node_modules
+        env_file:
+        - .env
+        ports:
+        - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
+        networks:
+        - frontend
+
 networks:
     backend:
         driver: bridge

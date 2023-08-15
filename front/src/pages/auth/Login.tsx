@@ -1,24 +1,26 @@
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { TextField, Button, Typography, Container, Grid, Link } from "@mui/material";
 
 function Login() {
   const navigate = useNavigate();
-  
+
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    
-    API.post("/auth/login", {
+
+    API.post("/users/login", {
       email: email,
       password: password,
     })
       .then(response => {
-        const token = response.token;
+        const token = response.data;
+        console.log(token);
         localStorage.setItem("token", token);
         toast("Vous êtes connecté!");
         navigate("/admin");
@@ -29,85 +31,55 @@ function Login() {
       });
   };
 
-  const handleInputChange = (setter: (value: string) => void) => (event: ChangeEvent<HTMLInputElement>) => {
-    setter(event.target.value);
-  };
-
   return (
-    <div className="bg-white white:bg-gray-900">
-      <div className="flex justify-center h-screen">
-        <div className="flex items-center w-full max-w-md px-6 mx-auto lg:w-2/6">
-          <div className="flex-1">
-            <div className="text-center">
-              <div className="flex justify-center mx-auto"></div>
+    <Container component="main" maxWidth="xs">
+      <Typography variant="h5" align="center">
+        Veuillez vous connecter à votre compte
+      </Typography>
 
-              <p className="mt-3 text-gray-500 white:text-gray-300">
-                Veuillez vous connecter à votre compte
-              </p>
-            </div>
-
-            <div className="mt-8">
-              <form onSubmit={handleSubmit}>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block mb-2 text-sm text-gray-600 white:text-gray-200"
-                  >
-                    Adresse email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    placeholder="exemple@exemple.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    autoComplete="current-password"
-                    className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg white:placeholder-gray-600 white:bg-gray-900 white:text-gray-300 white:border-gray-700 focus:border-blue-400 white:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"
-                  />
-                </div>
-
-                <div className="mt-6">
-                  <div className="flex justify-between mb-2">
-                    <label
-                      htmlFor="password"
-                      className="text-sm text-gray-600 white:text-gray-200"
-                    >
-                      Mot de passe
-                    </label>
-                    <a
-                      href="#"
-                      className="text-sm text-gray-400 focus:text-blue-500 hover:text-blue-500 hover:underline"
-                    >
-                      Mot de passe oublié ?
-                    </a>
-                  </div>
-
-                  <input
-                    type="password"
-                    name="password"
-                    id="password"
-                    placeholder="Votre mot de passe"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg white:placeholder-gray-600 white:bg-gray-900 white:text-gray-300 white:border-gray-700 focus:border-blue-400 white:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"
-                  />
-                </div>
-
-                <div className="mt-6">
-                  <button
-                    //onClick={handleSubmit}
-                    className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-300 transform bg-blue-500 rounded-lg hover:bg-blue-400 focus:outline-none focus:bg-blue-400 focus:ring focus:ring-blue-300 focus:ring-opacity-50"
-                  >
-                    Se connecter
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      <form onSubmit={handleSubmit} noValidate>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required
+          fullWidth
+          id="email"
+          label="Adresse email"
+          name="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required
+          fullWidth
+          name="password"
+          label="Mot de passe"
+          type="password"
+          id="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <Grid container>
+          <Grid item xs>
+            <Link href="#" variant="body2">
+              Mot de passe oublié ?
+            </Link>
+          </Grid>
+        </Grid>
+        <Button
+          type="submit"
+          fullWidth
+          variant="contained"
+          color="primary"
+        >
+          Se connecter
+        </Button>
+      </form>
+    </Container>
   );
 }
 
