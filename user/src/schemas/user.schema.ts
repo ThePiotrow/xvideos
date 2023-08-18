@@ -9,6 +9,7 @@ function transformValue(doc, ret: { [key: string]: any }) {
 }
 
 export interface IUserSchema extends mongoose.Document {
+  username: string;
   email: string;
   password: string;
   is_confirmed: boolean;
@@ -18,6 +19,11 @@ export interface IUserSchema extends mongoose.Document {
 
 export const UserSchema = new mongoose.Schema<IUserSchema>(
   {
+    username: {
+      type: String,
+      required: [true, 'Username can not be empty'],
+      minlength: [3, 'Username should include at least 3 chars'],
+    },
     email: {
       type: String,
       required: [true, 'Email can not be empty'],

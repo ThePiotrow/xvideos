@@ -1,10 +1,10 @@
 FROM node:18-alpine
 
-WORKDIR /var/www/media
+WORKDIR /var/www/live
 
 COPY package*.json ./
 
-#RUN npm install -g npm@9.8.1
+RUN npm install npm@latest -g
 RUN npm install
 
 COPY . .

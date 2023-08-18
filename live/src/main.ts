@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
-import { MediaModule } from './media.module';
+import { LiveModule } from './live.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 
 import { ConfigService } from './services/config/config.service';
 
 async function bootstrap() {
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
-    MediaModule,
+    LiveModule,
     {
       transport: Transport.TCP,
       options: {

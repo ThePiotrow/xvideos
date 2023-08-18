@@ -1,33 +1,36 @@
 import * as mongoose from 'mongoose';
-import { IMedia } from '../interfaces/media.interface';
+import { ILive } from '../interfaces/live.interface';
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id;
 }
 
-export const MediaSchema = new mongoose.Schema(
+export const LiveSchema = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
-      required: [true, 'Name can not be empty'],
+      required: [true, 'Title can not be empty'],
     },
-    description: String,
-    user_id: {
+    description: {
       type: String,
+      default: "",
+    },
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
       required: [true, 'User can not be empty'],
     },
     start_time: {
-      type: Number,
+      type: Date,
       required: [true, 'Start time can not be empty'],
     },
-    duration: {
-      type: Number,
-      required: [true, 'Duration can not be empty'],
-    },
-    notification_id: {
-      type: Number,
-      required: false,
+    end_time: {
+      type: Date,
       default: null,
+    },
+    socket_id: {
+      type: String,
+      required: [true, 'Socket id can not be empty'],
     },
   },
   {
@@ -48,8 +51,8 @@ export const MediaSchema = new mongoose.Schema(
   },
 );
 
-MediaSchema.pre('validate', function (next) {
-  const self = this as IMedia;
+LiveSchema.pre('validate', function (next) {
+  const self = this as ILive;
 
   if (this.isModified('user_id') && self.created_at) {
     this.invalidate('user_id', 'The field value can not be updated');

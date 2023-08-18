@@ -3,7 +3,7 @@ export class ConfigService {
 
   constructor() {
     this.envConfig = {
-      port: process.env.MEDIA_SERVICE_PORT,
+      port: process.env.LIVE_SERVICE_PORT,
     };
   }
 

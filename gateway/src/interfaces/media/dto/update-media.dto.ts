@@ -9,6 +9,4 @@ export class UpdateMediaDto {
   start_time: number;
   @ApiProperty({ required: false, example: 90000 })
   duration: number;
-  @ApiProperty({ required: false, example: true })
-  is_solved: boolean;
 }
