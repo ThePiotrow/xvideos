@@ -1,4 +1,4 @@
-export interface ILiveUpdateParams {
+export interface ILive {
   name: string;
   description: string;
   start_time: number;

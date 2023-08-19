@@ -10,6 +10,8 @@ import {
   Req,
   HttpException,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -30,6 +32,7 @@ import { UpdateMediaResponseDto } from './interfaces/media/dto/update-media-resp
 import { CreateMediaDto } from './interfaces/media/dto/create-media.dto';
 import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
 @Controller('medias')
 @ApiBearerAuth()
@@ -41,7 +44,7 @@ export class MediasController {
 
   @Get()
   @Authorization(true)
-  // @Permission('media_search_by_user_id')
+  @Permission('media_search_by_user_id')
   @ApiOkResponse({
     type: GetMediasResponseDto,
     description: 'List of medias for signed in user',
@@ -68,12 +71,14 @@ export class MediasController {
   @Post()
   @Authorization(true)
   @Permission('media_create')
+  @UseInterceptors(FilesInterceptor('files'))
   @ApiCreatedResponse({
     type: CreateMediaResponseDto,
   })
   public async createMedia(
     @Req() request: IAuthorizedRequest,
     @Body() mediaRequest: CreateMediaDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<CreateMediaResponseDto> {
     const userInfo = request.user;
     const createMediaResponse: IServiceMediaCreateResponse =
