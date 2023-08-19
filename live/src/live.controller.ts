@@ -102,6 +102,8 @@ export class LiveController {
 
     if (liveBody) {
       try {
+        liveBody.socket_id = Math.random().toString(36).substring(2);
+        liveBody.start_time = +new Date();
         const live = await this.liveService.createLive(liveBody);
         // socket io create
         result = {
