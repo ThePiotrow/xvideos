@@ -1,19 +1,17 @@
-import { useNavigate } from 'react-router-dom';
-import { ReactNode, useEffect, useState } from 'react';
+//import { useNavigate, } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { useEffect, useState } from 'react';
 import API from "../api"
 
-const isAuthenticated = (): boolean => {
-  const authToken = localStorage.getItem("token");
+
+const isAuthenticated = () => {
+  const authToken = localStorage.getItem("token")
   return !!authToken;
 };
 
-interface AuthGuardProps {
-  children: ReactNode;
-}
-
-function AuthGuard({ children }: AuthGuardProps): ReactNode | null {
+function AuthGuard({ children }) {
   const navigate = useNavigate();
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [isAdmin, setIsAdmin] = useState(null);
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -31,16 +29,20 @@ function AuthGuard({ children }: AuthGuardProps): ReactNode | null {
         }
       }).catch((error) => {
         console.error(error);
-        navigate("/login");
+        navigate("/login")
       });
     }
   }, [navigate]);
 
-  if (!isAuthenticated() || isAdmin === false) {
+  if (!isAuthenticated || isAdmin === false) {
     return null;
   }
 
   return isAdmin !== null ? children : null;
+}
+
+AuthGuard.propTypes = {
+  children: PropTypes.node.isRequired
 }
 
 export default AuthGuard;

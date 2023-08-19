@@ -1,7 +1,6 @@
-import { Link } from "react-router-dom";
-import { ReactElement } from "react";
+//import { Link } from "react-router-dom";
 
-function Home(): ReactElement {
+function HomePage() {
   return (
     <div>
       <div className="text-center pt-4">
@@ -13,6 +12,7 @@ function Home(): ReactElement {
             <div className="w-full max-w-xs max-h-xs overflow-hidden bg-white rounded-3xl shadow-lg">
               <img
                 className="object-cover w-full h52 max-h-44"
+                src={cocktails}
                 alt="cocktails"
               ></img>
               <p className="block text-xl font-bold text-gray-800" tabIndex={0}>
@@ -25,6 +25,7 @@ function Home(): ReactElement {
             <div className="w-full max-w-xs overflow-hidden bg-white rounded-3xl shadow-lg">
               <img
                 className="object-cover w-full h56 max-h-44"
+                src={users}
                 alt="utilisateurs"
               ></img>
               <p className="block text-xl font-bold text-gray-800" tabIndex={0}>
@@ -39,6 +40,7 @@ function Home(): ReactElement {
             <div className="w-full max-w-xs overflow-hidden bg-white rounded-3xl shadow-lg">
               <img
                 className="object-cover w-full h56 max-h-44"
+                src={ingredients}
                 alt="ingrédiens"
               ></img>
               <p className="block text-xl font-bold text-gray-800" tabIndex={0}>
@@ -53,6 +55,7 @@ function Home(): ReactElement {
             <div className="w-full max-w-xs max-h-xs overflow-hidden bg-white rounded-3xl shadow-lg">
               <img
                 className="object-cover w-full h56 max-h-44"
+                src={stocks}
                 alt="stock"
               ></img>
               <p className="block text-xl font-bold text-gray-800" tabIndex={0}>
@@ -67,4 +70,4 @@ function Home(): ReactElement {
   );
 }
 
-export default Home;
+export default HomePage;

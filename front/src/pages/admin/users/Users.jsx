@@ -1,26 +1,19 @@
 import { useState, useEffect } from "react";
 import API from "../../../api";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
-interface User {
-  firstName: string;
-  lastName: string;
-  isAdmin: boolean;
-  email: string;
-  // Add other necessary fields here as needed
-}
+//import { toast } from "react-toastify";
+//import "react-toastify/dist/ReactToastify.css";
 
 function Users() {
-  const [users, setUsers] = useState<User[]>([]);
+const [users, setUsers] = useState([]);
 
-  const getUsers = async () => {
+  const getUSers = async () => {
     try {
       const response = await API.get('/users', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}`}
       });
+      
 
-      setUsers(response.data); // Assuming the users are in the data property of response
+      setUsers(response)
     } catch (error) {
       console.log('Il y a un problème avec la récupération des utilisateurs' + error);
     }
@@ -32,14 +25,14 @@ function Users() {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}`}
       });
 
-      setUsers(response.data); // Assuming the users are in the data property of response
+      setUsers(response)
     } catch (error) {
       console.log('Il y a un problème avec la récupération des utilisateurs' + error);
     }
-  };
+  }
 
   useEffect(() => {
-    getUsers();
+    getUSers();
   }, [users]);
 
   return (
