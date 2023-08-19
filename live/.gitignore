@@ -30,6 +30,6 @@ lerna-debug.log*
 # IDE - VSCode
 .vscode/*
 !.vscode/settings.json
-!.vscode/medias.json
+!.vscode/lives.json
 !.vscode/launch.json
 !.vscode/extensions.json

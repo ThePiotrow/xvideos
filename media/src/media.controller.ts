@@ -100,7 +100,6 @@ export class MediaController {
     if (mediaBody) {
       try {
         mediaBody.notification_id = null;
-        mediaBody.is_solved = false;
         const media = await this.mediaService.createMedia(mediaBody);
         result = {
           status: HttpStatus.CREATED,

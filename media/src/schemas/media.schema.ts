@@ -24,10 +24,6 @@ export const MediaSchema = new mongoose.Schema(
       type: Number,
       required: [true, 'Duration can not be empty'],
     },
-    is_solved: {
-      type: Boolean,
-      required: [true, 'Solved flag can not be empty'],
-    },
     notification_id: {
       type: Number,
       required: false,

@@ -3,6 +3,5 @@ export interface IMediaUpdateParams {
   description: string;
   start_time: number;
   duration: number;
-  is_solved: boolean;
   notification_id: number;
 }

@@ -9,10 +9,11 @@ import { AuthGuard } from './services/guards/authorization.guard';
 import { PermissionGuard } from './services/guards/permission.guard';
 
 import { ConfigService } from './services/config/config.service';
+import { LivesController } from './lives.controller';
 
 @Module({
   imports: [],
-  controllers: [UsersController, MediasController],
+  controllers: [UsersController, MediasController, LivesController],
   providers: [
     ConfigService,
     {
@@ -35,6 +36,13 @@ import { ConfigService } from './services/config/config.service';
       provide: 'MEDIA_SERVICE',
       useFactory: (configService: ConfigService) => {
         return ClientProxyFactory.create(configService.get('mediaService'));
+      },
+      inject: [ConfigService],
+    },
+    {
+      provide: 'LIVE_SERVICE',
+      useFactory: (configService: ConfigService) => {
+        return ClientProxyFactory.create(configService.get('liveService'));
       },
       inject: [ConfigService],
     },

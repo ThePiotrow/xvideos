@@ -25,6 +25,18 @@ services:
         networks:
             - backend
 
+    live:
+        build: ./live
+        restart: always
+        volumes:
+          - ./live:/var/www/live
+        env_file:
+            - .env
+        ports:
+            - ${LIVE_SERVICE_PORT}:${LIVE_SERVICE_PORT}
+        networks:
+            - backend
+
     token:
         build: ./token
         restart: always

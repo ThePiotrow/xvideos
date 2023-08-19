@@ -13,7 +13,6 @@ export class CreateMediaResponseDto {
         start_time: +new Date(),
         duration: 90000,
         user_id: '5d987c3bfb881ec86b476bca',
-        is_solved: false,
         created_at: +new Date(),
         updated_at: +new Date(),
         id: '5d987c3bfb881ec86b476bcc',

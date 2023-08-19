@@ -27,6 +27,13 @@ export class ConfigService {
       },
       transport: Transport.TCP,
     };
+    this.envConfig.liveService = {
+      options: {
+        port: process.env.LIVE_SERVICE_PORT,
+        host: process.env.LIVE_SERVICE_HOST,
+      },
+      transport: Transport.TCP,
+    };
     this.envConfig.permissionService = {
       options: {
         port: process.env.PERMISSION_SERVICE_PORT,
