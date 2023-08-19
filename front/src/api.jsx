@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT}`,
+  baseURL: `${import.meta.env.VITE_BASE_URI}:${
+    import.meta.env.VITE_API_GATEWAY_PORT
+  }`, // l'URL de base de vos requêtes API
   timeout: 10000, // spécifie le nombre de millisecondes avant que la requête n'expire
   headers: {
     "Content-Type": "application/json",
@@ -38,10 +40,10 @@ API.interceptors.response.use(
         // Vous pourriez vouloir faire une redirection vers la page de connexion ici
       }
     } else if (error.request) {
-      console.log('No response was received', error.request);
+      console.log("No response was received", error.request);
     } else {
       // Quelque chose s'est mal passé lors de la configuration de la requête
-      console.log('Error', error.message);
+      console.log("Error", error.message);
     }
 
     return Promise.reject(error);
