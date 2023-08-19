@@ -16,14 +16,14 @@ export class UserController {
 
   @MessagePattern('user_search_by_credentials')
   public async searchUserByCredentials(searchParams: {
-    email: string;
+    username: string;
     password: string;
   }): Promise<IUserSearchResponse> {
     let result: IUserSearchResponse;
 
-    if (searchParams.email && searchParams.password) {
+    if (searchParams.username && searchParams.password) {
       const user = await this.userService.searchUser({
-        email: searchParams.email,
+        username: searchParams.username,
       });
 
       if (user && user[0]) {
@@ -134,7 +134,7 @@ export class UserController {
 
     if (userParams) {
       const usersWithEmail = await this.userService.searchUser({
-        email: userParams.email,
+        username: userParams.username,
       });
 
       if (usersWithEmail && usersWithEmail.length > 0) {

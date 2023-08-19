@@ -14,7 +14,7 @@ export class UserService {
     private readonly configService: ConfigService,
   ) { }
 
-  async searchUser(params: { email: string }): Promise<IUser[]> {
+  async searchUser(params: { username: string }): Promise<IUser[]> {
     return this.userModel.find(params).exec();
   }
 
