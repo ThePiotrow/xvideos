@@ -13,7 +13,6 @@ export class UpdateLiveResponseDto {
         end_time: +new Date(),
         user_id: '5d987c3bfb881ec86b476bca',
         socket_id: '5d987c3bfb881ec86b476bcb',
-        is_finished: false,
         created_at: +new Date(),
         updated_at: +new Date(),
         id: '5d987c3bfb881ec86b476bcc',

@@ -5,6 +5,6 @@ export class UpdateLiveDto {
   name: string;
   @ApiProperty({ required: false, example: 'Edited description' })
   description: string;
-  @ApiProperty({ required: false, example: false })
-  is_finished?: boolean;
+  @ApiProperty({ required: false, example: +new Date() })
+  end_date?: number;
 }

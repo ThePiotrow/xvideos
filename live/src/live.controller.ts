@@ -49,6 +49,9 @@ export class LiveController {
         const live = await this.liveService.findLiveById(params.id);
         if (live) {
           if (live.user_id === params.userId) {
+            if (params.live.end_date) {
+              //socket io destroy
+            }
             const updatedLive = Object.assign(live, params.live);
             await updatedLive.save();
             result = {
@@ -99,9 +102,8 @@ export class LiveController {
 
     if (liveBody) {
       try {
-        liveBody.notification_id = null;
-        liveBody.is_finished = false;
         const live = await this.liveService.createLive(liveBody);
+        // socket io create
         result = {
           status: HttpStatus.CREATED,
           message: 'live_create_success',
