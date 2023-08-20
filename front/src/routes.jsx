@@ -4,13 +4,18 @@ import Login from "./pages/auth/Login";
 import HomePage from "./pages/admin/HomePage";
 import AuthGuard from "./guards/AuthGuard";
 import Users from "./pages/admin/users/Users"
+import useToken from "./hooks/useToken"
+
 
 function AppRoutes() {
+  const { token, setToken } = useToken
+
+  if(!token) {
+    return <Routes><Route path="/login" element={<Login setToken={setToken} />} /></Routes>
+  }
   return (
     <Routes>
       <Route exact path="/" element={<Home />} />
-      <Route path="/login" element={<Login />} />
-
 
       {/* IS AUTHENTICATED && IS ADMIN */}
       <Route path="/admin" element={<AuthGuard><HomePage /></AuthGuard>} />

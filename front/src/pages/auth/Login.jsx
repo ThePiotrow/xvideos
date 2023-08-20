@@ -2,21 +2,23 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import { toast } from "react-toastify";
-//import "react-toastify/dist/ReactToastify.css";
+import PropTypes from 'prop-types';
+import "react-toastify/dist/ReactToastify.css";
+
 
 function Login() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     API.post("/users/login", {
-      email: email,
+      username: username,
       password: password,
     })
       .then((response) => {
-        const token = response.token;
+        const token = response.data.token;
         localStorage.setItem("token", token);
         toast("Vous êtes connecté!");
         navigate("/");
@@ -26,6 +28,8 @@ function Login() {
         toast.error("Un problème est survenu !");
       });
   };
+
+
   return (
     <div className="bg-white white:bg-gray-900">
       <div className="flex justify-center h-screen">
@@ -43,18 +47,18 @@ function Login() {
               <form onSubmit={handleSubmit}>
                 <div>
                   <label
-                    htmlFor="email"
+                    htmlFor="username"
                     className="block mb-2 text-sm text-gray-600 white:text-gray-200"
                   >
-                    Adresse email
+                    Username
                   </label>
                   <input
-                    type="email"
-                    name="email"
-                    id="email"
-                    placeholder="exemple@exemple.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="username"
+                    name="username"
+                    id="username"
+                    placeholder="exemple"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
                     autoComplete="current-password"
                     className="block w-full px-4 py-2 mt-2 text-gray-700 placeholder-gray-400 bg-white border border-gray-200 rounded-lg white:placeholder-gray-600 white:bg-gray-900 white:text-gray-300 white:border-gray-700 focus:border-blue-400 white:focus:border-blue-400 focus:ring-blue-400 focus:outline-none focus:ring focus:ring-opacity-40"
                   />

@@ -4,34 +4,29 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 //import logo from "../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../api";
+import useToken from "../hooks/useToken";
 
 export default function Header() {
   const navigate = useNavigate();
-  const [token, setToken] = useState(localStorage?.getItem("token"));
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [user, setUser] = useState(null);
 
-  useEffect(() => {
-    if (token) {
-      API.get("/users", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => {
-          console.log(response);
-          console.log(token);
-          console.log(user);
-          setUser(response);
-        })
-        .catch((error) => console.error(error));
-    }
-  }, [token]);
+  const { token } = useToken();
 
-  // fonction pour gérer la déconnexion
+useEffect(() => {
+  if(token) {
+    API.get('/users', {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }).then((response) => {
+      setUser(response.data.user)
+    }).catch((error) => console.error(error))
+  }
+}, [useToken.token]);
+
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setToken(null);
     setUser(null);
     navigate("/login");
   };
@@ -48,7 +43,7 @@ export default function Header() {
           </Link>
         </div>
         <Popover.Group className="hidden lg:flex lg:gap-x-12">
-          <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
+          <a href="#" className="text-3xl font-bold underline">
             Features
           </a>
           <a href="#" className="text-sm font-semibold leading-6 text-gray-900">
@@ -61,7 +56,7 @@ export default function Header() {
         <div className="hidden lg:flex lg:flex-1 lg:justify-end">
           {user ? (
             <span className="text-sm font semibold leading-6 text-gray-900">
-              Bienvenue {user.firstName} {user.lastName}
+              Bienvenue {user.username}
               <button
                 type="button"
                 onClick={handleLogout}

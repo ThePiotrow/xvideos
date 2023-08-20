@@ -7,11 +7,13 @@ import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <BrowserRouter>
-      <ToastContainer />
-      <Header />
-      <AppRoutes />
-    </BrowserRouter>
+    <div className="wrapper">
+      <BrowserRouter>
+        <ToastContainer />
+        <Header />
+        <AppRoutes />
+      </BrowserRouter>
+    </div>
   );
 }
 
