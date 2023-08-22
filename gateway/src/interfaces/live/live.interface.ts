@@ -1,5 +1,5 @@
 export interface ILive {
-  name: string;
+  title: string;
   description: string;
   start_time: number;
   end_date: number;

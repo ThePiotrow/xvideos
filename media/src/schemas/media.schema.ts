@@ -22,7 +22,7 @@ export const MediaSchema = new mongoose.Schema(
     },
     path: {
       type: String,
-      required: [true, 'User can not be empty'],
+      required: [true, 'Path can not be empty'],
     },
   },
   {

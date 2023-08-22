@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateMediaDto {
   @ApiProperty({ example: 'test media' })
-  name: string;
+  title: string;
   @ApiProperty({ example: 'test media description' })
   description: string;
   @ApiProperty({ type: 'string', format: 'binary' })

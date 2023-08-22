@@ -90,15 +90,15 @@ export class MediasController {
         user_id: user.id,
         file: file,
         duration: null,
+        data: file.buffer,
       }
     );
-
 
     const createMediaResponse: IServiceMediaCreateResponse =
       await firstValueFrom(
         this.mediaServiceClient.send(
           'media_create',
-          media
+          { ...media }
         ),
       );
 

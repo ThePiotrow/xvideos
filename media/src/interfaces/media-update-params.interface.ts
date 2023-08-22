@@ -1,4 +1,4 @@
 export interface IMediaUpdateParams {
-  name: string;
+  title: string;
   description: string;
 }

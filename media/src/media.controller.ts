@@ -101,14 +101,9 @@ export class MediaController {
 
         const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
 
-        const file = {
-          ...body.file,
-          name: `${body.file.originalname.replace(/(\.[^\.]+)$/, `-${suffix}$1`).replace(/\s/g, '-')}`,
-        };
+        body.path = `${body.file.originalname.replace(/(\.[^\.]+)$/, `-${suffix}$1`).replace(/\s/g, '-')}`;
 
-        console.log(body.file.originalname.replace(/(\.[^\.]+)$/, `-${suffix}$1`).replace(/\s/g, '-'))
-
-        if (!file.mimetype.includes('image') && !file.mimetype.includes('video')) {
+        if (!body.file.mimetype.includes('image') && !body.file.mimetype.includes('video')) {
           return {
             status: HttpStatus.BAD_REQUEST,
             message: 'media_create_bad_request_media_type',
@@ -119,10 +114,10 @@ export class MediaController {
 
         const folder = 'uploads';
 
-        // fs.writeFile(`./${folder}/${file.name}`, file.buffer.toString(), (err) => {
-        //   if (err) console.log(err);
-        //   console.log("The file has been saved!");
-        // });
+        fs.writeFile(`./${folder}/${body.path}`, Buffer.from(body.data), (err) => {
+          if (err) console.log(err);
+          console.log("The file has been saved!");
+        });
 
         const media = await this.mediaService.createMedia(body);
         return {

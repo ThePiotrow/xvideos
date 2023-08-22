@@ -1,5 +1,5 @@
 export interface ILiveUpdateParams {
-  name: string;
+  title: string;
   description: string;
   end_date?: number;
 }

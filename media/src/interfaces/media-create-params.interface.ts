@@ -1,5 +1,5 @@
 export interface IMediaUpdateParams {
-  name: string;
+  title: string;
   description: string;
   file: Express.Multer.File;
 }

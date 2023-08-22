@@ -1,5 +1,5 @@
 export interface IMedia {
-  name: string;
+  title: string;
   description: string;
   user_id: string;
   duration: number | null;
