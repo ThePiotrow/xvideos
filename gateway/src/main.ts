@@ -6,9 +6,7 @@ import { ConfigService } from './services/config/config.service';
 async function bootstrap() {
   console.log(new ConfigService().get('tokenService'));
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    origin: 'http://localhost:3006',
-  });
+  app.enableCors();
   const options = new DocumentBuilder()
     .setTitle('API docs')
     .addTag('users')
