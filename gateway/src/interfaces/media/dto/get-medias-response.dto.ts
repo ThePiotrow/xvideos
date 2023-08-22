@@ -8,10 +8,8 @@ export class GetMediasResponseDto {
     example: {
       medias: [
         {
-          notification_id: null,
           name: 'test media',
           description: 'test media description',
-          start_time: +new Date(),
           duration: 90000,
           user_id: '5d987c3bfb881ec86b476bca',
           created_at: +new Date(),

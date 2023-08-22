@@ -37,7 +37,7 @@ export class TokenService {
     // const tokenModel = await this.tokenModel.find({
     //   token,
     // });
-    // let result = null;
+    // let return null;
 
     // if (tokenModel && tokenModel[0]) {
     //   try {
@@ -46,14 +46,14 @@ export class TokenService {
     //       userId: any;
     //     };
     //     if (!tokenData || tokenData.exp <= Math.floor(+new Date() / 1000)) {
-    //       result = null;
+    //       return null;
     //     } else {
-    //       result = {
+    //       return {
     //         userId: tokenData.userId,
     //       };
     //     }
     //   } catch (e) {
-    //     result = null;
+    //     return null;
     //   }
     // }
     // return result;

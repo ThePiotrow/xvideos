@@ -21,20 +21,18 @@ export class LiveController {
 
     if (userId) {
       const lives = await this.liveService.getLivesByUserId(userId);
-      result = {
+      return {
         status: HttpStatus.OK,
         message: 'live_search_by_user_id_success',
         lives,
       };
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'live_search_by_user_id_bad_request',
         lives: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('live_update_by_id')
@@ -47,21 +45,23 @@ export class LiveController {
     if (params.id) {
       try {
         const live = await this.liveService.findLiveById(params.id);
+        console.log('live', live)
         if (live) {
-          if (live.user_id === params.userId) {
+          console.log('live.user_id', live.user_id.toString(), 'params.userId', params.userId)
+          if (live.user_id.toString() === params.userId.toString()) {
             if (params.live.end_date) {
               //socket io destroy
             }
             const updatedLive = Object.assign(live, params.live);
             await updatedLive.save();
-            result = {
+            return {
               status: HttpStatus.OK,
               message: 'live_update_by_id_success',
               live: updatedLive,
               errors: null,
             };
           } else {
-            result = {
+            return {
               status: HttpStatus.FORBIDDEN,
               message: 'live_update_by_id_forbidden',
               live: null,
@@ -69,7 +69,7 @@ export class LiveController {
             };
           }
         } else {
-          result = {
+          return {
             status: HttpStatus.NOT_FOUND,
             message: 'live_update_by_id_not_found',
             live: null,
@@ -77,7 +77,7 @@ export class LiveController {
           };
         }
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: 'live_update_by_id_precondition_failed',
           live: null,
@@ -85,15 +85,13 @@ export class LiveController {
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'live_update_by_id_bad_request',
         live: null,
         errors: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('live_create')
@@ -106,14 +104,14 @@ export class LiveController {
         liveBody.start_time = +new Date();
         const live = await this.liveService.createLive(liveBody);
         // socket io create
-        result = {
+        return {
           status: HttpStatus.CREATED,
           message: 'live_create_success',
           live,
           errors: null,
         };
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: 'live_create_precondition_failed',
           live: null,
@@ -121,15 +119,13 @@ export class LiveController {
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'live_create_bad_request',
         live: null,
         errors: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('live_delete_by_id')
@@ -146,40 +142,38 @@ export class LiveController {
         if (live) {
           if (live.user_id === params.userId) {
             await this.liveService.removeLiveById(params.id);
-            result = {
+            return {
               status: HttpStatus.OK,
               message: 'live_delete_by_id_success',
               errors: null,
             };
           } else {
-            result = {
+            return {
               status: HttpStatus.FORBIDDEN,
               message: 'live_delete_by_id_forbidden',
               errors: null,
             };
           }
         } else {
-          result = {
+          return {
             status: HttpStatus.NOT_FOUND,
             message: 'live_delete_by_id_not_found',
             errors: null,
           };
         }
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.FORBIDDEN,
           message: 'live_delete_by_id_forbidden',
           errors: null,
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'live_delete_by_id_bad_request',
         errors: null,
       };
     }
-
-    return result;
   }
 }

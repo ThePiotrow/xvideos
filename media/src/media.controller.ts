@@ -9,6 +9,8 @@ import { IMediaDeleteResponse } from './interfaces/media-delete-response.interfa
 import { IMediaCreateResponse } from './interfaces/media-create-response.interface';
 import { IMediaUpdateByIdResponse } from './interfaces/media-update-by-id-response.interface';
 
+import * as fs from 'node:fs';
+
 @Controller()
 export class MediaController {
   constructor(private readonly mediaService: MediaService) { }
@@ -21,20 +23,18 @@ export class MediaController {
 
     if (userId) {
       const medias = await this.mediaService.getMediasByUserId(userId);
-      result = {
+      return {
         status: HttpStatus.OK,
         message: 'media_search_by_user_id_success',
         medias,
       };
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'media_search_by_user_id_bad_request',
         medias: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('media_update_by_id')
@@ -48,17 +48,17 @@ export class MediaController {
       try {
         const media = await this.mediaService.findMediaById(params.id);
         if (media) {
-          if (media.user_id === params.userId) {
+          if (media.user_id.toString() === params.userId.toString()) {
             const updatedMedia = Object.assign(media, params.media);
             await updatedMedia.save();
-            result = {
+            return {
               status: HttpStatus.OK,
               message: 'media_update_by_id_success',
               media: updatedMedia,
               errors: null,
             };
           } else {
-            result = {
+            return {
               status: HttpStatus.FORBIDDEN,
               message: 'media_update_by_id_forbidden',
               media: null,
@@ -66,7 +66,7 @@ export class MediaController {
             };
           }
         } else {
-          result = {
+          return {
             status: HttpStatus.NOT_FOUND,
             message: 'media_update_by_id_not_found',
             media: null,
@@ -74,7 +74,7 @@ export class MediaController {
           };
         }
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: 'media_update_by_id_precondition_failed',
           media: null,
@@ -82,33 +82,57 @@ export class MediaController {
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'media_update_by_id_bad_request',
         media: null,
         errors: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('media_create')
-  public async mediaCreate(mediaBody: IMedia): Promise<IMediaCreateResponse> {
-    let result: IMediaCreateResponse;
+  public async mediaCreate(body: IMedia): Promise<IMediaCreateResponse> {
 
-    if (mediaBody) {
+    console.log(body)
+
+    if (body && body.file) {
       try {
-        mediaBody.notification_id = null;
-        const media = await this.mediaService.createMedia(mediaBody);
-        result = {
+
+        const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
+
+        const file = {
+          ...body.file,
+          name: `${body.file.originalname.replace(/(\.[^\.]+)$/, `-${suffix}$1`).replace(/\s/g, '-')}`,
+        };
+
+        console.log(body.file.originalname.replace(/(\.[^\.]+)$/, `-${suffix}$1`).replace(/\s/g, '-'))
+
+        if (!file.mimetype.includes('image') && !file.mimetype.includes('video')) {
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'media_create_bad_request_media_type',
+            media: null,
+            errors: null,
+          };
+        }
+
+        const folder = 'uploads';
+
+        // fs.writeFile(`./${folder}/${file.name}`, file.buffer.toString(), (err) => {
+        //   if (err) console.log(err);
+        //   console.log("The file has been saved!");
+        // });
+
+        const media = await this.mediaService.createMedia(body);
+        return {
           status: HttpStatus.CREATED,
           message: 'media_create_success',
           media,
           errors: null,
         };
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: 'media_create_precondition_failed',
           media: null,
@@ -116,15 +140,13 @@ export class MediaController {
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'media_create_bad_request',
         media: null,
         errors: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('media_delete_by_id')
@@ -141,40 +163,38 @@ export class MediaController {
         if (media) {
           if (media.user_id === params.userId) {
             await this.mediaService.removeMediaById(params.id);
-            result = {
+            return {
               status: HttpStatus.OK,
               message: 'media_delete_by_id_success',
               errors: null,
             };
           } else {
-            result = {
+            return {
               status: HttpStatus.FORBIDDEN,
               message: 'media_delete_by_id_forbidden',
               errors: null,
             };
           }
         } else {
-          result = {
+          return {
             status: HttpStatus.NOT_FOUND,
             message: 'media_delete_by_id_not_found',
             errors: null,
           };
         }
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.FORBIDDEN,
           message: 'media_delete_by_id_forbidden',
           errors: null,
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'media_delete_by_id_bad_request',
         errors: null,
       };
     }
-
-    return result;
   }
 }

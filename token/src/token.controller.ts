@@ -7,7 +7,7 @@ import { ITokenDestroyResponse } from './interfaces/token-destroy-response.inter
 
 @Controller('token')
 export class TokenController {
-  constructor(private readonly tokenService: TokenService) {}
+  constructor(private readonly tokenService: TokenService) { }
 
   @MessagePattern('token_create')
   public async createToken(data: { userId: string }): Promise<ITokenResponse> {
@@ -15,27 +15,25 @@ export class TokenController {
     if (data && data.userId) {
       try {
         const createResult = await this.tokenService.createToken(data.userId);
-        result = {
+        return {
           status: HttpStatus.CREATED,
           message: 'token_create_success',
           token: createResult.token,
         };
       } catch (e) {
-        result = {
+        return {
           status: HttpStatus.BAD_REQUEST,
           message: 'token_create_bad_request',
           token: null,
         };
       }
     } else {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'token_create_bad_request',
         token: null,
       };
     }
-
-    return result;
   }
 
   @MessagePattern('token_destroy')
@@ -47,7 +45,7 @@ export class TokenController {
       message:
         data && data.userId
           ? (await this.tokenService.deleteTokenForUserId(data.userId)) &&
-            'token_destroy_success'
+          'token_destroy_success'
           : 'token_destroy_bad_request',
       errors: null,
     };

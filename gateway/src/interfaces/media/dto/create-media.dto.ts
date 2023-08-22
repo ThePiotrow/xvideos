@@ -5,8 +5,6 @@ export class CreateMediaDto {
   name: string;
   @ApiProperty({ example: 'test media description' })
   description: string;
-  @ApiProperty({ example: +new Date() })
-  start_time: number;
-  @ApiProperty({ example: 90000 })
-  duration: number;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  file: any;
 }

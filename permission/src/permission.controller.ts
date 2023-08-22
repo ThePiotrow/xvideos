@@ -17,7 +17,7 @@ export class PermissionController {
     let result: IPermissionCheckResponse;
 
     if (!permissionParams || !permissionParams.user) {
-      result = {
+      return {
         status: HttpStatus.BAD_REQUEST,
         message: 'permission_check_bad_request',
         errors: null,
@@ -31,7 +31,7 @@ export class PermissionController {
         permissionParams.permission,
       );
 
-      result = {
+      return {
         status: isAllowed ? HttpStatus.OK : HttpStatus.FORBIDDEN,
         message: isAllowed
           ? 'permission_check_success'
@@ -39,7 +39,5 @@ export class PermissionController {
         errors: null,
       };
     }
-
-    return result;
   }
 }

@@ -5,7 +5,6 @@ const SALT_ROUNDS = 10;
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id;
-  delete ret.password;
 }
 
 export interface IUserSchema extends mongoose.Document {

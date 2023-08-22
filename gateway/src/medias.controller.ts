@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
 
 import { Authorization } from './decorators/authorization.decorator';
 import { Permission } from './decorators/permission.decorator';
@@ -32,7 +32,8 @@ import { UpdateMediaResponseDto } from './interfaces/media/dto/update-media-resp
 import { CreateMediaDto } from './interfaces/media/dto/create-media.dto';
 import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { IMedia } from './interfaces/media/media.interface';
 
 @Controller('medias')
 @ApiBearerAuth()
@@ -52,11 +53,11 @@ export class MediasController {
   public async getMedias(
     @Req() request: IAuthorizedRequest,
   ): Promise<GetMediasResponseDto> {
-    const userInfo = request.user;
+    const user = request.user;
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
-        this.mediaServiceClient.send('media_search_by_user_id', userInfo.id),
+        this.mediaServiceClient.send('media_search_by_user_id', user.id),
       );
 
     return {
@@ -71,21 +72,33 @@ export class MediasController {
   @Post()
   @Authorization(true)
   @Permission('media_create')
-  @UseInterceptors(FilesInterceptor('files'))
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   @ApiCreatedResponse({
     type: CreateMediaResponseDto,
   })
   public async createMedia(
     @Req() request: IAuthorizedRequest,
-    @Body() mediaRequest: CreateMediaDto,
+    @Body() body: CreateMediaDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<CreateMediaResponseDto> {
-    const userInfo = request.user;
+    const user = request.user;
+
+    const media = Object.assign(
+      body,
+      {
+        user_id: user.id,
+        file: file,
+        duration: null,
+      }
+    );
+
+
     const createMediaResponse: IServiceMediaCreateResponse =
       await firstValueFrom(
         this.mediaServiceClient.send(
           'media_create',
-          Object.assign(mediaRequest, { user_id: userInfo.id }),
+          media
         ),
       );
 
@@ -119,13 +132,13 @@ export class MediasController {
     @Req() request: IAuthorizedRequest,
     @Param() params: MediaIdDto,
   ): Promise<DeleteMediaResponseDto> {
-    const userInfo = request.user;
+    const user = request.user;
 
     const deleteMediaResponse: IServiceMediaDeleteResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_delete_by_id', {
           id: params.id,
-          userId: userInfo.id,
+          userId: user.id,
         }),
       );
 
@@ -158,12 +171,12 @@ export class MediasController {
     @Param() params: MediaIdDto,
     @Body() mediaRequest: UpdateMediaDto,
   ): Promise<UpdateMediaResponseDto> {
-    const userInfo = request.user;
+    const user = request.user;
     const updateMediaResponse: IServiceMediaUpdateByIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_update_by_id', {
           id: params.id,
-          userId: userInfo.id,
+          userId: user.id,
           media: mediaRequest,
         }),
       );

@@ -16,18 +16,13 @@ export const MediaSchema = new mongoose.Schema(
       type: String,
       required: [true, 'User can not be empty'],
     },
-    start_time: {
-      type: Number,
-      required: [true, 'Start time can not be empty'],
-    },
     duration: {
       type: Number,
-      required: [true, 'Duration can not be empty'],
+      required: [false, 'Duration can not be empty'],
     },
-    notification_id: {
-      type: Number,
-      required: false,
-      default: null,
+    path: {
+      type: String,
+      required: [true, 'User can not be empty'],
     },
   },
   {

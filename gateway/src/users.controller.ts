@@ -31,6 +31,9 @@ import { LoginUserResponseDto } from './interfaces/user/dto/login-user-response.
 import { LogoutUserResponseDto } from './interfaces/user/dto/logout-user-response.dto';
 import { ConfirmUserDto } from './interfaces/user/dto/confirm-user.dto';
 import { ConfirmUserResponseDto } from './interfaces/user/dto/confirm-user-response.dto';
+import { CheckUsernameAvailabilityResponseDto } from './interfaces/user/dto/check-username-availability-response.dto';
+import { CheckUsernameAvailabilityDto } from './interfaces/user/dto/check-username-availability.dto';
+import { IServiceUsernameUserCheckAvailabilityDtoResponse } from './interfaces/user/service-check-username-response.interface';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -174,6 +177,41 @@ export class UsersController {
       message: destroyTokenResponse.message,
       errors: null,
       data: null,
+    };
+  }
+
+  @Get('/username/check-availability/:username')
+  @ApiOkResponse({
+    type: CheckUsernameAvailabilityResponseDto,
+  })
+  public async checkUsernameUsernameAvailability(
+    @Param() params: CheckUsernameAvailabilityDto,
+  ): Promise<CheckUsernameAvailabilityResponseDto> {
+    const getUserResponse: IServiceUsernameUserCheckAvailabilityDtoResponse = await firstValueFrom(
+      this.userServiceClient.send('user_username_check_availability', {
+        username: params.username,
+      }),
+    );
+
+    if (getUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: getUserResponse.message,
+          data: null,
+
+          errors: getUserResponse.errors,
+        },
+        getUserResponse.status,
+      );
+    }
+
+    return {
+      message: getUserResponse.message,
+      data: {
+        available: getUserResponse.available,
+      },
+
+      errors: null,
     };
   }
 

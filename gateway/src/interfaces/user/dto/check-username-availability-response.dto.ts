@@ -1,22 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IUser } from '../user.interface';
 
-export class GetUserByTokenResponseDto {
-  @ApiProperty({ example: 'user_get_by_id_success' })
+export class CheckUsernameAvailabilityResponseDto {
+  @ApiProperty({ example: 'user_username_check_availabilityOrEmail' })
   message: string;
   @ApiProperty({
     example: {
-      user: {
-        username: 'username',
-        email: 'test@example.com',
-        is_confirmed: true,
-        id: '5d987c3bfb881ec86b476bcc',
-      },
+      available: true,
     },
     nullable: true,
   })
   data: {
-    user: IUser;
+    available: boolean;
   };
   @ApiProperty({ example: null, nullable: true })
   errors: { [key: string]: any };

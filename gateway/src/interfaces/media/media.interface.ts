@@ -1,7 +1,8 @@
 export interface IMedia {
   name: string;
   description: string;
-  start_time: number;
-  duration: number;
-  notification_id: number;
+  user_id: string;
+  duration: number | null;
+  file: string;
+  created_at: number;
 }

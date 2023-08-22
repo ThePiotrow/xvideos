@@ -10,6 +10,8 @@ export const permissions = [
   'media_create',
   'media_delete_by_id',
   'media_update_by_id',
+  'live_create',
+  'live_update_by_id',
   'live_search_by_user_id',
   'live_create',
   'live_join',
