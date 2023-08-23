@@ -5,17 +5,16 @@ import HomePage from "./pages/admin/HomePage";
 import AuthGuard from "./guards/AuthGuard";
 import Users from "./pages/admin/users/Users"
 import useToken from "./hooks/useToken"
+import SignUp from "./pages/auth/SignUp";
 
 
 function AppRoutes() {
-  const { token, setToken } = useToken
+  const token = localStorage.getItem("token")
 
-  if(!token) {
-    return <Routes><Route path="/login" element={<Login setToken={setToken} />} /></Routes>
-  }
   return (
     <Routes>
       <Route exact path="/" element={<Home />} />
+      <Route path="/signup" element={<AuthGuard><SignUp /></AuthGuard>} />
 
       {/* IS AUTHENTICATED && IS ADMIN */}
       <Route path="/admin" element={<AuthGuard><HomePage /></AuthGuard>} />
@@ -23,6 +22,6 @@ function AppRoutes() {
 
     </Routes>
   );
-}
+ }
 
 export default AppRoutes;

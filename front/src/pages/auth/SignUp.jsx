@@ -4,31 +4,30 @@ import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-
-function Login() {
+function SignUp() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    API.post("/users/login", {
+    API.post("/users", {
       username: username,
+      email: email,
       password: password,
     })
       .then((response) => {
         const token = response.data.token;
         localStorage.setItem("token", token);
-        toast("Vous êtes connecté!");
-        navigate("/");
+        toast("Vous êtes inscrit!");
+        navigate("/login");
       })
       .catch((error) => {
         console.log(error);
         toast.error("Un problème est survenu !");
       });
   };
-
-
   return (
     <section className="max-w-4xl p-6 mx-auto bg-white rounded-md shadow-md dark:bg-gray-800">
       <div className="flex justify-center h-screen">
@@ -37,9 +36,21 @@ function Login() {
             <div className="text-center">
               <h2 className="text-lg font-semibold text-gray-700 capitalize dark:text-white">Veuillez vous connecter à votre compte</h2>
             </div>
-
             <div className="mt-8">
               <form onSubmit={handleSubmit}>
+              <div>
+                  <label htmlFor="username" className="text-gray-700 dark:text-gray-200">Email</label>
+                  <input
+                    type="username"
+                    name="username"
+                    id="username"
+                    placeholder="exemple"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="current-password"
+                    className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
+                  />
+                </div>
                 <div>
                   <label htmlFor="username" className="text-gray-700 dark:text-gray-200">Username</label>
                   <input
@@ -80,8 +91,7 @@ function Login() {
         </div>
       </div>
     </section>
-    
-  );
+  )
 }
 
-export default Login;
+export default SignUp;
