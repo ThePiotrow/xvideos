@@ -10,7 +10,6 @@ export class GetMediasResponseDto {
         {
           name: 'test media',
           description: 'test media description',
-          duration: 90000,
           user_id: '5d987c3bfb881ec86b476bca',
           created_at: +new Date(),
           updated_at: +new Date(),

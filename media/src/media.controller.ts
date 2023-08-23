@@ -9,8 +9,6 @@ import { IMediaDeleteResponse } from './interfaces/media-delete-response.interfa
 import { IMediaCreateResponse } from './interfaces/media-create-response.interface';
 import { IMediaUpdateByIdResponse } from './interfaces/media-update-by-id-response.interface';
 
-import * as fs from 'node:fs';
-
 @Controller()
 export class MediaController {
   constructor(private readonly mediaService: MediaService) { }
@@ -94,14 +92,15 @@ export class MediaController {
   @MessagePattern('media_create')
   public async mediaCreate(body: IMedia): Promise<IMediaCreateResponse> {
 
-    console.log(body)
-
     if (body && body.file) {
       try {
 
+        const folder = 'uploads';
         const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
 
-        body.path = `${body.file.originalname.replace(/(\.[^\.]+)$/, `-${suffix}$1`).replace(/\s/g, '-')}`;
+        body.path = body.file.originalname
+          .replace(/(\.[^\.]+)$/, `-${suffix}$1`)
+          .replace(/[^a-zA-Z0-9-.]/g, '-');
 
         if (!body.file.mimetype.includes('image') && !body.file.mimetype.includes('video')) {
           return {
@@ -112,12 +111,13 @@ export class MediaController {
           };
         }
 
-        const folder = 'uploads';
-
-        fs.writeFile(`./${folder}/${body.path}`, Buffer.from(body.data), (err) => {
-          if (err) console.log(err);
-          console.log("The file has been saved!");
-        });
+        if (!this.mediaService.createFile(`./${folder}/${body.path}`, body.data))
+          return {
+            status: HttpStatus.BAD_REQUEST,
+            message: 'media_create_bad_request',
+            media: null,
+            errors: null,
+          };
 
         const media = await this.mediaService.createMedia(body);
         return {
@@ -126,6 +126,7 @@ export class MediaController {
           media,
           errors: null,
         };
+
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,

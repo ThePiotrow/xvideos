@@ -16,10 +16,6 @@ export const MediaSchema = new mongoose.Schema(
       type: String,
       required: [true, 'User can not be empty'],
     },
-    duration: {
-      type: Number,
-      required: [false, 'Duration can not be empty'],
-    },
     path: {
       type: String,
       required: [true, 'Path can not be empty'],

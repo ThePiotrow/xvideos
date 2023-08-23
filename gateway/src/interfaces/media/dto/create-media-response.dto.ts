@@ -9,8 +9,8 @@ export class CreateMediaResponseDto {
       media: {
         name: 'test media',
         description: 'test media description',
-        duration: 90000,
         user_id: '5d987c3bfb881ec86b476bca',
+        path: './uploads/5d987c3bfb881ec86b476bca/5d987c3bfb881ec86b476bcc',
         created_at: +new Date(),
         updated_at: +new Date(),
         id: '5d987c3bfb881ec86b476bcc',
