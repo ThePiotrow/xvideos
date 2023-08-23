@@ -11,6 +11,8 @@ import { PermissionGuard } from './services/guards/permission.guard';
 import { ConfigService } from './services/config/config.service';
 import { LivesController } from './lives.controller';
 
+import { EventsGateway } from './events.gateway';
+
 @Module({
   imports: [],
   controllers: [UsersController, MediasController, LivesController],
@@ -63,6 +65,7 @@ import { LivesController } from './lives.controller';
       provide: APP_GUARD,
       useClass: PermissionGuard,
     },
+    EventsGateway
   ],
 })
 export class AppModule { }

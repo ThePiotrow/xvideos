@@ -104,6 +104,46 @@ export class LivesController {
     };
   }
 
+
+  @Post(':id/stop')
+  @Authorization(true)
+  @Permission('live_stop')
+  @ApiCreatedResponse({
+    type: CreateLiveResponseDto,
+  })
+  public async stopLive(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: LiveIdDto,
+  ): Promise<CreateLiveResponseDto> {
+    const userInfo = request.user;
+    const createLiveResponse: IServiceLiveCreateResponse =
+      await firstValueFrom(
+        this.liveServiceClient.send(
+          'live_stop',
+          Object.assign(params, { userId: userInfo.id }),
+        ),
+      );
+
+    if (createLiveResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: createLiveResponse.message,
+          data: null,
+          errors: createLiveResponse.errors,
+        },
+        createLiveResponse.status,
+      );
+    }
+
+    return {
+      message: createLiveResponse.message,
+      data: {
+        live: createLiveResponse.live,
+      },
+      errors: null,
+    };
+  }
+
   @Delete(':id')
   @Authorization(true)
   @Permission('live_delete_by_id')

@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
+        integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"
+        integrity="sha512-qtX0GLM3qX8rxJN1gyDfcnMFFrKvixfoEOwbBib9VafR5vbChV5LeE5wSI/x+IlCkTY5ZFddFDCCfaVJJNnuKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+
+    Room ID : <input type="text" id="roomID" value="1234" />
+    </br>
+    <button id="start">Start</button>
+    </br>
+    <button id="stop">Stop</button>
+
+    <video src="" id="video" autoplay="true"></video>
+    </br>
+    <canvas style="display:none;" id="preview"></canvas>
+    <div id="log"></div>
+
+    Nb viewers : <span id="nbViewers">0</span>
+
+    <script type="text/javascript">
+        const socket = io('ws://localhost:3000');
+        let connected = null;
+
+        const startBtn = document.getElementById("start");
+        const stopBtn = document.getElementById("stop");
+
+        startBtn.addEventListener("click", () => {
+            const roomID = document.getElementById("roomID").value;
+            if (!connected)
+                start(roomID);
+        });
+
+        stopBtn.addEventListener("click", () => {
+            const roomID = document.getElementById("roomID").value;
+            if (connected)
+                stop(roomID);
+        });
+
+        const start = (roomID) => {
+            let mediaRecorder;
+            const imageBuffer = [];
+            const audioBuffer = [];
+            const canvas = document.getElementById("preview");
+            const context = canvas.getContext('2d');
+
+            canvas.width = 900;
+            canvas.height = 700;
+
+            context.width = canvas.width;
+            context.height = canvas.height;
+
+            const video = document.getElementById("video");
+
+            connected = true;
+
+            socket.on('nb_viewers', (data) => {
+                console.log('data', data.nbViewers)
+                document.getElementById("nbViewers").innerHTML = data.nbViewers;
+            });
+
+            function logger(msg) {
+                document.getElementById("log").innerHTML += msg + "<br>";
+            }
+
+            function loadCamera(stream) {
+                try {
+                    video.srcObject = stream;
+                }
+
+                catch (error) {
+                    video.src = URL.createObjectURL(stream);
+                }
+                logger("Camera connected");
+            }
+
+            function loadFail() {
+                logger("Camera not connected");
+            }
+
+            function Draw(video, context) {
+                context.drawImage(video, 0, 0, context.width, context.height);
+                const imageData = canvas.toDataURL('image/webp');
+                const compressedImage = LZString.compressToUTF16(imageData);
+                imageBuffer.push(compressedImage);
+
+                if (imageBuffer.length > 5) {
+                    socket.emit('stream', { room: roomID, image: imageBuffer.shift() });
+                }
+            }
+
+            function startRecording(stream) {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = event => {
+                    if (event.data.size > 0) {
+                        audioBuffer.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = () => {
+                    let audioBlob = new Blob(audioBuffer, { type: 'audio/wav' });
+                    let audioUrl = URL.createObjectURL(audioBlob);
+                    console.log(audioUrl);
+                    fetch(audioUrl)
+                        .then(res => res.arrayBuffer())
+                        .then(buffer => {
+                            const audioBase64 = btoa(
+                                new Uint8Array(buffer)
+                                    .reduce((data, byte) => data + String.fromCharCode(byte), '')
+                            );
+                            socket.emit('stream', { room: roomID, audio: audioBase64 });
+                            audioBuffer = [];
+                            setTimeout(() => mediaRecorder.start(), 5000);
+                        });
+                };
+
+                mediaRecorder.onerror = function (event) {
+                    console.log("Error: ", event.error);
+                };
+
+                mediaRecorder.start(1000);
+            }
+
+            function stopRecording() {
+                mediaRecorder.stop();
+            }
+
+            (function () {
+                navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msgGetUserMedia);
+
+                if (navigator.getUserMedia) {
+                    navigator.getUserMedia({
+                        video: true,
+                        audio: true
+                    }, (stream) => {
+                        loadCamera(stream);
+                        startRecording(stream);
+                    }, loadFail);
+                }
+
+                setInterval(function () {
+                    Draw(video, context);
+                }, 1000 / 30);
+            })();
+        }
+
+        const stop = (roomID) => {
+            socket.emit('liveStop', { live_id: roomID });
+            socket.disconnect();
+            connected = false;
+        }
+    </script>
+
+</body>
+
+</html>

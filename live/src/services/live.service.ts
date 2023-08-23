@@ -11,8 +11,15 @@ export class LiveService {
     @InjectModel('Live') private readonly liveModel: Model<ILive>,
   ) { }
 
-  public async getLivesByUserId(userId: string): Promise<ILive[]> {
-    return this.liveModel.find({ user_id: userId }).exec();
+  public async getLivesByUserId(userId: string, onAir?: boolean): Promise<ILive[]> {
+    const params: { user_id: string, end_time?: null } = {
+      user_id: userId,
+    }
+
+    if (onAir)
+      params.end_time = null;
+
+    return this.liveModel.find(params).exec();
   }
 
   public async createLive(liveBody: ILive): Promise<ILive> {

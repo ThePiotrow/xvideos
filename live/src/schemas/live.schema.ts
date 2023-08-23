@@ -11,10 +11,6 @@ export const LiveSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Title can not be empty'],
     },
-    description: {
-      type: String,
-      default: "",
-    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -27,10 +23,6 @@ export const LiveSchema = new mongoose.Schema(
     end_time: {
       type: Date,
       default: null,
-    },
-    socket_id: {
-      type: String,
-      required: [true, 'Socket id can not be empty'],
     },
   },
   {

@@ -8,6 +8,7 @@ import { ILiveSearchByUserResponse } from './interfaces/live-search-by-user-resp
 import { ILiveDeleteResponse } from './interfaces/live-delete-response.interface';
 import { ILiveCreateResponse } from './interfaces/live-create-response.interface';
 import { ILiveUpdateByIdResponse } from './interfaces/live-update-by-id-response.interface';
+import { ILiveSearchByIdResponse } from './interfaces/live-search-by-id-response.interface';
 
 @Controller()
 export class LiveController {
@@ -31,6 +32,28 @@ export class LiveController {
         status: HttpStatus.BAD_REQUEST,
         message: 'live_search_by_user_id_bad_request',
         lives: null,
+      };
+    }
+  }
+
+  @MessagePattern('live_search_by_id')
+  public async liveSearchById(
+    liveId: string,
+  ): Promise<ILiveSearchByIdResponse> {
+    let result: ILiveSearchByIdResponse;
+
+    if (liveId) {
+      const live = await this.liveService.findLiveById(liveId);
+      return {
+        status: HttpStatus.OK,
+        message: 'live_search_by_user_id_success',
+        live,
+      };
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'live_search_by_user_id_bad_request',
+        live: null,
       };
     }
   }
@@ -100,10 +123,8 @@ export class LiveController {
 
     if (liveBody) {
       try {
-        liveBody.socket_id = Math.random().toString(36).substring(2);
         liveBody.start_time = +new Date();
         const live = await this.liveService.createLive(liveBody);
-        // socket io create
         return {
           status: HttpStatus.CREATED,
           message: 'live_create_success',
@@ -122,6 +143,59 @@ export class LiveController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'live_create_bad_request',
+        live: null,
+        errors: null,
+      };
+    }
+  }
+
+  @MessagePattern('live_stop')
+  public async liveStop(params: {
+    userId: string;
+    id: string;
+  }): Promise<ILiveUpdateByIdResponse> {
+    let result: ILiveUpdateByIdResponse;
+    if (params.id) {
+      try {
+        const live: ILive = await this.liveService.findLiveById(params.id);
+        if (live) {
+          if (live.user_id === params.userId) {
+            live.end_time = +new Date();
+            await live.save();
+            return {
+              status: HttpStatus.OK,
+              message: 'live_stop_success',
+              live,
+              errors: null,
+            };
+          } else {
+            return {
+              status: HttpStatus.FORBIDDEN,
+              message: 'live_stop_forbidden',
+              live: null,
+              errors: null,
+            };
+          }
+        } else {
+          return {
+            status: HttpStatus.NOT_FOUND,
+            message: 'live_stop_not_found',
+            live: null,
+            errors: null,
+          };
+        }
+      } catch (e) {
+        return {
+          status: HttpStatus.PRECONDITION_FAILED,
+          message: 'live_stop_precondition_failed',
+          live: null,
+          errors: e.errors,
+        };
+      }
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: 'live_stop_bad_request',
         live: null,
         errors: null,
       };

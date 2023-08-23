@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js"
+        integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"
+        integrity="sha512-qtX0GLM3qX8rxJN1gyDfcnMFFrKvixfoEOwbBib9VafR5vbChV5LeE5wSI/x+IlCkTY5ZFddFDCCfaVJJNnuKQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    RoomID : <input type="text" id="roomID" value="1234" />
+    </br>
+    <button id="join">Join</button>
+    </br>
+    <button id="leave">Leave</button>
+
+    <img id="play" src=""></img>
+    </br>
+    <audio id="audioPlayer"></audio>
+    <div id="log"></div>
+
+    <script type="text/javascript">
+        let connected = false;
+        var socket = io('ws://localhost:3000');
+
+        var joinBtn = document.getElementById("join");
+        var leaveBtn = document.getElementById("leave");
+
+        joinBtn.addEventListener("click", () => {
+            join(roomID);
+
+            var audioPlayer = document.getElementById('audioPlayer');
+
+            socket.on('stream', function (data) {
+                if (data.image) {
+                    var imageData = LZString.decompressFromUTF16(data.image);
+                    document.getElementById('play').src = imageData;
+                }
+
+                if (data.audio && data.audio.length) {
+                    let byteCharacters = atob(data.audio);
+                    const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
+                    let byteArray = new Uint8Array(byteNumbers);
+                    let audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+                    let audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+                }
+            });
+        });
+
+        leaveBtn.addEventListener("click", () => {
+            if (connected)
+                leave(roomID);
+        });
+
+        var join = () => {
+            var roomID = document.getElementById("roomID").value;
+            socket.emit('connectToLive', { room: roomID });
+        }
+
+        var leave = () => {
+            var roomID = document.getElementById("roomID").value;
+            socket.emit('disconnectToLive', { room: roomID });
+        }
+
+
+    </script>
+</body>
+
+</html>
+
+</html>

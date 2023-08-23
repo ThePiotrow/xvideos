@@ -8,11 +8,9 @@ export class UpdateLiveResponseDto {
     example: {
       live: {
         title: 'test live',
-        description: 'test live description',
         start_time: +new Date(),
         end_time: +new Date(),
         user_id: '5d987c3bfb881ec86b476bca',
-        socket_id: '5d987c3bfb881ec86b476bcb',
         created_at: +new Date(),
         updated_at: +new Date(),
         id: '5d987c3bfb881ec86b476bcc',
