@@ -7,7 +7,7 @@ export class CreateMediaResponseDto {
   @ApiProperty({
     example: {
       media: {
-        name: 'test media',
+        title: 'test media',
         description: 'test media description',
         user_id: '5d987c3bfb881ec86b476bca',
         path: './uploads/5d987c3bfb881ec86b476bca/5d987c3bfb881ec86b476bcc',

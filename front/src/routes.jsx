@@ -14,7 +14,12 @@ function AppRoutes() {
   return (
     <Routes>
       <Route exact path="/" element={<Home />} />
-      <Route path="/signup" element={<AuthGuard><SignUp /></AuthGuard>} />
+      <Route path="/signup" element={<SignUp />} />
+      <Route path="/login" element={<Login />} />
+
+      {/* IS AUTHENTICATED */}
+      <Route path="/medias/edit" element={<AuthGuard><SignUp /></AuthGuard>} />
+      <Route path="/lives/launch" element={<AuthGuard><SignUp /></AuthGuard>} />
 
       {/* IS AUTHENTICATED && IS ADMIN */}
       <Route path="/admin" element={<AuthGuard><HomePage /></AuthGuard>} />

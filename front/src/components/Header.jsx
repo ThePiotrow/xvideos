@@ -7,7 +7,6 @@ import useToken from "../hooks/useToken";
 export default function Header() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
-
   const { token } = useToken();
 
 useEffect(() => {
@@ -23,9 +22,6 @@ useEffect(() => {
 }, [token]);
 
   const handleLogout = () => {
-    // localStorage.removeItem("token");
-    // setUser(null);
-    // navigate("/login");
     API.put('/users/logout', {
         headers: {
             Authorization: `Bearer ${token}`

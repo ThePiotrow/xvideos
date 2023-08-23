@@ -7,9 +7,9 @@ function transformValue(doc, ret: { [key: string]: any }) {
 
 export const MediaSchema = new mongoose.Schema(
   {
-    name: {
+    title: {
       type: String,
-      required: [true, 'Name can not be empty'],
+      required: [true, 'Title can not be empty'],
     },
     description: String,
     user_id: {
