@@ -16,12 +16,15 @@ export class LiveController {
 
   @MessagePattern('live_search_by_user_id')
   public async liveSearchByUserId(
-    userId: string,
+    params: {
+      userId: string,
+      onAir?: boolean,
+    }
   ): Promise<ILiveSearchByUserResponse> {
     let result: ILiveSearchByUserResponse;
 
-    if (userId) {
-      const lives = await this.liveService.getLivesByUserId(userId);
+    if (params.userId) {
+      const lives = await this.liveService.getLivesByUserId(params.userId, params.onAir);
       return {
         status: HttpStatus.OK,
         message: 'live_search_by_user_id_success',
@@ -37,22 +40,26 @@ export class LiveController {
   }
 
   @MessagePattern('live_search_by_id')
-  public async liveSearchById(
+  public async liveSearchById(params: {
     liveId: string,
+    onAir?: boolean,
+  }
   ): Promise<ILiveSearchByIdResponse> {
     let result: ILiveSearchByIdResponse;
 
-    if (liveId) {
-      const live = await this.liveService.findLiveById(liveId);
-      return {
-        status: HttpStatus.OK,
-        message: 'live_search_by_user_id_success',
-        live,
-      };
-    } else {
+    if (params.liveId) {
+      const live = await this.liveService.findLiveById(params.liveId, params.onAir);
+
+      if (live)
+        return {
+          status: HttpStatus.OK,
+          message: 'live_search_by_id_success',
+          live,
+        };
+
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'live_search_by_user_id_bad_request',
+        message: 'live_search_by_id_bad_request',
         live: null,
       };
     }
@@ -68,9 +75,7 @@ export class LiveController {
     if (params.id) {
       try {
         const live = await this.liveService.findLiveById(params.id);
-        console.log('live', live)
         if (live) {
-          console.log('live.user_id', live.user_id.toString(), 'params.userId', params.userId)
           if (live.user_id.toString() === params.userId.toString()) {
             if (params.live.end_date) {
               //socket io destroy
@@ -123,6 +128,18 @@ export class LiveController {
 
     if (liveBody) {
       try {
+        const existedLives = await this.liveService.getLivesByUserId(
+          liveBody.user_id,
+          true
+        );
+
+        if (existedLives.length > 0) {
+          for (let i = 0; i < existedLives.length; i++) {
+            existedLives[i].end_time = +new Date();
+            await existedLives[i].save();
+          }
+        }
+
         liveBody.start_time = +new Date();
         const live = await this.liveService.createLive(liveBody);
         return {

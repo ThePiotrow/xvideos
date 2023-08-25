@@ -4,6 +4,7 @@ import {
   CanActivate,
   ExecutionContext,
   HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { Reflector } from '@nestjs/core';
@@ -27,28 +28,40 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    const request = context.switchToHttp().getRequest();
+    let token = null;
 
-    //Vérifier le préfixe Bearer dans le header Authorization
+    const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      throw new HttpException('Token not provided.', 401);
+    //If token is a query Socket.io request
+    if (context.getType() === 'ws') {
+      const client = context.switchToWs().getClient();
+      token = client.handshake.query.token;
     }
 
-    const token = authHeader.split('Bearer ')[1];
+    //If token is a query HTTP request
+    if (context.getType() === 'http') {
+
+      const request = context.switchToHttp().getRequest();
+      token = authHeader.split('Bearer ')[1];
+    }
+    if (!token) {
+      throw new HttpException(
+        {
+          message: 'Token not found',
+          data: null,
+
+          errors: null,
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
 
     const userTokenInfo = await firstValueFrom(
       this.tokenServiceClient.send('token_decode', {
         token: token,
       }),
     );
-
-    // const userTokenInfo = await firstValueFrom(
-    //   this.tokenServiceClient.send('token_decode', {
-    //     token: request.headers.authorization,
-    //   }),
-    // );
 
     if (!userTokenInfo || !userTokenInfo.data) {
       throw new HttpException(

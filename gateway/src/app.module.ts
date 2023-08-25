@@ -65,7 +65,7 @@ import { EventsGateway } from './events.gateway';
       provide: APP_GUARD,
       useClass: PermissionGuard,
     },
-    EventsGateway
+    EventsGateway,
   ],
 })
 export class AppModule { }

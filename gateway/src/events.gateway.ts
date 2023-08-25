@@ -9,7 +9,7 @@ import {
 import { firstValueFrom, from, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
-import { Inject, Req } from '@nestjs/common';
+import { Body, Inject, Param, Req } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { IServiceLiveSearchByIdResponse } from './interfaces/live/service-live-search-by-id-response.interface';
 import { IServiceLiveSearchByUserIdResponse } from './interfaces/live/service-live-search-by-user-id-response.interface';
@@ -20,9 +20,60 @@ import { IServiceLiveSearchByUserIdResponse } from './interfaces/live/service-li
     },
 })
 export class EventsGateway {
+    private rooms: { [room_id: string]: { users: string[], live: object } } = {}
+    private users: { [client_id: string]: { user_id: string, username: string, token: string } } = {}
+
     constructor(
         @Inject('LIVE_SERVICE') private readonly liveServiceClient: ClientProxy,
+        @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     ) { }
+
+    private async validateUser(token: string | string[], client_id: string): Promise<{ user_id: string, username: string, token: string } | false> {
+        try {
+            const tokenUnique = Array.isArray(token) ? token[0] : token
+
+            let userTokenExists = null;
+
+            for (let key in this.users) {
+                if (this.users[key].token === tokenUnique) {
+                    userTokenExists = { key, value: this.users[key] };
+                    break;
+                }
+            }
+
+            if (this.users[client_id] !== undefined && this.users[client_id].token === tokenUnique)
+                return this.users[client_id];
+
+            if (userTokenExists?.value !== undefined) {
+                this.users[client_id] = { ...userTokenExists.value, token: tokenUnique };
+                delete this.users[userTokenExists.key];
+                return this.users[client_id];
+            }
+
+            const userTokenInfo = await firstValueFrom(
+                this.tokenServiceClient.send('token_decode', {
+                    token: tokenUnique,
+                }),
+            );
+
+            if (userTokenInfo?.data === null || userTokenInfo?.data === undefined)
+                return false;
+
+            const data = userTokenInfo.data;
+
+            this.users[client_id] = {
+                user_id: data.userId,
+                username: data.username,
+                token: tokenUnique
+            }
+
+            return this.users[client_id];
+        }
+        catch (e) {
+            console.error(e);
+        }
+
+    }
 
     @WebSocketServer()
     server: Server;
@@ -34,43 +85,48 @@ export class EventsGateway {
 
     @SubscribeMessage('disconnectToLive')
     async disconnectToLive(
-        @MessageBody() data: any,
+        @MessageBody() data: { room?: string },
         @ConnectedSocket() client: Socket,
     ): Promise<any> {
+        const token = client.handshake.query.token;
+        const user = await this.validateUser(token, client.id);
+
+        if (!user)
+            return {
+                message: "no_user_found",
+                data: {
+                    live: null
+                },
+                errors: {
+                    message: "No user found"
+                }
+            };
+
         client.leave(data.room);
-        return { status: 'disconnected', room: data.room, client: client.id };
+
+        this.getClients({ room: data.room });
+
+        return {
+            message: "disconnected",
+            data: {
+                live: { room: data.room, client: client.id }
+            },
+            errors: null
+        };
+
     }
 
     @SubscribeMessage('stream')
     handleStream(
-        @MessageBody() data: any,
+        @MessageBody() data: { room: string, audio?: string, image?: string },
         @ConnectedSocket() client: Socket,
     ): void {
         this.server.to(data.room).emit('stream', { audio: data?.audio ?? null, image: data?.image ?? null });
     }
     @SubscribeMessage('getClients')
     async getClients(
-        @ConnectedSocket() client: Socket,
+        @Body() data: { room: string },
     ): Promise<any> {
-        const clients = await this.server.of('/stream').allSockets();
-        return { clients: Array.from(clients) };
-    }
-
-    @SubscribeMessage('connectToLive')
-    async handleEvent(
-        @MessageBody() data: { room: string },
-        @ConnectedSocket() client: Socket,
-    ): Promise<any> {
-        const livesResponse: IServiceLiveSearchByIdResponse =
-            await firstValueFrom(
-                this.liveServiceClient.send('live_search_by_id', data.room),
-            );
-
-        if (livesResponse.live === null)
-            return { status: 'not_found', room: null, client: client.id };
-
-        client.join(data.room);
-
         const viewers = this.server.sockets.adapter.rooms.get(data.room);
 
         this.server.to(data.room).emit('nb_viewers', {
@@ -79,30 +135,103 @@ export class EventsGateway {
                     ? 0
                     : viewers.size,
         });
-        return { status: 'connected', room: data.room, client: client.id };
     }
+
+    @SubscribeMessage('connectToLive')
+    async handleEvent(
+        @MessageBody() data: { room?: string, user_id?: string },
+        @ConnectedSocket() client: Socket,
+    ): Promise<any> {
+        const token = client.handshake.query.token;
+        const user = await this.validateUser(token, client.id);
+
+        if (user) {
+            const livesResponse = data.room
+                ? await firstValueFrom(
+                    this.liveServiceClient.send('live_search_by_id',
+                        {
+                            liveId: data.room,
+                            onAir: true
+                        }),
+                )
+                : await firstValueFrom(
+                    this.liveServiceClient.send('live_search_by_user_id', {
+                        userId: data.user_id,
+                        onAir: true
+                    }),
+                );
+
+            const live = Array.isArray(livesResponse) ? livesResponse[0].live : livesResponse.live;
+
+            console.log('live', live, livesResponse)
+
+            if (live === null)
+                return { status: 'not_found', room: null, client: client.id };
+
+            client.join(data.room);
+
+            this.getClients({ room: data.room });
+
+            return {
+                message: "Connected",
+                data: {
+                    live: { room: data.room, client: client.id }
+                },
+                errors: null
+            };
+        }
+        else {
+            return {
+                message: "User Not Found",
+                data: {
+                    live: null
+                },
+                errors: null
+            };
+        }
+    }
+
 
     @SubscribeMessage('hostLive')
     async createLiveEvent(
-        @MessageBody() data: { user_id: string },
         @ConnectedSocket() client: Socket,
     ): Promise<any> {
-        const livesResponse: IServiceLiveSearchByUserIdResponse =
-            await firstValueFrom(
-                this.liveServiceClient.send('live_search_by_user_id', data.user_id),
-            );
+        const token = client.handshake.query.token;
+        const user = await this.validateUser(token, client.id);
 
-        const liveResponse = this.liveServiceClient.send('live_create', {
-            user_id: data.user_id,
-        });
+        if (user) {
+            try {
+                const livesResponse: IServiceLiveSearchByUserIdResponse =
+                    await firstValueFrom(
+                        this.liveServiceClient.send('live_search_by_user_id', {
+                            userId: this.users[client.id].user_id,
+                            onAir: true
+                        })
+                    );
 
-        const live = await firstValueFrom(liveResponse);
+                if (livesResponse.lives.length < 1) {
+                    return { status: 'not_found', room: null, client: client.id };
+                }
 
-        if (livesResponse.lives.length > 0)
-            return { status: 'already_exists', room: null, client: client.id };
+                const live = livesResponse.lives[0];
 
-        client.join(live.id);
-        return { status: 'created', room: live.id, client: client.id };
+                this.rooms[live.id] = {
+                    live: live,
+                    users: [this.users[client.id].user_id]
+                }
+
+                client.join(live.id);
+
+                return { status: 'joined', room: live.id, client: client.id };
+            }
+            catch (e) {
+                console.log(e)
+                return { status: 'error', room: null, client: client.id };
+            }
+        }
+        else {
+            return { status: 'not_found', room: null, client: client.id };
+        }
     }
 
     @SubscribeMessage('liveStop')
@@ -110,7 +239,6 @@ export class EventsGateway {
         @MessageBody() data: { live_id: string },
         @ConnectedSocket() client: Socket,
     ): Promise<any> {
-        console.log('data', data)
         const liveResponse: IServiceLiveSearchByIdResponse =
             await firstValueFrom(
                 this.liveServiceClient.send('live_search_by_id', data.live_id),

@@ -14,11 +14,11 @@
 
 <body>
 
-    Room ID : <input type="text" id="roomID" value="1234" />
+    User ID : <input type="text" id="roomID" value="64e549793517833abed2a483" />
     </br>
     <button id="start">Start</button>
     </br>
-    <button id="stop">Stop</button>
+    <button id="stop" disabled>Stop</button>
 
     <video src="" id="video" autoplay="true"></video>
     </br>
@@ -28,22 +28,31 @@
     Nb viewers : <span id="nbViewers">0</span>
 
     <script type="text/javascript">
-        const socket = io('ws://localhost:3000');
+        const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NGU1NDk3OTM1MTc4MzNhYmVkMmE0ODMiLCJ1c2VybmFtZSI6InVzZXJuYW1lIiwiaWF0IjoxNjkyOTU1NTg5LCJleHAiOjE2OTU1NDc1ODl9.OzdERYoUFhNqAIG_DhmLROfpL7d973hfnZxDDSh6xVk'
+        const socket = io('ws://localhost:3000', { query: { token } });
         let connected = null;
+
+        const streamer_id = "64e549793517833abed2a483"
 
         const startBtn = document.getElementById("start");
         const stopBtn = document.getElementById("stop");
 
         startBtn.addEventListener("click", () => {
             const roomID = document.getElementById("roomID").value;
-            if (!connected)
+            if (!connected) {
                 start(roomID);
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+            }
         });
 
         stopBtn.addEventListener("click", () => {
             const roomID = document.getElementById("roomID").value;
-            if (connected)
+            if (connected) {
                 stop(roomID);
+                stopBtn.disabled = true;
+                startBtn.disabled = false;
+            }
         });
 
         const start = (roomID) => {
@@ -63,9 +72,13 @@
 
             connected = true;
 
+            socket.emit('hostLive', (data) => {
+                console.log('data', data)
+            });
+
             socket.on('nb_viewers', (data) => {
-                console.log('data', data.nbViewers)
-                document.getElementById("nbViewers").innerHTML = data.nbViewers;
+                console.log('data', data.value)
+                document.getElementById("nbViewers").innerHTML = data.value;
             });
 
             function logger(msg) {

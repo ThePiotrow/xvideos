@@ -120,7 +120,7 @@ export class LivesController {
       await firstValueFrom(
         this.liveServiceClient.send(
           'live_stop',
-          Object.assign(params, { userId: userInfo.id }),
+          Object.assign(params, { user_id: userInfo.id, id: params.id }),
         ),
       );
 

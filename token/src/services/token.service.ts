@@ -11,18 +11,29 @@ export class TokenService {
     @InjectModel('Token') private readonly tokenModel: Model<IToken>,
   ) { }
 
-  public createToken(userId: string): Promise<IToken> {
+  public createToken(userId: string, username: string): Promise<IToken> {
     const token = this.jwtService.sign(
       {
         userId,
+        username,
       },
       {
         expiresIn: 30 * 24 * 60 * 60,
       },
     );
 
+    console.log('token', token)
+
+    const decoded = this.jwtService.decode(token) as {
+      exp: number;
+      userId: any;
+    };
+
+    console.log('decoded', decoded)
+
     return new this.tokenModel({
       user_id: userId,
+      username,
       token,
     }).save();
   }
@@ -63,16 +74,20 @@ export class TokenService {
     token = token.replace("Bearer ", ""); // Suppression du préfixe
     const tokenModel = await this.tokenModel.findOne({ token });
 
+    console.log(tokenModel)
+
     if (!tokenModel) return null;
 
     try {
       const tokenData = this.jwtService.verify(tokenModel.token) as {
         exp: number;
+        username: string;
         userId: any;
       };
 
       return {
         userId: tokenData.userId,
+        username: tokenData.username,
       };
     } catch (e) {
       return null;

@@ -10,6 +10,10 @@ export const TokenSchema = new mongoose.Schema(
       type: String,
       required: [true, 'User can not be empty'],
     },
+    username: {
+      type: String,
+      required: [true, 'Username can not be empty'],
+    },
     token: {
       type: String,
       required: [true, 'Token can not be empty'],

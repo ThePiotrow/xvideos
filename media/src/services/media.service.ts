@@ -84,4 +84,12 @@ export class MediaService {
 
     return valid;
   }
+
+  public async getAllMedias({ limit, offset }: { limit: number, offset: number }) {
+    return this.mediaModel.find()
+      .sort({ created_at: -1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
+  }
 }

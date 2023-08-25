@@ -16,7 +16,7 @@
     </br>
     <button id="join">Join</button>
     </br>
-    <button id="leave">Leave</button>
+    <button id="leave" disabled>Leave</button>
 
     <img id="play" src=""></img>
     </br>
@@ -25,53 +25,66 @@
 
     <script type="text/javascript">
         let connected = false;
-        var socket = io('ws://localhost:3000');
+        let room = {
+            id: null,
+        }
+        const socket = io('ws://localhost:3000', {
+            query: { token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NGU4YTEyNjI0ZTk5NDNmZDlkYzk3M2MiLCJ1c2VybmFtZSI6InZpZXdlciIsImlhdCI6MTY5Mjk2NzUyMSwiZXhwIjoxNjk1NTU5NTIxfQ.Hs9PEMIDE9-gwqYisrU3XMeuUflf1TaYyzpioPiEwcA' }
+        });
 
-        var joinBtn = document.getElementById("join");
-        var leaveBtn = document.getElementById("leave");
+        const joinBtn = document.getElementById("join");
+        const leaveBtn = document.getElementById("leave");
+        const audioPlayer = document.getElementById('audioPlayer');
 
         joinBtn.addEventListener("click", () => {
+            const roomID = document.getElementById("roomID").value;
+            room.id = roomID;
             join(roomID);
 
-            var audioPlayer = document.getElementById('audioPlayer');
 
             socket.on('stream', function (data) {
+                console.log(data, room)
                 if (data.image) {
-                    var imageData = LZString.decompressFromUTF16(data.image);
+                    const imageData = LZString.decompressFromUTF16(data.image);
                     document.getElementById('play').src = imageData;
                 }
 
                 if (data.audio && data.audio.length) {
-                    let byteCharacters = atob(data.audio);
+                    const byteCharacters = atob(data.audio);
                     const byteNumbers = Array.from(byteCharacters, char => char.charCodeAt(0));
-                    let byteArray = new Uint8Array(byteNumbers);
-                    let audioBlob = new Blob([byteArray], { type: 'audio/wav' });
-                    let audioUrl = URL.createObjectURL(audioBlob);
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const audioBlob = new Blob([byteArray], { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
                     audioPlayer.src = audioUrl;
                     audioPlayer.play();
                 }
             });
+
+            joinBtn.disabled = true;
+            leaveBtn.disabled = false;
         });
 
         leaveBtn.addEventListener("click", () => {
-            if (connected)
-                leave(roomID);
+            const roomID = document.getElementById("roomID").value;
+            leave(roomID);
+
+            joinBtn.disabled = false;
+            leaveBtn.disabled = true;
         });
 
-        var join = () => {
-            var roomID = document.getElementById("roomID").value;
-            socket.emit('connectToLive', { room: roomID });
+        const join = (roomID) => {
+            socket.emit('connectToLive', { room: roomID }, (data) => {
+                console.log(data)
+            });
         }
 
-        var leave = () => {
-            var roomID = document.getElementById("roomID").value;
-            socket.emit('disconnectToLive', { room: roomID });
+        const leave = () => {
+            socket.emit('disconnectToLive', { room: room.id }, (data) => {
+                console.log(data)
+            });
         }
-
 
     </script>
 </body>
-
-</html>
 
 </html>

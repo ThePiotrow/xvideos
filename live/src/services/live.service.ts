@@ -19,7 +19,9 @@ export class LiveService {
     if (onAir)
       params.end_time = null;
 
-    return this.liveModel.find(params).exec();
+    return this.liveModel.find(params).sort(
+      { start_time: -1 }
+    );
   }
 
   public async createLive(liveBody: ILive): Promise<ILive> {
@@ -27,8 +29,17 @@ export class LiveService {
     return await liveModel.save();
   }
 
-  public async findLiveById(id: string) {
-    return await this.liveModel.findById(id);
+  public async findLiveById(id: string, onAir?: boolean) {
+    const params: { id: string, end_time?: null } = {
+      id: id,
+    }
+
+    if (onAir)
+      params.end_time = null;
+
+    return await this.liveModel.findOne(params).sort(
+      { start_time: -1 }
+    );
   }
 
   public async removeLiveById(id: string) {

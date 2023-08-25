@@ -34,6 +34,8 @@ import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { IMedia } from './interfaces/media/media.interface';
+import { IServiceMediaSearchByIdResponse } from './interfaces/media/service-media-search-by-id-response.interface';
+import { GetMediaResponseDto } from './interfaces/media/dto/get-media-response.dto';
 
 @Controller('medias')
 @ApiBearerAuth()
@@ -43,14 +45,14 @@ export class MediasController {
     @Inject('MEDIA_SERVICE') private readonly mediaServiceClient: ClientProxy,
   ) { }
 
-  @Get()
+  @Get('/user/:id')
   @Authorization(true)
   @Permission('media_search_by_user_id')
   @ApiOkResponse({
     type: GetMediasResponseDto,
     description: 'List of medias for signed in user',
   })
-  public async getMedias(
+  public async getMediasByUser(
     @Req() request: IAuthorizedRequest,
   ): Promise<GetMediasResponseDto> {
     const user = request.user;
@@ -58,6 +60,63 @@ export class MediasController {
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_search_by_user_id', user.id),
+      );
+
+    return {
+      message: mediasResponse.message,
+      data: {
+        medias: mediasResponse.medias,
+      },
+      errors: null,
+    };
+  }
+
+  @Get('/:id')
+  @Authorization(true)
+  @Permission('media_search_by_user_id')
+  @ApiOkResponse({
+    type: GetMediaResponseDto,
+    description: 'List of medias for signed in user',
+  })
+  public async getMediaById(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: MediaIdDto,
+  ): Promise<GetMediaResponseDto> {
+    const user = request.user;
+
+    const mediasResponse: IServiceMediaSearchByIdResponse =
+      await firstValueFrom(
+        this.mediaServiceClient.send('media_search_by_id', params.id),
+      );
+
+    return {
+      message: mediasResponse.message,
+      data: {
+        media: mediasResponse.media,
+      },
+      errors: null,
+    };
+  }
+
+  @Get()
+  @Authorization(true)
+  @Permission('media_get_all')
+  @ApiOkResponse({
+    type: GetMediasResponseDto,
+    description: 'List of medias for signed in user',
+  })
+  public async getMedias(
+    @Req() request: IAuthorizedRequest,
+    @Body() body: { limit: number; offset: number },
+  ): Promise<GetMediasResponseDto> {
+    const user = request.user;
+
+    const mediasResponse: IServiceMediaSearchByUserIdResponse =
+      await firstValueFrom(
+        this.mediaServiceClient.send('media_get_all', {
+          limit: 10,
+          offset: 0
+        }),
       );
 
     return {

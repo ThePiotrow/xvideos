@@ -10,11 +10,11 @@ export class TokenController {
   constructor(private readonly tokenService: TokenService) { }
 
   @MessagePattern('token_create')
-  public async createToken(data: { userId: string }): Promise<ITokenResponse> {
+  public async createToken(data: { userId: string, username: string }): Promise<ITokenResponse> {
     let result: ITokenResponse;
     if (data && data.userId) {
       try {
-        const createResult = await this.tokenService.createToken(data.userId);
+        const createResult = await this.tokenService.createToken(data.userId, data.username);
         return {
           status: HttpStatus.CREATED,
           message: 'token_create_success',

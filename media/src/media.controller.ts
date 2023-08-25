@@ -145,6 +145,16 @@ export class MediaController {
     }
   }
 
+  @MessagePattern('media_get_all')
+  public async mediaGetAll(
+    params: {
+      limit: number;
+      offset: number;
+    }
+  ): Promise<IMedia[]> {
+    return await this.mediaService.getAllMedias({ limit: params.limit, offset: params.offset });
+  }
+
   @MessagePattern('media_delete_by_id')
   public async mediaDeleteForUser(params: {
     userId: string;

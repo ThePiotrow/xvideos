@@ -74,11 +74,9 @@ export class UsersController {
   public async createUser(
     @Body() userRequest: CreateUserDto,
   ): Promise<CreateUserResponseDto> {
-    console.log('userRequest', userRequest);
     const createUserResponse: IServiceUserCreateResponse = await firstValueFrom(
       this.userServiceClient.send('user_create', userRequest),
     );
-    console.log('createUserResponse', createUserResponse);
     if (createUserResponse.status !== HttpStatus.CREATED) {
       throw new HttpException(
         {
@@ -94,6 +92,7 @@ export class UsersController {
       await firstValueFrom(
         this.tokenServiceClient.send('token_create', {
           userId: createUserResponse.user.id,
+          username: createUserResponse.user.username,
         }),
       );
 
@@ -133,6 +132,7 @@ export class UsersController {
       await firstValueFrom(
         this.tokenServiceClient.send('token_create', {
           userId: getUserResponse.user.id,
+          username: getUserResponse.user.username,
         }),
       );
 
