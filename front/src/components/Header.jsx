@@ -8,9 +8,10 @@ export default function Header() {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const { token } = useToken();
+  const hasToken = localStorage.getItem("token")
 
 useEffect(() => {
-  if(token) {
+  if(hasToken) {
     API.get('/users', {
       headers: {
         Authorization: `Bearer ${token}`
