@@ -6,6 +6,7 @@ import AuthGuard from "./guards/AuthGuard";
 import Users from "./pages/admin/users/Users"
 import useToken from "./hooks/useToken"
 import SignUp from "./pages/auth/SignUp";
+import Live from "./pages/live/Live";
 
 
 function AppRoutes() {
@@ -16,6 +17,7 @@ function AppRoutes() {
       <Route exact path="/" element={<Home />} />
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/live" element={<Live />} />
 
       {/* IS AUTHENTICATED */}
       <Route path="/medias/edit" element={<AuthGuard><SignUp /></AuthGuard>} />

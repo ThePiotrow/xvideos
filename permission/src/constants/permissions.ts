@@ -1,6 +1,6 @@
 export enum Roles {
-  ADMIN = 'admin',
-  USER = 'user',
+  ADMIN = 'ROLE_ADMIN',
+  USER = 'ROLE_USER',
 }
 
 export const permissions = [
@@ -8,6 +8,7 @@ export const permissions = [
   'user_confirm',
   'media_search_by_user_id',
   'media_create',
+  'media_get_all',
   'media_delete_by_id',
   'media_update_by_id',
   'live_create',

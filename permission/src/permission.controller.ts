@@ -1,22 +1,23 @@
 import { Controller, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 import { ConfirmedStrategyService } from './services/confirmed-strategy.service';
-import { permissions } from './constants/permissions';
+import { rolePermissions } from './constants/permissions';
 import { IPermissionCheckResponse } from './interfaces/permission-check-response.interface';
 import { IUser } from './interfaces/user.interface';
+import { userInfo } from 'os';
 
 @Controller()
 export class PermissionController {
   constructor(private confirmedStrategy: ConfirmedStrategyService) { }
 
   @MessagePattern('permission_check')
-  public permissionCheck(permissionParams: {
+  public permissionCheck(params: {
     user: IUser;
     permission: string;
   }): IPermissionCheckResponse {
     let result: IPermissionCheckResponse;
 
-    if (!permissionParams || !permissionParams.user) {
+    if (!params || !params.user || !rolePermissions[params.user.role]) {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: 'permission_check_bad_request',
@@ -24,13 +25,12 @@ export class PermissionController {
       };
     } else {
       const allowedPermissions = this.confirmedStrategy.getAllowedPermissions(
-        permissionParams.user,
-        permissions,
+        params.user,
+        rolePermissions[params.user.role],
       );
       const isAllowed = allowedPermissions.includes(
-        permissionParams.permission,
+        params.permission,
       );
-
       return {
         status: isAllowed ? HttpStatus.OK : HttpStatus.FORBIDDEN,
         message: isAllowed

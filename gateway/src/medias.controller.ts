@@ -119,8 +119,9 @@ export class MediasController {
         }),
       );
 
+    console.log(mediasResponse)
     return {
-      message: mediasResponse.message,
+      message: "mediasResponse.message",
       data: {
         medias: mediasResponse.medias,
       },

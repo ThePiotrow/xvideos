@@ -12,6 +12,7 @@ export interface IUserSchema extends mongoose.Document {
   email: string;
   password: string;
   is_confirmed: boolean;
+  role: string;
   comparePassword: (password: string) => Promise<boolean>;
   getEncryptedPassword: (password: string) => Promise<string>;
 }
@@ -39,6 +40,11 @@ export const UserSchema = new mongoose.Schema<IUserSchema>(
       type: String,
       required: [true, 'Password can not be empty'],
       minlength: [6, 'Password should include at least 6 chars'],
+    },
+    role: {
+      type: String,
+      required: [true, 'Role can not be empty'],
+      enum: ['ROLE_ADMIN', 'ROLE_USER'],
     },
   },
   {

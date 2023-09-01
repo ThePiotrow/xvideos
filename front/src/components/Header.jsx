@@ -57,11 +57,8 @@ useEffect(() => {
 
                   <div x-cloak="true" className="[isOpen ? 'translate-x-0 opacity-100 ' : 'opacity-0 -translate-x-full'] absolute inset-x-0 z-20 flex-1 w-full px-6 py-4 transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:bg-transparent lg:w-auto lg:opacity-100 lg:translate-x-0 lg:flex lg:items-center lg:justify-between">
                       <div className="flex flex-col text-gray-600 capitalize dark:text-gray-300 lg:flex lg:px-16 lg:-mx-4 lg:flex-row lg:items-center">
-                          <a href="#" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">features</a>
-                          <a href="#" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">downloads</a>
-                          <a href="#" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">docs</a>
-                          <a href="#" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">support</a>
-                          <a href="#" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">blog</a>
+                          <Link to="/" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">Accueil</Link>
+                          <Link to="/live" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">Live</Link>
           
                           <div className="relative mt-4 lg:mt-0 lg:mx-4">
                               <span className="absolute inset-y-0 left-0 flex items-center pl-3">
@@ -76,7 +73,13 @@ useEffect(() => {
           
                       <div className="flex justify-center mt-6 lg:flex lg:mt-0 lg:-mx-2">
                         {user ? (
+                          <div className="flex items-center mt-4 lg:mt-0">
                             <Link onClick={handleLogout} className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">Se déconnecter</Link>
+                            <div className="w-8 h-8 overflow-hidden border-2 border-gray-400 rounded-full">
+                              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" className="object-cover w-full h-full" alt="avatar"/>
+                            </div>
+                          </div>
+
                         ) : (
                             <Link to="/login" className="mt-2 transition-colors duration-300 transform lg:mt-0 lg:mx-4 hover:text-gray-900 dark:hover:text-gray-200">Se connecter</Link>
                         )}
