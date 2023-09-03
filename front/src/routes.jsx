@@ -7,6 +7,10 @@ import Users from "./pages/admin/users/Users"
 import useToken from "./hooks/useToken"
 import SignUp from "./pages/auth/SignUp";
 import Live from "./pages/live/Live";
+import Profile from "./pages/user/Profile";
+import EditMedias from "./pages/medias/EditMedias";
+import CreateMedias from "./pages/medias/CreateMedias";
+import LaunchLive from "./pages/live/LaunchLive";
 
 
 function AppRoutes() {
@@ -20,8 +24,17 @@ function AppRoutes() {
       <Route path="/live" element={<Live />} />
 
       {/* IS AUTHENTICATED */}
-      <Route path="/medias/edit" element={<AuthGuard><SignUp /></AuthGuard>} />
-      <Route path="/lives/launch" element={<AuthGuard><SignUp /></AuthGuard>} />
+
+      {/* MEDIAS */}
+      <Route path="/medias/edit" element={<AuthGuard><EditMedias /></AuthGuard>} />
+      <Route path="/medias/create" element={<AuthGuard><CreateMedias /></AuthGuard>} />
+
+      {/* LIVES */}
+      <Route path="/lives/launch" element={<AuthGuard><LaunchLive /></AuthGuard>} />
+
+      {/* PROFILE USER */}
+      <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
+
 
       {/* IS AUTHENTICATED && IS ADMIN */}
       <Route path="/admin" element={<AuthGuard><HomePage /></AuthGuard>} />
