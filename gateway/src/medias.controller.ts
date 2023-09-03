@@ -46,8 +46,6 @@ export class MediasController {
   ) { }
 
   @Get('/user/:id')
-  @Authorization(true)
-  @Permission('media_search_by_user_id')
   @ApiOkResponse({
     type: GetMediasResponseDto,
     description: 'List of medias for signed in user',
@@ -72,8 +70,6 @@ export class MediasController {
   }
 
   @Get('/:id')
-  @Authorization(true)
-  @Permission('media_search_by_user_id')
   @ApiOkResponse({
     type: GetMediaResponseDto,
     description: 'List of medias for signed in user',
@@ -99,8 +95,6 @@ export class MediasController {
   }
 
   @Get()
-  @Authorization(true)
-  @Permission('media_get_all')
   @ApiOkResponse({
     type: GetMediasResponseDto,
     description: 'List of medias for signed in user',
@@ -121,7 +115,7 @@ export class MediasController {
 
     console.log(mediasResponse)
     return {
-      message: "mediasResponse.message",
+      message: mediasResponse.message,
       data: {
         medias: mediasResponse.medias,
       },
@@ -199,7 +193,7 @@ export class MediasController {
       await firstValueFrom(
         this.mediaServiceClient.send('media_delete_by_id', {
           id: params.id,
-          userId: user.id,
+          user_id: user.id,
         }),
       );
 
@@ -237,7 +231,7 @@ export class MediasController {
       await firstValueFrom(
         this.mediaServiceClient.send('media_update_by_id', {
           id: params.id,
-          userId: user.id,
+          user_id: user.id,
           media: body,
         }),
       );

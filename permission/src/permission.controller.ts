@@ -19,7 +19,7 @@ export class PermissionController {
     if (!params || !params.user || !rolePermissions[params.user.role]) {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'permission_check_bad_request',
+        message: 'Permission check failed',
         errors: null,
       };
     } else {
@@ -33,8 +33,8 @@ export class PermissionController {
       return {
         status: isAllowed ? HttpStatus.OK : HttpStatus.FORBIDDEN,
         message: isAllowed
-          ? 'permission_check_success'
-          : 'permission_check_forbidden',
+          ? 'Permission check successful'
+          : 'Permission check failed',
         errors: null,
       };
     }

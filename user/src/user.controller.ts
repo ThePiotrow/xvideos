@@ -28,11 +28,18 @@ export class UserController {
 
       if (user && user[0]) {
         if (await user[0].compareEncryptedPassword(params.password)) {
+          if (!user[0].is_confirmed) {
+            return {
+              status: HttpStatus.UNAUTHORIZED,
+              message: 'User not confirmed',
+              user: null,
+            };
+          }
           return {
             status: HttpStatus.OK,
             message: 'User found',
             user: user[0],
-          };
+          }
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
@@ -188,6 +195,7 @@ export class UserController {
       } else {
         try {
           params.is_confirmed = false;
+          params.role = 'ROLE_USER'
 
           const createdUser = await this.userService.createUser(params);
           const userLink = await this.userService.createUserLink(

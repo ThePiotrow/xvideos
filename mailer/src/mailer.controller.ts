@@ -26,13 +26,13 @@ export class MailerController {
         .catch(() => {
           return {
             status: HttpStatus.INTERNAL_SERVER_ERROR,
-            message: 'mail_send_error',
+            message: '⚠️ Mail send failed',
           }
         });
     }
     return {
       status: HttpStatus.ACCEPTED,
-      message: 'mail_send_success',
+      message: '✅ Mail sent successful',
     };
   }
 }

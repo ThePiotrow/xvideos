@@ -27,16 +27,15 @@ export class LiveController {
       const lives = await this.liveService.getLivesByUserId(params.user_id, params.on_air);
       return {
         status: HttpStatus.OK,
-        message: 'live_search_by_user_id_success',
+        message: '✅ Lives found',
         lives,
       };
-    } else {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'live_search_by_user_id_bad_request',
-        lives: null,
-      };
     }
+    return {
+      status: HttpStatus.BAD_REQUEST,
+      message: '⚠️ Lives not found',
+      lives: null,
+    };
   }
 
   @MessagePattern('live_search_by_id')
@@ -53,13 +52,13 @@ export class LiveController {
       if (live)
         return {
           status: HttpStatus.OK,
-          message: 'live_search_by_id_success',
+          message: '✅ Live found',
           live,
         };
 
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'live_search_by_id_bad_request',
+        message: '⚠️ Live not found',
         live: null,
       };
     }
@@ -84,14 +83,14 @@ export class LiveController {
             await updatedLive.save();
             return {
               status: HttpStatus.OK,
-              message: 'live_update_by_id_success',
+              message: '✅ Live updated',
               live: updatedLive,
               errors: null,
             };
           } else {
             return {
               status: HttpStatus.FORBIDDEN,
-              message: 'live_update_by_id_forbidden',
+              message: '⛔ Forbidden',
               live: null,
               errors: null,
             };
@@ -99,7 +98,7 @@ export class LiveController {
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'live_update_by_id_not_found',
+            message: '⚠️ Live not found',
             live: null,
             errors: null,
           };
@@ -107,19 +106,18 @@ export class LiveController {
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,
-          message: 'live_update_by_id_precondition_failed',
+          message: '⚠️ Live update failed',
           live: null,
           errors: e.errors,
         };
       }
-    } else {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'live_update_by_id_bad_request',
-        live: null,
-        errors: null,
-      };
     }
+    return {
+      status: HttpStatus.BAD_REQUEST,
+      message: '⚠️ Live update failed',
+      live: null,
+      errors: null,
+    };
   }
 
   @MessagePattern('live_create')
@@ -144,26 +142,25 @@ export class LiveController {
         const live = await this.liveService.createLive(body);
         return {
           status: HttpStatus.CREATED,
-          message: 'live_create_success',
+          message: '✅ Live created',
           live,
           errors: null,
         };
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,
-          message: 'live_create_precondition_failed',
+          message: '⚠️ Live create failed',
           live: null,
           errors: e.errors,
         };
       }
-    } else {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'live_create_bad_request',
-        live: null,
-        errors: null,
-      };
     }
+    return {
+      status: HttpStatus.BAD_REQUEST,
+      message: '⚠️ Live create failed',
+      live: null,
+      errors: null,
+    };
   }
 
   @MessagePattern('live_stop')
@@ -181,14 +178,14 @@ export class LiveController {
             await live.save();
             return {
               status: HttpStatus.OK,
-              message: 'live_stop_success',
+              message: '✅ Live stopped',
               live,
               errors: null,
             };
           } else {
             return {
               status: HttpStatus.FORBIDDEN,
-              message: 'live_stop_forbidden',
+              message: '⛔ Forbidden',
               live: null,
               errors: null,
             };
@@ -196,7 +193,7 @@ export class LiveController {
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'live_stop_not_found',
+            message: '⚠️ Live not found',
             live: null,
             errors: null,
           };
@@ -204,19 +201,18 @@ export class LiveController {
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,
-          message: 'live_stop_precondition_failed',
+          message: '⚠️ Live stop failed',
           live: null,
           errors: e.errors,
         };
       }
-    } else {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'live_stop_bad_request',
-        live: null,
-        errors: null,
-      };
     }
+    return {
+      status: HttpStatus.BAD_REQUEST,
+      message: 'live_stop_bad_request',
+      live: null,
+      errors: null,
+    };
   }
 
   @MessagePattern('live_delete_by_id')
@@ -259,12 +255,11 @@ export class LiveController {
           errors: null,
         };
       }
-    } else {
-      return {
-        status: HttpStatus.BAD_REQUEST,
-        message: 'live_delete_by_id_bad_request',
-        errors: null,
-      };
     }
+    return {
+      status: HttpStatus.BAD_REQUEST,
+      message: 'live_delete_by_id_bad_request',
+      errors: null,
+    };
   }
 }

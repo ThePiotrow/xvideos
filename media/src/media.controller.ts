@@ -15,21 +15,21 @@ export class MediaController {
 
   @MessagePattern('media_search_by_user_id')
   public async mediaSearchByUserId(
-    userId: string,
+    user_id: string,
   ): Promise<IMediaSearchByUserResponse> {
     let result: IMediaSearchByUserResponse;
 
-    if (userId) {
-      const medias = await this.mediaService.getMediasByUserId(userId);
+    if (user_id) {
+      const medias = await this.mediaService.getMediasByUserId(user_id);
       return {
         status: HttpStatus.OK,
-        message: 'media_search_by_user_id_success',
+        message: '✅ Medias found',
         medias,
       };
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'media_search_by_user_id_bad_request',
+        message: '⚠️ Medias not found',
         medias: null,
       };
     }
@@ -39,26 +39,26 @@ export class MediaController {
   public async mediaUpdateById(params: {
     media: IMediaUpdateParams;
     id: string;
-    userId: string;
+    user_id: string;
   }): Promise<IMediaUpdateByIdResponse> {
     let result: IMediaUpdateByIdResponse;
     if (params.id) {
       try {
         const media = await this.mediaService.findMediaById(params.id);
         if (media) {
-          if (media.user_id.toString() === params.userId.toString()) {
+          if (media.user_id.toString() === params.user_id.toString()) {
             const updatedMedia = Object.assign(media, params.media);
             await updatedMedia.save();
             return {
               status: HttpStatus.OK,
-              message: 'media_update_by_id_success',
+              message: '✅ Media updated',
               media: updatedMedia,
               errors: null,
             };
           } else {
             return {
               status: HttpStatus.FORBIDDEN,
-              message: 'media_update_by_id_forbidden',
+              message: '⛔ Forbidden',
               media: null,
               errors: null,
             };
@@ -66,7 +66,7 @@ export class MediaController {
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'media_update_by_id_not_found',
+            message: '⚠️ Media not found',
             media: null,
             errors: null,
           };
@@ -74,7 +74,7 @@ export class MediaController {
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,
-          message: 'media_update_by_id_precondition_failed',
+          message: '⚠️ Media update failed',
           media: null,
           errors: e.errors,
         };
@@ -82,7 +82,7 @@ export class MediaController {
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'media_update_by_id_bad_request',
+        message: '⚠️ Media update failed',
         media: null,
         errors: null,
       };
@@ -105,7 +105,7 @@ export class MediaController {
         if (!body.file.mimetype.includes('image') && !body.file.mimetype.includes('video')) {
           return {
             status: HttpStatus.BAD_REQUEST,
-            message: 'media_create_bad_request_media_type',
+            message: '🚫 Media type not allowed',
             media: null,
             errors: null,
           };
@@ -114,7 +114,7 @@ export class MediaController {
         if (!this.mediaService.createFile(`./${folder}/${body.path}`, body.data))
           return {
             status: HttpStatus.BAD_REQUEST,
-            message: 'media_create_bad_request',
+            message: '⚠️ Media create failed',
             media: null,
             errors: null,
           };
@@ -122,7 +122,7 @@ export class MediaController {
         const media = await this.mediaService.createMedia(body);
         return {
           status: HttpStatus.CREATED,
-          message: 'media_create_success',
+          message: '✅ Media created',
           media,
           errors: null,
         };
@@ -130,7 +130,7 @@ export class MediaController {
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,
-          message: 'media_create_precondition_failed',
+          message: '⚠️ Media create failed',
           media: null,
           errors: e.errors,
         };
@@ -138,7 +138,7 @@ export class MediaController {
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'media_create_bad_request',
+        message: '⚠️ Media create failed',
         media: null,
         errors: null,
       };
@@ -151,54 +151,68 @@ export class MediaController {
       limit: number;
       offset: number;
     }
-  ): Promise<IMedia[]> {
-    return await this.mediaService.getAllMedias({ limit: params.limit, offset: params.offset });
+  ): Promise<IMediaSearchByUserResponse> {
+    try {
+      const medias = await this.mediaService.getAllMedias({ limit: params.limit, offset: params.offset });
+      return {
+        status: HttpStatus.OK,
+        message: '✅ Medias found',
+        medias,
+      };
+    }
+    catch (e) {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: '⚠️ Medias not found',
+        medias: null,
+      };
+    }
   }
 
   @MessagePattern('media_delete_by_id')
   public async mediaDeleteForUser(params: {
-    userId: string;
+    user_id: string;
     id: string;
   }): Promise<IMediaDeleteResponse> {
     let result: IMediaDeleteResponse;
 
-    if (params && params.userId && params.id) {
+    if (params && params.user_id && params.id) {
       try {
         const media = await this.mediaService.findMediaById(params.id);
 
         if (media) {
-          if (media.user_id === params.userId) {
+          if (media.user_id === params.user_id) {
             await this.mediaService.removeMediaById(params.id);
             return {
               status: HttpStatus.OK,
-              message: 'media_delete_by_id_success',
+              message: '✅ Media deleted',
               errors: null,
             };
           } else {
             return {
               status: HttpStatus.FORBIDDEN,
-              message: 'media_delete_by_id_forbidden',
+              message: '⛔ Forbidden',
               errors: null,
             };
           }
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'media_delete_by_id_not_found',
+            message: '⚠️ Media not found',
             errors: null,
           };
         }
       } catch (e) {
         return {
           status: HttpStatus.FORBIDDEN,
-          message: 'media_delete_by_id_forbidden',
+          message: '⚠️ Media delete failed',
           errors: null,
         };
       }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'media_delete_by_id_bad_request',
+        message: '⚠️ Media delete failed',
         errors: null,
       };
     }
