@@ -52,10 +52,10 @@ export class UsersController {
   public async getUserByToken(
     @Req() request: IAuthorizedRequest,
   ): Promise<GetUserByTokenResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', userInfo.id),
+      this.userServiceClient.send('user_get_by_id', user.id),
     );
 
     return {
@@ -72,10 +72,13 @@ export class UsersController {
     type: CreateUserResponseDto,
   })
   public async createUser(
-    @Body() userRequest: CreateUserDto,
+    @Body() body: CreateUserDto,
+    @Req() request: IAuthorizedRequest,
   ): Promise<CreateUserResponseDto> {
     const createUserResponse: IServiceUserCreateResponse = await firstValueFrom(
-      this.userServiceClient.send('user_create', userRequest),
+      this.userServiceClient.send('user_create', { ...body, role: 'ROLE_USER' }),
+
+
     );
     if (createUserResponse.status !== HttpStatus.CREATED) {
       throw new HttpException(
@@ -111,10 +114,10 @@ export class UsersController {
     type: LoginUserResponseDto,
   })
   public async loginUser(
-    @Body() loginRequest: LoginUserDto,
+    @Body() body: LoginUserDto,
   ): Promise<LoginUserResponseDto> {
     const getUserResponse: IServiceUserSearchResponse = await firstValueFrom(
-      this.userServiceClient.send('user_search_by_credentials', loginRequest),
+      this.userServiceClient.send('user_search_by_credentials', body),
     );
 
     if (getUserResponse.status !== HttpStatus.OK) {
@@ -153,12 +156,12 @@ export class UsersController {
   public async logoutUser(
     @Req() request: IAuthorizedRequest,
   ): Promise<LogoutUserResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
 
     const destroyTokenResponse: IServiceTokenDestroyResponse =
       await firstValueFrom(
         this.tokenServiceClient.send('token_destroy', {
-          userId: userInfo.id,
+          userId: user.id,
         }),
       );
 

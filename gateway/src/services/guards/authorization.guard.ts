@@ -48,7 +48,7 @@ export class AuthGuard implements CanActivate {
     if (!token) {
       throw new HttpException(
         {
-          message: 'Token not found',
+          message: '[AuthGuard] You do not have permission to access this resource',
           data: null,
 
           errors: null,

@@ -7,6 +7,7 @@ import { IUserCreateResponse } from './interfaces/user-create-response.interface
 import { IUserSearchResponse } from './interfaces/user-search-response.interface';
 import { IUserConfirmResponse } from './interfaces/user-confirm-response.interface';
 import { IUserUsernameCheckAvailabilityResponse } from './interfaces/user-username-check-availability-response.interface';
+import { firstValueFrom } from 'rxjs';
 
 @Controller('user')
 export class UserController {
@@ -29,27 +30,27 @@ export class UserController {
         if (await user[0].compareEncryptedPassword(params.password)) {
           return {
             status: HttpStatus.OK,
-            message: 'user_search_by_credentials_success',
+            message: 'User found',
             user: user[0],
           };
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'user_search_by_credentials_not_match',
+            message: 'User not found',
             user: null,
           };
         }
       } else {
         return {
           status: HttpStatus.NOT_FOUND,
-          message: 'user_search_by_credentials_not_found',
+          message: 'User not found',
           user: null,
         };
       }
     } else {
       return {
-        status: HttpStatus.NOT_FOUND,
-        message: 'user_search_by_credentials_not_found',
+        status: HttpStatus.BAD_REQUEST,
+        message: 'User not found',
         user: null,
       };
     }
@@ -65,20 +66,20 @@ export class UserController {
       if (user) {
         return {
           status: HttpStatus.OK,
-          message: 'user_get_by_id_success',
+          message: 'User found',
           user,
         };
       } else {
         return {
           status: HttpStatus.NOT_FOUND,
-          message: 'user_get_by_id_not_found',
+          message: 'User not found',
           user: null,
         };
       }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'user_get_by_id_bad_request',
+        message: 'User not found',
         user: null,
       };
     }
@@ -94,14 +95,14 @@ export class UserController {
       return {
         status: HttpStatus.OK,
         message: !(users && users[0]) ?
-          'user_username_check_availability_available' :
-          'user_username_check_availability_unavailable',
+          'Username available' :
+          'Username not available',
         available: !(users && users[0]),
       };
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'user_username_check_availability_bad_request',
+        message: 'Username not available',
         available: null,
       };
     }
@@ -126,20 +127,20 @@ export class UserController {
         });
         return {
           status: HttpStatus.OK,
-          message: 'user_confirm_success',
+          message: 'User confirmed',
           errors: null,
         };
       } else {
         return {
           status: HttpStatus.NOT_FOUND,
-          message: 'user_confirm_not_found',
+          message: 'User not found',
           errors: null,
         };
       }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'user_confirm_bad_request',
+        message: 'User not found',
         errors: null,
       };
     }
@@ -180,44 +181,48 @@ export class UserController {
 
         return {
           status: HttpStatus.CONFLICT,
-          message: 'user_create_conflict',
+          message: 'User already exists',
           user: null,
           errors,
         };
       } else {
         try {
           params.is_confirmed = false;
+
           const createdUser = await this.userService.createUser(params);
           const userLink = await this.userService.createUserLink(
             createdUser.id,
           );
+
           delete createdUser.password;
-          return {
-            status: HttpStatus.CREATED,
-            message: 'user_create_success',
-            user: createdUser,
-            errors: null,
-          };
-          this.mailerServiceClient
+
+          await firstValueFrom(this.mailerServiceClient
             .send('mail_send', {
               to: createdUser.email,
               subject: 'Email confirmation',
               html: `<center>
-            <b>Hi there, please confirm your email to use Smoothday.</b><br>
+            <b>Hello, ${createdUser.username}!</b>
+            <br>
+            Please confirm your email.
+            <br>
             Use the following link for this.<br>
             <a href="${this.userService.getConfirmationLink(
                 userLink.link,
               )}"><b>Confirm The Email</b></a>
             </center>`,
             })
-            .subscribe({
-              next: (response) => console.log('Email sent successfully.', response),
-              error: (error) => console.error('Failed to send email.', error)
-            });
+          );
+
+          return {
+            status: HttpStatus.CREATED,
+            message: 'User created',
+            user: createdUser,
+            errors: null,
+          };
         } catch (e) {
           return {
             status: HttpStatus.PRECONDITION_FAILED,
-            message: 'user_create_precondition_failed',
+            message: 'User not created',
             user: null,
             errors: e.errors,
           };
@@ -226,7 +231,7 @@ export class UserController {
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'user_create_bad_request',
+        message: 'User not created',
         user: null,
         errors: null,
       };

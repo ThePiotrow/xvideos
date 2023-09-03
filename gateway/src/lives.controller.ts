@@ -30,6 +30,7 @@ import { UpdateLiveResponseDto } from './interfaces/live/dto/update-live-respons
 import { CreateLiveDto } from './interfaces/live/dto/create-live.dto';
 import { UpdateLiveDto } from './interfaces/live/dto/update-live.dto';
 import { LiveIdDto } from './interfaces/live/dto/live-id.dto';
+import { Admin } from './decorators/admin.decorator';
 
 @Controller('lives')
 @ApiBearerAuth()
@@ -40,8 +41,6 @@ export class LivesController {
   ) { }
 
   @Get()
-  @Authorization(true)
-  // @Permission('live_search_by_user_id')
   @ApiOkResponse({
     type: GetLivesResponseDto,
     description: 'List of lives for signed in user',
@@ -49,11 +48,66 @@ export class LivesController {
   public async getLives(
     @Req() request: IAuthorizedRequest,
   ): Promise<GetLivesResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
 
     const livesResponse: IServiceLiveSearchByUserIdResponse =
       await firstValueFrom(
-        this.liveServiceClient.send('live_search_by_user_id', userInfo.id),
+        this.liveServiceClient.send('live_search_by_user_id', user.id),
+      );
+
+    return {
+      message: livesResponse.message,
+      data: {
+        lives: livesResponse.lives,
+      },
+      errors: null,
+    };
+  }
+
+  @Get('user/:id')
+  @ApiOkResponse({
+    type: GetLivesResponseDto,
+    description: 'Live for signed in user',
+  })
+  public async getUserLive(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: LiveIdDto,
+  ): Promise<GetLivesResponseDto> {
+    const { user } = request;
+
+    const livesResponse: IServiceLiveSearchByUserIdResponse =
+      await firstValueFrom(
+        this.liveServiceClient.send('live_search_by_user_id', {
+          user_id: params.id,
+        }),
+      );
+
+    return {
+      message: livesResponse.message,
+      data: {
+        lives: livesResponse.lives,
+      },
+      errors: null,
+    };
+  }
+
+  @Get('user/:id/lives')
+  @ApiOkResponse({
+    type: GetLivesResponseDto,
+    description: 'Live for signed in user',
+  })
+  public async getAllUserLive(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: LiveIdDto,
+  ): Promise<GetLivesResponseDto> {
+    const { user } = request;
+
+    const livesResponse: IServiceLiveSearchByUserIdResponse =
+      await firstValueFrom(
+        this.liveServiceClient.send('live_search_by_id', {
+          user_id: user.id,
+          live_id: params.id,
+        }),
       );
 
     return {
@@ -67,20 +121,21 @@ export class LivesController {
 
   @Post()
   @Authorization(true)
+  @Admin()
   @Permission('live_create')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
   })
   public async createLive(
     @Req() request: IAuthorizedRequest,
-    @Body() liveRequest: CreateLiveDto,
+    @Body() body: CreateLiveDto,
   ): Promise<CreateLiveResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
     const createLiveResponse: IServiceLiveCreateResponse =
       await firstValueFrom(
         this.liveServiceClient.send(
           'live_create',
-          Object.assign(liveRequest, { user_id: userInfo.id }),
+          Object.assign(body, { user_id: user.id }),
         ),
       );
 
@@ -115,12 +170,12 @@ export class LivesController {
     @Req() request: IAuthorizedRequest,
     @Param() params: LiveIdDto,
   ): Promise<CreateLiveResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
     const createLiveResponse: IServiceLiveCreateResponse =
       await firstValueFrom(
         this.liveServiceClient.send(
           'live_stop',
-          Object.assign(params, { user_id: userInfo.id, id: params.id }),
+          Object.assign(params, { user_id: user.id, id: params.id }),
         ),
       );
 
@@ -154,13 +209,13 @@ export class LivesController {
     @Req() request: IAuthorizedRequest,
     @Param() params: LiveIdDto,
   ): Promise<DeleteLiveResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
 
     const deleteLiveResponse: IServiceLiveDeleteResponse =
       await firstValueFrom(
         this.liveServiceClient.send('live_delete_by_id', {
           id: params.id,
-          userId: userInfo.id,
+          userId: user.id,
         }),
       );
 
@@ -191,15 +246,15 @@ export class LivesController {
   public async updateLive(
     @Req() request: IAuthorizedRequest,
     @Param() params: LiveIdDto,
-    @Body() liveRequest: UpdateLiveDto,
+    @Body() body: UpdateLiveDto,
   ): Promise<UpdateLiveResponseDto> {
-    const userInfo = request.user;
+    const { user } = request;
     const updateLiveResponse: IServiceLiveUpdateByIdResponse =
       await firstValueFrom(
         this.liveServiceClient.send('live_update_by_id', {
           id: params.id,
-          userId: userInfo.id,
-          live: liveRequest,
+          userId: user.id,
+          live: body,
         }),
       );
 

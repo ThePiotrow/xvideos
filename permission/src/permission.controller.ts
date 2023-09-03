@@ -4,7 +4,6 @@ import { ConfirmedStrategyService } from './services/confirmed-strategy.service'
 import { rolePermissions } from './constants/permissions';
 import { IPermissionCheckResponse } from './interfaces/permission-check-response.interface';
 import { IUser } from './interfaces/user.interface';
-import { userInfo } from 'os';
 
 @Controller()
 export class PermissionController {

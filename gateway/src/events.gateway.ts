@@ -72,7 +72,6 @@ export class EventsGateway {
         catch (e) {
             console.error(e);
         }
-
     }
 
     @WebSocketServer()

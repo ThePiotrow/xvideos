@@ -12,6 +12,7 @@ import { ConfigService } from './services/config/config.service';
 import { LivesController } from './lives.controller';
 
 import { EventsGateway } from './events.gateway';
+import { AdminGuard } from './services/guards/admin.guard';
 
 @Module({
   imports: [],
@@ -64,6 +65,10 @@ import { EventsGateway } from './events.gateway';
     {
       provide: APP_GUARD,
       useClass: PermissionGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: AdminGuard,
     },
     EventsGateway,
   ],

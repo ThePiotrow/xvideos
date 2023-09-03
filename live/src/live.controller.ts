@@ -17,14 +17,14 @@ export class LiveController {
   @MessagePattern('live_search_by_user_id')
   public async liveSearchByUserId(
     params: {
-      userId: string,
-      onAir?: boolean,
+      user_id: string,
+      on_air?: boolean,
     }
   ): Promise<ILiveSearchByUserResponse> {
     let result: ILiveSearchByUserResponse;
 
-    if (params.userId) {
-      const lives = await this.liveService.getLivesByUserId(params.userId, params.onAir);
+    if (params.user_id) {
+      const lives = await this.liveService.getLivesByUserId(params.user_id, params.on_air);
       return {
         status: HttpStatus.OK,
         message: 'live_search_by_user_id_success',
@@ -41,14 +41,14 @@ export class LiveController {
 
   @MessagePattern('live_search_by_id')
   public async liveSearchById(params: {
-    liveId: string,
-    onAir?: boolean,
+    live_id: string,
+    on_air?: boolean,
   }
   ): Promise<ILiveSearchByIdResponse> {
     let result: ILiveSearchByIdResponse;
 
-    if (params.liveId) {
-      const live = await this.liveService.findLiveById(params.liveId, params.onAir);
+    if (params.live_id) {
+      const live = await this.liveService.findLiveById(params.live_id, params.on_air);
 
       if (live)
         return {
@@ -69,14 +69,14 @@ export class LiveController {
   public async liveUpdateById(params: {
     live: ILiveUpdateParams;
     id: string;
-    userId: string;
+    user_id: string;
   }): Promise<ILiveUpdateByIdResponse> {
     let result: ILiveUpdateByIdResponse;
     if (params.id) {
       try {
         const live = await this.liveService.findLiveById(params.id);
         if (live) {
-          if (live.user_id.toString() === params.userId.toString()) {
+          if (live.user_id.toString() === params.user_id.toString()) {
             if (params.live.end_date) {
               //socket io destroy
             }
@@ -123,13 +123,13 @@ export class LiveController {
   }
 
   @MessagePattern('live_create')
-  public async liveCreate(liveBody: ILive): Promise<ILiveCreateResponse> {
+  public async liveCreate(body: ILive): Promise<ILiveCreateResponse> {
     let result: ILiveCreateResponse;
 
-    if (liveBody) {
+    if (body) {
       try {
         const existedLives = await this.liveService.getLivesByUserId(
-          liveBody.user_id,
+          body.user_id,
           true
         );
 
@@ -140,8 +140,8 @@ export class LiveController {
           }
         }
 
-        liveBody.start_time = +new Date();
-        const live = await this.liveService.createLive(liveBody);
+        body.start_time = +new Date();
+        const live = await this.liveService.createLive(body);
         return {
           status: HttpStatus.CREATED,
           message: 'live_create_success',
@@ -168,7 +168,7 @@ export class LiveController {
 
   @MessagePattern('live_stop')
   public async liveStop(params: {
-    userId: string;
+    user_id: string;
     id: string;
   }): Promise<ILiveUpdateByIdResponse> {
     let result: ILiveUpdateByIdResponse;
@@ -176,7 +176,7 @@ export class LiveController {
       try {
         const live: ILive = await this.liveService.findLiveById(params.id);
         if (live) {
-          if (live.user_id === params.userId) {
+          if (live.user_id === params.user_id) {
             live.end_time = +new Date();
             await live.save();
             return {
@@ -221,17 +221,17 @@ export class LiveController {
 
   @MessagePattern('live_delete_by_id')
   public async liveDeleteForUser(params: {
-    userId: string;
+    user_id: string;
     id: string;
   }): Promise<ILiveDeleteResponse> {
     let result: ILiveDeleteResponse;
 
-    if (params && params.userId && params.id) {
+    if (params && params.user_id && params.id) {
       try {
         const live = await this.liveService.findLiveById(params.id);
 
         if (live) {
-          if (live.user_id === params.userId) {
+          if (live.user_id === params.user_id) {
             await this.liveService.removeLiveById(params.id);
             return {
               status: HttpStatus.OK,

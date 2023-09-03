@@ -55,7 +55,7 @@ export class MediasController {
   public async getMediasByUser(
     @Req() request: IAuthorizedRequest,
   ): Promise<GetMediasResponseDto> {
-    const user = request.user;
+    const { user } = request;
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
@@ -82,7 +82,7 @@ export class MediasController {
     @Req() request: IAuthorizedRequest,
     @Param() params: MediaIdDto,
   ): Promise<GetMediaResponseDto> {
-    const user = request.user;
+    const { user } = request;
 
     const mediasResponse: IServiceMediaSearchByIdResponse =
       await firstValueFrom(
@@ -109,7 +109,7 @@ export class MediasController {
     @Req() request: IAuthorizedRequest,
     @Body() body: { limit: number; offset: number },
   ): Promise<GetMediasResponseDto> {
-    const user = request.user;
+    const { user } = request;
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
@@ -142,7 +142,7 @@ export class MediasController {
     @Body() body: CreateMediaDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<CreateMediaResponseDto> {
-    const user = request.user;
+    const { user } = request;
 
     const media = Object.assign(
       body,
@@ -193,7 +193,7 @@ export class MediasController {
     @Req() request: IAuthorizedRequest,
     @Param() params: MediaIdDto,
   ): Promise<DeleteMediaResponseDto> {
-    const user = request.user;
+    const { user } = request;
 
     const deleteMediaResponse: IServiceMediaDeleteResponse =
       await firstValueFrom(
@@ -230,15 +230,15 @@ export class MediasController {
   public async updateMedia(
     @Req() request: IAuthorizedRequest,
     @Param() params: MediaIdDto,
-    @Body() mediaRequest: UpdateMediaDto,
+    @Body() body: UpdateMediaDto,
   ): Promise<UpdateMediaResponseDto> {
-    const user = request.user;
+    const { user } = request;
     const updateMediaResponse: IServiceMediaUpdateByIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_update_by_id', {
           id: params.id,
           userId: user.id,
-          media: mediaRequest,
+          media: body,
         }),
       );
 
