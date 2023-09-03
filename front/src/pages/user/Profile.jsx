@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api";
+import useToken from "../../hooks/useToken";
 
 function Profile() {
   const navigate = useNavigate();
@@ -23,7 +24,14 @@ useEffect(() => {
 
     return (
       <div>
-        <h2>Page de profile de {user}</h2>
+        {user ? (
+          <h2>Page de profile de {user.username}</h2>
+        ):(
+          <div>
+            <h2>Page de profile</h2>
+          </div>
+          
+        )}
       </div>
     );
   }

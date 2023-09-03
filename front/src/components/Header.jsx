@@ -10,6 +10,7 @@ export default function Header() {
   const { token } = useToken();
   const hasToken = localStorage.getItem("token")
   const [isOpen, setIsOpen] = useState(false)
+  const [isOpenDropdown, setIsOpenDropdown] = useState(false)
 
 useEffect(() => {
   if(hasToken) {
@@ -76,15 +77,21 @@ useEffect(() => {
           
                       <div className="flex justify-center mt-6 lg:flex lg:mt-0 lg:-mx-2">
                         {user ? (
-                          <div className="flex items-center mt-4 lg:mt-0">
+                          <div className="flex items-center mt-4 lg:mt-0 relative">
                             <Link onClick={handleLogout} className="px-3 py-2 mx-3 mt-2 text-gray-700 transition-colors duration-300 transform rounded-md lg:mt-0 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Se déconnecter</Link>
-                            <div className="w-8 h-8 overflow-hidden border-2 border-gray-400 rounded-full">
-                              <Link to="/profile">
-                              <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=334&q=80" className="object-cover w-full h-full" alt="avatar"/>
-                              </Link>
+                            <div onClick={() => setIsOpenDropdown(!isOpenDropdown)} className="w-8 h-8 overflow-hidden border-2 border-gray-400 rounded-full flex items-center justify-center bg-gray-200">
+                                <span className="text-xl font-bold text-gray-600">
+                                  {user.username ? user.username[0].toUpperCase() : ''}
+                                </span>
                             </div>
+                            {isOpenDropdown && (
+                              <div className="absolute top-full left-0 mt-2 w-48 py-2 bg-white border rounded shadow dark:text-gray-200">
+                                <Link to="/medias" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Médias</Link>
+                                <Link to="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Profil</Link>
+                                <Link to="/live" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Live</Link>
+                              </div>
+                            )}
                           </div>
-
                         ) : (
                             <Link to="/login" className="px-3 py-2 mx-3 mt-2 text-gray-700 transition-colors duration-300 transform rounded-md lg:mt-0 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">Se connecter</Link>
                         )}

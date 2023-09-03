@@ -26,6 +26,7 @@ function AppRoutes() {
       {/* IS AUTHENTICATED */}
 
       {/* MEDIAS */}
+      <Route path="/medias" element={<AuthGuard><EditMedias /></AuthGuard>} />
       <Route path="/medias/edit" element={<AuthGuard><EditMedias /></AuthGuard>} />
       <Route path="/medias/create" element={<AuthGuard><CreateMedias /></AuthGuard>} />
 
