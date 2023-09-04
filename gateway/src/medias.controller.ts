@@ -12,6 +12,8 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFile,
+  Res,
+  StreamableFile,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -48,16 +50,15 @@ export class MediasController {
   @Get('/user/:id')
   @ApiOkResponse({
     type: GetMediasResponseDto,
-    description: 'List of medias for signed in user',
   })
   public async getMediasByUser(
     @Req() request: IAuthorizedRequest,
+    @Param() params: MediaIdDto,
   ): Promise<GetMediasResponseDto> {
-    const { user } = request;
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
-        this.mediaServiceClient.send('media_search_by_user_id', user.id),
+        this.mediaServiceClient.send('media_search_by_user_id', params.id),
       );
 
     return {
@@ -72,14 +73,11 @@ export class MediasController {
   @Get('/:id')
   @ApiOkResponse({
     type: GetMediaResponseDto,
-    description: 'List of medias for signed in user',
   })
   public async getMediaById(
-    @Req() request: IAuthorizedRequest,
+    @Res() res,
     @Param() params: MediaIdDto,
   ): Promise<GetMediaResponseDto> {
-    const { user } = request;
-
     const mediasResponse: IServiceMediaSearchByIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_search_by_id', params.id),
@@ -94,26 +92,37 @@ export class MediasController {
     };
   }
 
+  @Get('/:id/file')
+  @ApiOkResponse({
+    type: GetMediaResponseDto,
+  })
+  public async getFile(
+    @Res() res,
+    @Param() params: MediaIdDto,
+  ): Promise<any> {
+    const mediaFile: StreamableFile = await firstValueFrom(
+      this.mediaServiceClient.send('get_file', params.id),
+    );
+
+    mediaFile.pipe(res);
+  }
+
   @Get()
   @ApiOkResponse({
     type: GetMediasResponseDto,
-    description: 'List of medias for signed in user',
   })
   public async getMedias(
-    @Req() request: IAuthorizedRequest,
     @Body() body: { limit: number; offset: number },
   ): Promise<GetMediasResponseDto> {
-    const { user } = request;
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all', {
-          limit: 10,
-          offset: 0
+          limit: body.limit ?? 10,
+          offset: body.offset ?? 0,
         }),
       );
 
-    console.log(mediasResponse)
     return {
       message: mediasResponse.message,
       data: {

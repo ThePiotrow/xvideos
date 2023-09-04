@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, StreamableFile } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -41,48 +41,49 @@ export class MediaService {
     });
   }
 
-  public async createFile(path: string, data: string) {
+  public async createFile(path: string, data: string): Promise<boolean> {
 
-    let valid = true;
-
-    fs.writeFile(path, Buffer.from(data), async (err) => {
-      if (err) {
-        valid = false;
-        console.log(err);
-      }
-
-      console.log("The file has been saved!");
-    })
+    await new Promise((resolve, reject) => {
+      fs.writeFile(path, Buffer.from(data), (err) => {
+        if (err) {
+          console.log(err);
+          reject(false);
+        } else {
+          console.log("The file has been saved!");
+          resolve(true);
+        }
+      });
+    });
 
     const basename = path.split('.')[0];
 
-    ffmpeg(path)
-      .output(`${basename}-720.mp4`)
-      .size('1280x720')
-      .on('end', async () => {
-        console.log('conversion ended');
-        fs.unlinkSync(path);
-      })
-      .on('error', (err) => {
-        console.log('error: ', err);
-        valid = false;
-      })
-      .run();
+    try {
+      await this.convertFile(path, `${basename}-720.mp4`, '1280x720');
+      await this.convertFile(path, `${basename}-480.mp4`, '854x480');
+    } catch (err) {
+      console.log('error: ', err);
+      return false;
+    }
 
-    ffmpeg(path)
-      .output(`${basename}-480.mp4`)
-      .size('854x480')
-      .on('end', async () => {
-        console.log('conversion ended');
-        fs.unlinkSync(path);
-      })
-      .on('error', (err) => {
-        console.log('error: ', err);
-        valid = false;
-      })
-      .run();
+    return true;
+  }
 
-    return valid;
+  private convertFile(inputPath: string, outputPath: string, size: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      ffmpeg(inputPath)
+        .output(outputPath)
+        .size(size)
+        .on('end', async () => {
+          console.log('conversion ended');
+          await fs.promises.unlink(inputPath);
+          resolve();
+        })
+        .on('error', (err) => {
+          console.log('error: ', err);
+          reject(err);
+        })
+        .run();
+    });
   }
 
   public async getAllMedias({ limit, offset }: { limit: number, offset: number }) {
@@ -91,5 +92,10 @@ export class MediaService {
       .skip(offset)
       .limit(limit)
       .exec();
+  }
+
+  public async getFile(path: string): Promise<StreamableFile> {
+    const stream = fs.createReadStream(path);
+    return new StreamableFile(stream);
   }
 }

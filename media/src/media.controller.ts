@@ -1,4 +1,4 @@
-import { Controller, HttpStatus } from '@nestjs/common';
+import { Controller, HttpStatus, StreamableFile } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { MediaService } from './services/media.service';
@@ -87,6 +87,11 @@ export class MediaController {
         errors: null,
       };
     }
+  }
+
+  @MessagePattern('get_file')
+  public async getFile(path: string): Promise<StreamableFile> {
+    return this.mediaService.getFile(`./uploads/${path}`);
   }
 
   @MessagePattern('media_create')

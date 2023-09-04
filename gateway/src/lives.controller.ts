@@ -43,7 +43,6 @@ export class LivesController {
   @Get()
   @ApiOkResponse({
     type: GetLivesResponseDto,
-    description: 'List of lives for signed in user',
   })
   public async getLives(
     @Req() request: IAuthorizedRequest,
@@ -67,7 +66,6 @@ export class LivesController {
   @Get('user/:id')
   @ApiOkResponse({
     type: GetLivesResponseDto,
-    description: 'Live for signed in user',
   })
   public async getUserLive(
     @Req() request: IAuthorizedRequest,
@@ -94,7 +92,6 @@ export class LivesController {
   @Get('user/:id/lives')
   @ApiOkResponse({
     type: GetLivesResponseDto,
-    description: 'Live for signed in user',
   })
   public async getAllUserLive(
     @Req() request: IAuthorizedRequest,
