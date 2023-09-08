@@ -18,6 +18,7 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { Response } from 'express';
 
 import { Authorization } from './decorators/authorization.decorator';
 import { Permission } from './decorators/permission.decorator';
@@ -97,14 +98,19 @@ export class MediasController {
     type: GetMediaResponseDto,
   })
   public async getFile(
-    @Res() res,
+    @Res({ passthrough: true }) res: Response,
     @Param() params: MediaIdDto,
-  ): Promise<any> {
-    const mediaFile: StreamableFile = await firstValueFrom(
+  ): Promise<StreamableFile> {
+    const mediaFile: { file: StreamableFile, path: string } = await firstValueFrom(
       this.mediaServiceClient.send('get_file', params.id),
     );
+    console.log(mediaFile)
+    res.header({
+      'Content-Type': 'application/octet-stream',
+      'Content-Disposition': `attachment; filename="${mediaFile.path}"`,
+    });
 
-    mediaFile.pipe(res);
+    return mediaFile.file;
   }
 
   @Get()
@@ -112,14 +118,14 @@ export class MediasController {
     type: GetMediasResponseDto,
   })
   public async getMedias(
-    @Body() body: { limit: number; offset: number },
+    @Body() body: { limit: number; offset?: number } = { limit: 10, offset: 0 },
   ): Promise<GetMediasResponseDto> {
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all', {
-          limit: body.limit ?? 10,
-          offset: body.offset ?? 0,
+          limit: body.limit,
+          offset: body.offset,
         }),
       );
 
