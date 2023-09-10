@@ -104,7 +104,7 @@ export class MediasController {
     const mediaFile: { file: StreamableFile, path: string } = await firstValueFrom(
       this.mediaServiceClient.send('get_file', params.id),
     );
-    console.log(mediaFile)
+    //console.log(mediaFile)
     res.header({
       'Content-Type': 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${mediaFile.path}"`,
