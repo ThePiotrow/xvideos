@@ -24,6 +24,18 @@ export class LiveService {
     );
   }
 
+  public async getAllLives({ limit, offset }: { limit: number, offset: number }) {
+    return this.liveModel.find(
+      {
+        end_time: null
+      }
+    )
+      .sort({ created_at: -1 })
+      .skip(offset)
+      .limit(limit)
+      .exec();
+  }
+
   public async createLive(liveBody: ILive): Promise<ILive> {
     const liveModel = new this.liveModel(liveBody);
     return await liveModel.save();

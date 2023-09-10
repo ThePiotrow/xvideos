@@ -9,10 +9,41 @@ import { ILiveDeleteResponse } from './interfaces/live-delete-response.interface
 import { ILiveCreateResponse } from './interfaces/live-create-response.interface';
 import { ILiveUpdateByIdResponse } from './interfaces/live-update-by-id-response.interface';
 import { ILiveSearchByIdResponse } from './interfaces/live-search-by-id-response.interface';
+import { threadId } from 'worker_threads';
 
 @Controller()
 export class LiveController {
   constructor(private readonly liveService: LiveService) { }
+
+  @MessagePattern('get_all_lives')
+  public async liveGetAll(
+    params: {
+      limit: number
+      offset: number,
+    }
+  ): Promise<ILiveSearchByUserResponse> {
+
+    try {
+      const lives = await this.liveService.getAllLives({
+        limit: 0 ?? params.limit,
+        offset: 0 ?? params.offset,
+      })
+
+      return {
+        status: HttpStatus.OK,
+        message: '✅ Lives found',
+        lives
+      }
+    }
+
+    catch (e) {
+      return {
+        status: HttpStatus.PRECONDITION_FAILED,
+        message: '⚠️ Lives not found',
+        lives: null,
+      };
+    }
+  }
 
   @MessagePattern('live_search_by_user_id')
   public async liveSearchByUserId(
