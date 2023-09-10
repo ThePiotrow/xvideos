@@ -88,7 +88,7 @@ useEffect(() => {
                               <div className="absolute top-full left-0 mt-2 w-48 py-2 bg-white border rounded shadow dark:text-gray-200">
                                 <Link to="/medias" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Médias</Link>
                                 <Link to="/profile" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Profil</Link>
-                                <Link to="/live" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Live</Link>
+                                <Link to="/lives/launch" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">Lancer un live</Link>
                               </div>
                             )}
                           </div>

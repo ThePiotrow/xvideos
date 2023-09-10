@@ -45,13 +45,15 @@ export class LivesController {
     type: GetLivesResponseDto,
   })
   public async getLives(
-    @Req() request: IAuthorizedRequest,
+    @Body() body: { limit?: number; offset?: number },
   ): Promise<GetLivesResponseDto> {
-    const { user } = request;
 
     const livesResponse: IServiceLiveSearchByUserIdResponse =
       await firstValueFrom(
-        this.liveServiceClient.send('live_search_by_user_id', user.id),
+        this.liveServiceClient.send('get_all_lives', {
+          limit: body.limit,
+          offset: body.offset,
+        }),
       );
 
     return {
@@ -118,7 +120,7 @@ export class LivesController {
 
   @Post()
   @Authorization(true)
-  @Admin()
+  // @Admin()
   @Permission('live_create')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
