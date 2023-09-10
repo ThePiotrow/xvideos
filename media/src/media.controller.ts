@@ -90,8 +90,10 @@ export class MediaController {
   }
 
   @MessagePattern('get_file')
-  public async getFile(path: string): Promise<StreamableFile> {
-    return this.mediaService.getFile(`./uploads/${path}`);
+  public async getFile(id: string): Promise<StreamableFile> {
+    const media: IMedia = await this.mediaService.findMediaById(id)
+
+    return this.mediaService.getFile(`./uploads/${media.path}`);
   }
 
   @MessagePattern('media_create')
