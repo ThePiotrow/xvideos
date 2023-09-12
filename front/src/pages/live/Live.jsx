@@ -10,7 +10,7 @@ function Live() {
   useEffect(() => {
     API.get("/lives")
     .then(response => {
-      setLives(response.data.Live)
+      setLives(response.data.lives)
       console.log(response.data)
     })
     .catch(error => {
@@ -21,6 +21,13 @@ function Live() {
     return (
       <div>
         <h2>Page des lives</h2>
+        <ul>
+          {lives.map(live => (
+            <React.Fragment key={live.id}>
+              <li>{live.title}</li>
+            </React.Fragment>
+          ))}
+        </ul>
       </div>
     );
   }

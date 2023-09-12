@@ -11,14 +11,15 @@ function Home() {
     API.get("/medias")
     .then(response => {
       setMedias(response.data.medias);
-      console.log(response.data)
-      console.log(`${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT}/uploads/`);
-      
+      //API.get(`/medias/${medias[0].id}/file`).then(res => console.log(res))
+      console.log(response.data.medias[0])
     })
     .catch(error => {
       console.error("Erreur lors de la récupération des médias", error);
     })
   }, []);
+
+  
 
     return (
       <div className="m-5">
@@ -26,10 +27,12 @@ function Home() {
         <ul>
           {medias.map(media => (
             <React.Fragment key={media.id}>
-              <li>{media.title}</li>
+              <a onClick={() => navigate(`/media/${media.id}`)}>
+                {media.title}
+              </a>
               <li>{media.description}</li>
               <li>{media.path}</li>
-              <li><img src={`${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT}/medias/${media.path}/file`} alt={media.title} /></li>
+              <li><img src={``} alt="" /></li>
             </React.Fragment>
           ))}
         </ul>
