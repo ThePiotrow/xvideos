@@ -11,6 +11,7 @@ import Profile from "./pages/user/Profile";
 import EditMedias from "./pages/medias/EditMedias";
 import CreateMedias from "./pages/medias/CreateMedias";
 import LaunchLive from "./pages/live/LaunchLive";
+import MediaViewer from "./pages/medias/MediaViewer";
 
 
 function AppRoutes() {
@@ -22,6 +23,7 @@ function AppRoutes() {
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
       <Route path="/live" element={<Live />} />
+      <Route path="/media/:id" element={<MediaViewer />} />
 
       {/* IS AUTHENTICATED */}
 
