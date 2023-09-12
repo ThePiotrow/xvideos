@@ -100,25 +100,16 @@ export class MediasController {
   public async getFile(
     @Res({ passthrough: true }) res: Response,
     @Param() params: MediaIdDto,
-  ): Promise<StreamableFile> {
+  ) {
     const mediaFile: { file: StreamableFile, path: string } = await firstValueFrom(
       this.mediaServiceClient.send('get_file', params.id),
     );
-<<<<<<< HEAD
-    //console.log(mediaFile)
     res.header({
       'Content-Type': 'application/octet-stream',
       'Content-Disposition': `attachment; filename="${mediaFile.path}"`,
     });
-=======
-    // console.log(mediaFile)
-    // res.header({
-    //   'Content-Type': 'application/octet-stream',
-    //   'Content-Disposition': `attachment; filename="${mediaFile.path}"`,
-    // });
->>>>>>> 54663f9e0e876a2e94c2ab1d1cf96564e9d1cc47
 
-    return mediaFile.file;
+    res.send(mediaFile.file)
   }
 
   @Get()

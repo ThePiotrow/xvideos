@@ -22,14 +22,10 @@ export class TokenService {
       },
     );
 
-    console.log('token', token)
-
     const decoded = this.jwtService.decode(token) as {
       exp: number;
       userId: any;
     };
-
-    console.log('decoded', decoded)
 
     return new this.tokenModel({
       user_id: userId,
@@ -73,8 +69,6 @@ export class TokenService {
     }
     token = token.replace("Bearer ", ""); // Suppression du préfixe
     const tokenModel = await this.tokenModel.findOne({ token });
-
-    console.log(tokenModel)
 
     if (!tokenModel) return null;
 

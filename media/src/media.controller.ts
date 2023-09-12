@@ -105,7 +105,7 @@ export class MediaController {
         const folder = 'uploads';
         const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
 
-        body.path = body.file.originalname
+        body.file.originalname = body.file.originalname
           .replace(/(\.[^\.]+)$/, `-${suffix}$1`)
           .replace(/[^a-zA-Z0-9-.]/g, '-');
 
@@ -118,7 +118,9 @@ export class MediaController {
           };
         }
 
-        if (!this.mediaService.createFile(`./${folder}/${body.path}`, body.data))
+        const uploadedFile = await this.mediaService.uploadFile(body.file);
+
+        if (!uploadedFile?.url)
           return {
             status: HttpStatus.BAD_REQUEST,
             message: '⚠️ Media create failed',
@@ -126,6 +128,7 @@ export class MediaController {
             errors: null,
           };
 
+        body.path = uploadedFile.url;
         const media = await this.mediaService.createMedia(body);
         return {
           status: HttpStatus.CREATED,
