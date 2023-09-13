@@ -18,6 +18,10 @@ jobs:
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/github-actions.pem
           chmod 600 ~/.ssh/github-actions.pem
 
+      - name: Create .env
+        run: |
+          echo "${{ secrets.ENV }}" > .env
+
       - name: Deploy to Staging server
         uses: easingthemes/ssh-deploy@main
         with:
