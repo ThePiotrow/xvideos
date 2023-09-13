@@ -1,0 +1,34 @@
+name: Deplot to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-add ~/.ssh/id_rsa
+      
+      - name: Test SSH
+        run: |
+          touch ~/text.txt
+          echo "Hello World" > ~/text.txt
+          scp ~/text.txt ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:~/text.txt
+
+
+        
+            
+
+
+
+        
