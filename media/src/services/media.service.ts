@@ -31,23 +31,6 @@ export class MediaService {
     );
   }
 
-  async uploadPDFInvoice(
-    buffer: Buffer,
-    file_name: string
-  ): Promise<{ url: string; name: string }> {
-    const params = {
-      Bucket: process.env.AWS_S3_BUCKET,
-      Key: file_name,
-      Body: buffer,
-    };
-
-    await this.s3.upload(params).promise();
-    return {
-      url: `https://s3-${this.s3.config.region}.amazonaws.com/${params.Bucket}/${params.Key}`,
-      name: file_name,
-    };
-  }
-
   async s3_upload(
     buffer: Buffer,
     mimetype: string,
@@ -65,14 +48,12 @@ export class MediaService {
       },
     };
 
-    console.log('params: ', params)
-    console.log('s3: ', this.s3.config)
-
     try {
-      await this.s3.upload(params).promise();
+      const res = await this.s3.upload(params).promise();
+
       return {
-        url: `https://s3-${this.s3.config.region}.amazonaws.com/${params.Bucket}/${params.Key}`,
-        name: file_name,
+        url: res.Location,
+        name: res.Key,
       };
     } catch (e) {
       console.error("Failed to upload file to S3:", e.message);

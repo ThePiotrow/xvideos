@@ -12,6 +12,13 @@ services:
             - ${API_GATEWAY_PORT}:${API_GATEWAY_PORT}
         networks:
             - backend
+        depends_on:
+            - media
+            - live
+            - token
+            - mailer
+            - permission
+            - user
 
     media:
         build: ./media

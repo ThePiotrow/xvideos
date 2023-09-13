@@ -102,7 +102,6 @@ export class MediaController {
     if (body && body.file) {
       try {
 
-        const folder = 'uploads';
         const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
 
         body.file.originalname = body.file.originalname
