@@ -33,10 +33,10 @@ jobs:
           EXCLUDE: "/dist/, /node_modules/, /front/"
           SCRIPT_BEFORE: |
             cd /home/ubuntu 
-            docker-compose -f docker-compose-ec2.yml down
+            sudo docker-compose -f docker-compose-ec2.yml down
           SCRIPT_AFTER: |
             cd /home/ubuntu 
-            docker-compose -f docker-compose-ec2.yml up -d --remove-orphans
+            sudo docker-compose -f docker-compose-ec2.yml up -d --remove-orphans
 
 
 
