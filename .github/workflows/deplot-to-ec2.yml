@@ -17,8 +17,7 @@ jobs:
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/github-actions.pem
           chmod 600 ~/.ssh/github-actions.pem
-          cat ~/.ssh/github-actions.pem
-          cat ~/.ssh/know_hosts
+          cat ~/.ssh/known_hosts
       
       - name: Test SSH
         run: |
