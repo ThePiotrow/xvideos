@@ -17,14 +17,14 @@ jobs:
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/github-actions.pem
           chmod 600 ~/.ssh/github-actions.pem
-          eval `ssh-agent -s`     
-          ssh-add ~/.ssh/github-actions.pem
+          cat ~/.ssh/github-actions.pem
+          cat ~/.ssh/know_hosts
       
       - name: Test SSH
         run: |
           touch ~/text.txt
           echo "Hello World" > ~/text.txt
-          scp ~/text.txt ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/text.txt
+          scp -i ~/.ssh/github-actions.pem ~/text.txt ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:~/text.txt
 
 
         
