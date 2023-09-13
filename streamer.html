@@ -57,6 +57,7 @@
 
         const start = (roomID) => {
             let mediaRecorder;
+            let room;
             const imageBuffer = [];
             const audioBuffer = [];
             const canvas = document.getElementById("preview");
@@ -74,7 +75,11 @@
 
             socket.emit('hostLive', (data) => {
                 console.log('data', data)
+                room = data.room;
             });
+
+            if (!room)
+                return;
 
             socket.on('nb_viewers', (data) => {
                 console.log('data', data.value)

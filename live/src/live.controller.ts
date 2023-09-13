@@ -240,7 +240,7 @@ export class LiveController {
     }
     return {
       status: HttpStatus.BAD_REQUEST,
-      message: 'live_stop_bad_request',
+      message: '⚠️ Live stop failed',
       live: null,
       errors: null,
     };
@@ -262,34 +262,34 @@ export class LiveController {
             await this.liveService.removeLiveById(params.id);
             return {
               status: HttpStatus.OK,
-              message: 'live_delete_by_id_success',
+              message: '✅ Live deleted',
               errors: null,
             };
           } else {
             return {
               status: HttpStatus.FORBIDDEN,
-              message: 'live_delete_by_id_forbidden',
+              message: '⛔ Forbidden',
               errors: null,
             };
           }
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'live_delete_by_id_not_found',
+            message: '⚠️ Live not found',
             errors: null,
           };
         }
       } catch (e) {
         return {
-          status: HttpStatus.FORBIDDEN,
-          message: 'live_delete_by_id_forbidden',
+          status: HttpStatus.PRECONDITION_FAILED,
+          message: '⚠️ Live delete failed',
           errors: null,
         };
       }
     }
     return {
       status: HttpStatus.BAD_REQUEST,
-      message: 'live_delete_by_id_bad_request',
+      message: '⚠️ Live delete failed',
       errors: null,
     };
   }

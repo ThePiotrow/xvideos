@@ -92,13 +92,11 @@ export class EventsGateway {
 
         if (!user)
             return {
-                message: "no_user_found",
+                message: "⚠️ User Not Found",
                 data: {
                     live: null
                 },
-                errors: {
-                    message: "No user found"
-                }
+                errors: {}
             };
 
         client.leave(data.room);
@@ -106,7 +104,7 @@ export class EventsGateway {
         this.getClients({ room: data.room });
 
         return {
-            message: "disconnected",
+            message: "✅ Disconnected",
             data: {
                 live: { room: data.room, client: client.id }
             },
@@ -165,14 +163,14 @@ export class EventsGateway {
             console.log('live', live, livesResponse)
 
             if (live === null)
-                return { status: 'not_found', room: null, client: client.id };
+                return { status: '⚠️ Not found', room: null, client: client.id };
 
             client.join(data.room);
 
             this.getClients({ room: data.room });
 
             return {
-                message: "Connected",
+                message: "✅ Connected",
                 data: {
                     live: { room: data.room, client: client.id }
                 },
@@ -181,7 +179,7 @@ export class EventsGateway {
         }
         else {
             return {
-                message: "User Not Found",
+                message: "⚠️ User Not Found",
                 data: {
                     live: null
                 },
@@ -221,7 +219,7 @@ export class EventsGateway {
 
                 client.join(live.id);
 
-                return { status: 'joined', room: live.id, client: client.id };
+                return { status: '✅ Live joined', room: live.id, client: client.id };
             }
             catch (e) {
                 console.log(e)
@@ -229,7 +227,7 @@ export class EventsGateway {
             }
         }
         else {
-            return { status: 'not_found', room: null, client: client.id };
+            return { status: '⚠️ Not found', room: null, client: client.id };
         }
     }
 
@@ -265,6 +263,6 @@ export class EventsGateway {
             }
         }
 
-        return { status: 'stopped', room: data.live_id, client: client.id };
+        return { status: '✅ Live stopped', room: data.live_id, client: client.id };
     }
 }

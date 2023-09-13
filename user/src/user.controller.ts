@@ -8,6 +8,7 @@ import { IUserSearchResponse } from './interfaces/user-search-response.interface
 import { IUserConfirmResponse } from './interfaces/user-confirm-response.interface';
 import { IUserUsernameCheckAvailabilityResponse } from './interfaces/user-username-check-availability-response.interface';
 import { firstValueFrom } from 'rxjs';
+import { IUserGetAllResponse } from './interfaces/user-get-all-response.interface';
 
 @Controller('user')
 export class UserController {
@@ -15,6 +16,26 @@ export class UserController {
     private readonly userService: UserService,
     @Inject('MAILER_SERVICE') private readonly mailerServiceClient: ClientProxy,
   ) { }
+
+  @MessagePattern('user_get_all')
+  public async getAllUsers(): Promise<IUserGetAllResponse> {
+    const users: IUser[] = await this.userService.getAllUsers();
+
+    if (users) {
+      return {
+        status: HttpStatus.OK,
+        message: '✅ Users found',
+        users,
+      };
+    } else {
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: '⚠️ Users not found',
+        users: null,
+      };
+    }
+  }
+
 
   @MessagePattern('user_search_by_credentials')
   public async searchUserByCredentials(params: {
@@ -31,33 +52,33 @@ export class UserController {
           if (!user[0].is_confirmed) {
             return {
               status: HttpStatus.UNAUTHORIZED,
-              message: 'User not confirmed',
+              message: '⛔ User not confirmed',
               user: null,
             };
           }
           return {
             status: HttpStatus.OK,
-            message: 'User found',
+            message: '✅ User found',
             user: user[0],
           }
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
-            message: 'User not found',
+            message: '⚠️ User not found',
             user: null,
           };
         }
       } else {
         return {
           status: HttpStatus.NOT_FOUND,
-          message: 'User not found',
+          message: '⚠️ User not found',
           user: null,
         };
       }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'User not found',
+        message: '⚠️ User not found',
         user: null,
       };
     }
@@ -73,20 +94,20 @@ export class UserController {
       if (user) {
         return {
           status: HttpStatus.OK,
-          message: 'User found',
+          message: '✅ User found',
           user,
         };
       } else {
         return {
           status: HttpStatus.NOT_FOUND,
-          message: 'User not found',
+          message: '⚠️ User not found',
           user: null,
         };
       }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'User not found',
+        message: '⚠️ User not found',
         user: null,
       };
     }
@@ -102,14 +123,14 @@ export class UserController {
       return {
         status: HttpStatus.OK,
         message: !(users && users[0]) ?
-          'Username available' :
-          'Username not available',
+          '✅ Username available' :
+          '⚠️ Username not available',
         available: !(users && users[0]),
       };
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'Username not available',
+        message: '⚠️ Username not available',
         available: null,
       };
     }
@@ -134,20 +155,20 @@ export class UserController {
         });
         return {
           status: HttpStatus.OK,
-          message: 'User confirmed',
+          message: '✅ User confirmed',
           errors: null,
         };
       } else {
         return {
           status: HttpStatus.NOT_FOUND,
-          message: 'User not found',
+          message: '⚠️ User not found',
           errors: null,
         };
       }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'User not found',
+        message: '⚠️ User not found',
         errors: null,
       };
     }
@@ -174,21 +195,21 @@ export class UserController {
         if (user.email === params.email) {
 
           errors.email = {
-            message: 'Email already exists',
+            message: '⚠️ Email already exists',
             path: 'email',
           };
         }
 
         if (user.username === params.username) {
           errors.username = {
-            message: 'Username already exists',
+            message: '⚠️ Username already exists',
             path: 'username',
           };
         }
 
         return {
           status: HttpStatus.CONFLICT,
-          message: 'User already exists',
+          message: '⚠️ User already exists',
           user: null,
           errors,
         };
@@ -223,14 +244,14 @@ export class UserController {
 
           return {
             status: HttpStatus.CREATED,
-            message: 'User created',
+            message: '✅ User created',
             user: createdUser,
             errors: null,
           };
         } catch (e) {
           return {
             status: HttpStatus.PRECONDITION_FAILED,
-            message: 'User not created',
+            message: '⚠️ User not created',
             user: null,
             errors: e.errors,
           };
@@ -239,7 +260,7 @@ export class UserController {
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
-        message: 'User not created',
+        message: '⚠️ User not created',
         user: null,
         errors: null,
       };

@@ -52,6 +52,9 @@ export class UserService {
     return this.userLinkModel.findOneAndUpdate({ _id: id }, linkParams, { new: true }).exec();
   }
 
+  async getAllUsers(): Promise<IUser[]> {
+    return this.userModel.find().exec();
+  }
 
   getConfirmationLink(link: string): string {
     return `${this.configService.get('baseUri')}:${this.configService.get(
