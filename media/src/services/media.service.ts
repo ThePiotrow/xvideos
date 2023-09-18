@@ -23,7 +23,7 @@ export class MediaService {
     region: process.env.AWS_S3_REGION,
   });
 
-  async uploadFile(file) {
+  async uploadFile(file: Express.Multer.File) {
     return await this.s3_upload(
       file.buffer,
       file.mimetype,
@@ -69,7 +69,7 @@ export class MediaService {
     return await mediaModel.save();
   }
 
-  public async findMediaById(id: string) {
+  public async getMediaById(id: string): Promise<IMedia> {
     return await this.mediaModel.findById(id);
   }
 
@@ -81,21 +81,28 @@ export class MediaService {
     id: string,
     params: IMediaUpdateParams,
   ): Promise<IMedia> {
-    return await this.mediaModel.findOneAndUpdate({ id }, params, {
+    return await this.mediaModel.findOneAndUpdate({ _id: id }, params, {
       new: true,
     });
   }
 
-  public async createThumbnail(path: string, output: string): Promise<boolean> {
+  public async createThumbnail(file: Express.Multer.File): Promise<boolean> {
+
+    const path = file.path;
+    const output = `${file.filename.split('.')[0]}.png`;
+
     return new Promise((resolve, reject) => {
       ffmpeg(path)
         .screenshots({
           timestamps: ['50%'],
           filename: output,
-          folder: './thumbnails',
+          folder: './uploads/thumbnails',
           size: '320x240',
         })
-        .on('end', () => {
+        .on('end', (
+          files: { filename: string; timemarks: string }[],
+        ) => {
+          console.log('files', files)
           console.log('Screenshots taken');
           resolve(true);
         })
