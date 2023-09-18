@@ -19,9 +19,15 @@ export class UserController {
 
   @MessagePattern('user_get_all')
   public async getAllUsers(): Promise<IUserGetAllResponse> {
-    const users: IUser[] = await this.userService.getAllUsers();
+    let users: IUser[] = await this.userService.getAllUsers();
+
 
     if (users) {
+      users = users.map((user) => {
+        delete user.password;
+        return user;
+      });
+
       return {
         status: HttpStatus.OK,
         message: '✅ Users found',
@@ -45,11 +51,16 @@ export class UserController {
     let result: IUserSearchResponse;
 
     if (params.username && params.password) {
-      const user: IUser[] = await this.userService.searchUser({ username: params.username });
+      const users: IUser[] = await this.userService.searchUser({ username: params.username });
 
-      if (user && user[0]) {
-        if (await user[0].compareEncryptedPassword(params.password)) {
-          if (!user[0].is_confirmed) {
+      const user: IUser = users[0];
+
+      if (user) {
+
+        delete user.password;
+
+        if (await user.compareEncryptedPassword(params.password)) {
+          if (!user.is_confirmed) {
             return {
               status: HttpStatus.UNAUTHORIZED,
               message: '⛔ User not confirmed',
@@ -59,7 +70,7 @@ export class UserController {
           return {
             status: HttpStatus.OK,
             message: '✅ User found',
-            user: user[0],
+            user: user,
           }
         } else {
           return {
@@ -86,12 +97,12 @@ export class UserController {
 
   @MessagePattern('user_get_by_id')
   public async getUserById(id: string): Promise<IUserSearchResponse> {
-    let result: IUserSearchResponse;
 
     if (id) {
       const user = await this.userService.searchUserById(id);
 
       if (user) {
+        delete user.password;
         return {
           status: HttpStatus.OK,
           message: '✅ User found',

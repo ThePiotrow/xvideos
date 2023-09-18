@@ -38,14 +38,23 @@ export class MediaController {
   public async mediaSearchById(
     id: string,
   ): Promise<IMediaSearchByIdResponse> {
-
     if (id) {
-      const media = await this.mediaService.findMediaById(id);
-      return {
-        status: HttpStatus.OK,
-        message: '✅ Media found',
-        media,
-      };
+      const media = await this.mediaService.getMediaById(id);
+
+      if (media) {
+        return {
+          status: HttpStatus.OK,
+          message: '✅ Media found',
+          media,
+        };
+      }
+      else {
+        return {
+          status: HttpStatus.BAD_REQUEST,
+          message: '⚠️ Media not found',
+          media: null,
+        };
+      }
     } else {
       return {
         status: HttpStatus.BAD_REQUEST,
@@ -63,7 +72,7 @@ export class MediaController {
   }): Promise<IMediaUpdateByIdResponse> {
     if (params.id) {
       try {
-        const media = await this.mediaService.findMediaById(params.id);
+        const media = await this.mediaService.getMediaById(params.id);
         if (media) {
           if (media.user_id.toString() === params.user_id.toString()) {
             const updatedMedia = Object.assign(media, params.media);
@@ -127,6 +136,12 @@ export class MediaController {
             media: null,
             errors: null,
           };
+        }
+
+        // if video, create thumbnail
+        if (body.file.mimetype.includes('video')) {
+          const thumbnail = await this.mediaService.createThumbnail(body.file);
+          // body.thumbnail = thumbnail;
         }
 
         const uploadedFile = await this.mediaService.uploadFile(body.file);
@@ -197,7 +212,7 @@ export class MediaController {
   }): Promise<IMediaDeleteResponse> {
     if (params && params.user_id && params.id) {
       try {
-        const media = await this.mediaService.findMediaById(params.id);
+        const media = await this.mediaService.getMediaById(params.id);
 
         if (media) {
           if (media.user_id === params.user_id) {

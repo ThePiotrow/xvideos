@@ -53,7 +53,6 @@ export class MediasController {
     type: GetMediasResponseDto,
   })
   public async getMediasByUser(
-    @Req() request: IAuthorizedRequest,
     @Param() params: MediaIdDto,
   ): Promise<GetMediasResponseDto> {
 
@@ -76,7 +75,6 @@ export class MediasController {
     type: GetMediaResponseDto,
   })
   public async getMediaById(
-    @Res() res,
     @Param() params: MediaIdDto,
   ): Promise<GetMediaResponseDto> {
     const mediasResponse: IServiceMediaSearchByIdResponse =
@@ -91,25 +89,6 @@ export class MediasController {
       },
       errors: null,
     };
-  }
-
-  @Get('/:id/file')
-  @ApiOkResponse({
-    type: GetMediaResponseDto,
-  })
-  public async getFile(
-    @Res({ passthrough: true }) res: Response,
-    @Param() params: MediaIdDto,
-  ) {
-    const mediaFile: { file: StreamableFile, path: string } = await firstValueFrom(
-      this.mediaServiceClient.send('get_file', params.id),
-    );
-    res.header({
-      'Content-Type': 'application/octet-stream',
-      'Content-Disposition': `attachment; filename="${mediaFile.path}"`,
-    });
-
-    res.send(mediaFile.file)
   }
 
   @Get()

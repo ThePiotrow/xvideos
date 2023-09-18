@@ -5,6 +5,7 @@ export interface IMedia extends Document {
   description: string;
   user_id: string;
   path: string;
+  thumbnail?: string | null;
   file?: Express.Multer.File;
   data?: string;
   created_at: number;

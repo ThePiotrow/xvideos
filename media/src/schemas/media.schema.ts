@@ -20,6 +20,10 @@ export const MediaSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Path can not be empty'],
     },
+    thumbnail: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: {
