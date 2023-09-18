@@ -8,6 +8,7 @@ import { IMediaSearchByUserResponse } from './interfaces/media-search-by-user-re
 import { IMediaDeleteResponse } from './interfaces/media-delete-response.interface';
 import { IMediaCreateResponse } from './interfaces/media-create-response.interface';
 import { IMediaUpdateByIdResponse } from './interfaces/media-update-by-id-response.interface';
+import { IMediaSearchByIdResponse } from './interfaces/media-search-by-id-response.interface';
 
 @Controller()
 export class MediaController {
@@ -17,8 +18,6 @@ export class MediaController {
   public async mediaSearchByUserId(
     user_id: string,
   ): Promise<IMediaSearchByUserResponse> {
-    let result: IMediaSearchByUserResponse;
-
     if (user_id) {
       const medias = await this.mediaService.getMediasByUserId(user_id);
       return {
@@ -35,13 +34,33 @@ export class MediaController {
     }
   }
 
+  @MessagePattern('media_search_by_id')
+  public async mediaSearchById(
+    id: string,
+  ): Promise<IMediaSearchByIdResponse> {
+
+    if (id) {
+      const media = await this.mediaService.findMediaById(id);
+      return {
+        status: HttpStatus.OK,
+        message: '✅ Media found',
+        media,
+      };
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: '⚠️ Media not found',
+        media: null,
+      };
+    }
+  }
+
   @MessagePattern('media_update_by_id')
   public async mediaUpdateById(params: {
     media: IMediaUpdateParams;
     id: string;
     user_id: string;
   }): Promise<IMediaUpdateByIdResponse> {
-    let result: IMediaUpdateByIdResponse;
     if (params.id) {
       try {
         const media = await this.mediaService.findMediaById(params.id);
@@ -87,13 +106,6 @@ export class MediaController {
         errors: null,
       };
     }
-  }
-
-  @MessagePattern('get_file')
-  public async getFile(id: string): Promise<StreamableFile> {
-    const media: IMedia = await this.mediaService.findMediaById(id)
-
-    return this.mediaService.getFile(`./uploads/${media.path}`);
   }
 
   @MessagePattern('media_create')
@@ -183,8 +195,6 @@ export class MediaController {
     user_id: string;
     id: string;
   }): Promise<IMediaDeleteResponse> {
-    let result: IMediaDeleteResponse;
-
     if (params && params.user_id && params.id) {
       try {
         const media = await this.mediaService.findMediaById(params.id);

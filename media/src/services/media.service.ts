@@ -86,6 +86,26 @@ export class MediaService {
     });
   }
 
+  public async createThumbnail(path: string, output: string): Promise<boolean> {
+    return new Promise((resolve, reject) => {
+      ffmpeg(path)
+        .screenshots({
+          timestamps: ['50%'],
+          filename: output,
+          folder: './thumbnails',
+          size: '320x240',
+        })
+        .on('end', () => {
+          console.log('Screenshots taken');
+          resolve(true);
+        })
+        .on('error', (err) => {
+          console.error(err);
+          reject(false);
+        });
+    });
+  }
+
   public async createFile(path: string, data: string): Promise<boolean> {
 
     await new Promise((resolve, reject) => {
@@ -111,24 +131,6 @@ export class MediaService {
     }
 
     return true;
-  }
-
-  private convertFile(inputPath: string, outputPath: string, size: string): Promise<void> {
-    return new Promise((resolve, reject) => {
-      ffmpeg(inputPath)
-        .output(outputPath)
-        .size(size)
-        .on('end', async () => {
-          console.log('conversion ended');
-          await fs.promises.unlink(inputPath);
-          resolve();
-        })
-        .on('error', (err) => {
-          console.log('error: ', err);
-          reject(err);
-        })
-        .run();
-    });
   }
 
   public async getAllMedias({ limit, offset }: { limit: number, offset: number }) {
