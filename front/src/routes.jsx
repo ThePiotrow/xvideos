@@ -3,19 +3,18 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import HomePage from "./pages/admin/HomePage";
 import AuthGuard from "./guards/AuthGuard";
-import Users from "./pages/admin/users/Users"
-import useToken from "./hooks/useToken"
+import Users from "./pages/admin/users/Users";
+import useToken from "./hooks/useToken";
 import SignUp from "./pages/auth/SignUp";
 import Live from "./pages/live/Live";
 import Profile from "./pages/user/Profile";
-import EditMedias from "./pages/medias/EditMedias";
+import ListMedias from "./pages/user/ListMedias";
 import CreateMedias from "./pages/medias/CreateMedias";
 import LaunchLive from "./pages/live/LaunchLive";
 import MediaViewer from "./pages/medias/MediaViewer";
 
-
 function AppRoutes() {
-  const token = localStorage.getItem("token")
+  const token = localStorage.getItem("token");
 
   return (
     <Routes>
@@ -28,23 +27,70 @@ function AppRoutes() {
       {/* IS AUTHENTICATED */}
 
       {/* MEDIAS */}
-      <Route path="/medias" element={<AuthGuard><EditMedias /></AuthGuard>} />
-      <Route path="/medias/edit" element={<AuthGuard><EditMedias /></AuthGuard>} />
-      <Route path="/medias/create" element={<AuthGuard><CreateMedias /></AuthGuard>} />
+      <Route
+        path="/medias"
+        element={
+          <AuthGuard>
+            <ListMedias />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/medias/edit"
+        element={
+          <AuthGuard>
+            <ListMedias />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/medias/create"
+        element={
+          <AuthGuard>
+            <CreateMedias />
+          </AuthGuard>
+        }
+      />
 
       {/* LIVES */}
-      <Route path="/lives/launch" element={<AuthGuard><LaunchLive /></AuthGuard>} />
+      <Route
+        path="/lives/launch"
+        element={
+          <AuthGuard>
+            <LaunchLive />
+          </AuthGuard>
+        }
+      />
 
       {/* PROFILE USER */}
-      <Route path="/profile" element={<AuthGuard><Profile /></AuthGuard>} />
-
+      <Route
+        path="/profile"
+        element={
+          <AuthGuard>
+            <Profile />
+          </AuthGuard>
+        }
+      />
 
       {/* IS AUTHENTICATED && IS ADMIN */}
-      <Route path="/admin" element={<AuthGuard><HomePage /></AuthGuard>} />
-      <Route path="/admin/users" element={<AuthGuard><Users /></AuthGuard>} />
-
+      <Route
+        path="/admin"
+        element={
+          <AuthGuard>
+            <HomePage />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/admin/users"
+        element={
+          <AuthGuard>
+            <Users />
+          </AuthGuard>
+        }
+      />
     </Routes>
   );
- }
+}
 
 export default AppRoutes;
