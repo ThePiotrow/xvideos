@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import { useAuth } from "../../contexts/authContext";
 import { toast } from "react-toastify";
+import dayjs from "dayjs";
 import MediaIcon from "../../components/MediaIcon";
 import Uploads from "../../components/icons/Uploads";
 import Details from "../../components/icons/Details";
@@ -14,6 +15,11 @@ function ListMedias() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
   const { token, user } = useAuth();
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+  const toggleModal = () => {
+    setIsUploadModalOpen(!isUploadModalOpen);
+  };
 
   useEffect(() => {
     if (!token) {
@@ -39,11 +45,14 @@ function ListMedias() {
     <section className="container px-4 mx-auto">
       <div className="sm:flex sm:items-center sm:justify-between">
         <h2 className="text-lg font-medium text-gray-800 dark:text-white">
-          Files uploaded
+          Vos médias
         </h2>
 
         <div className="flex items-center mt-4 gap-x-3">
-          <button className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600">
+          <button
+            onClick={toggleModal}
+            className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600"
+          >
             <Uploads />
             <span>Upload</span>
           </button>
@@ -133,10 +142,10 @@ function ListMedias() {
                         720 MB
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {media.created_at}
+                        {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {media.updated_at}
+                        {dayjs(media.updated_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         {user.username}
@@ -171,36 +180,7 @@ function ListMedias() {
           >
             1
           </a>
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-          >
-            2
-          </a>
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-          >
-            3
-          </a>
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-          >
-            ...
-          </a>
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-          >
-            12
-          </a>
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-          >
-            13
-          </a>
+          ...
           <a
             href="#"
             className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
@@ -217,6 +197,75 @@ function ListMedias() {
           <RightArrow />
         </a>
       </div>
+
+      {isUploadModalOpen && (
+        <div
+          onClick={toggleModal}
+          className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-gray-800 rounded p-8 w-4/12"
+          >
+            <h2 className="mb-4 text-gray-700 dark:text-gray-200">
+              Ajouter un média
+            </h2>
+            <form>
+              <div>
+                <label htmlFor="" className="text-gray-700 dark:text-gray-200">
+                  Titre
+                </label>
+                <input
+                  type="text"
+                  name="titre"
+                  id="titre"
+                  placeholder="titre"
+                  value="titre"
+                  onChange={(e) => setTitle(e.target.value)}
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
+                />
+              </div>
+              <div className="mt-6">
+                <label htmlFor="" className="text-gray-700 dark:text-gray-200">
+                  Description
+                </label>
+                <textarea
+                  type="test"
+                  name="Description"
+                  id="Description"
+                  placeholder="Description"
+                  value="Description"
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
+                />
+              </div>
+              <div className="mt-6">
+                <div className="flex justify-between mb-2">
+                  <label
+                    htmlFor="password"
+                    className="text-gray-700 dark:text-gray-200"
+                  >
+                    Fichier
+                  </label>
+                </div>
+                <input
+                  type="file"
+                  name="file"
+                  id="file"
+                  onChange={(e) => setFile(e.target.value)}
+                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
+                />
+              </div>
+              <div className="mt-6">
+                <button className="mr-5 px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
+                  Ajouter
+                </button>
+                <button onClick={toggleModal}>Fermer</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </section>
   );
 }
