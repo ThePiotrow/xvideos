@@ -10,28 +10,33 @@ import Uploads from "../../components/icons/Uploads";
 import Details from "../../components/icons/Details";
 import LeftArrow from "../../components/icons/LeftArrow";
 import RightArrow from "../../components/icons/RightArrows";
+import Trash from "../../components/icons/Trash";
+import UploadForm from "../../components/forms/UploadForm";
+import DeleteForm from "../../components/forms/DeleteForm";
 
 function ListMedias() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
   const { token, user } = useAuth();
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [selectMediaId, setSelectMediaId] = useState(new Set());
+  const [modals, setModals] = useState({
+    upload: false,
+    delete: false,
+  });
 
-  const toggleModal = () => {
-    setIsUploadModalOpen(!isUploadModalOpen);
+  const toggleModal = (modalId) => {
+    console.log("Toggling modal: ", modalId);
+    setModals({
+      ...modals,
+      [modalId]: !modals[modalId],
+    });
   };
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/login");
-    }
-
-    const headers = {
-      Authorization: `Bearer ${token}`,
-    };
-
+  const fetchMedias = () => {
     if (!user) return;
-    API.get(`/medias/user/${user.id}`, { headers })
+    API.get(`/medias/user/${user.id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
       .then((response) => {
         setMedias(response.data.medias);
       })
@@ -39,22 +44,43 @@ function ListMedias() {
         toast.error("Erreur lors de la récupération des médias");
         console.error(error);
       });
+  };
+
+  useEffect(() => {
+    fetchMedias();
   }, [token, navigate, user]);
+
+  const handleCheckboxChange = (event, mediaId) => {
+    const newSelectedMediaIds = new Set(selectMediaId);
+    if (event.target.checked) {
+      newSelectedMediaIds.add(mediaId);
+    } else {
+      newSelectedMediaIds.delete(mediaId);
+    }
+    setSelectMediaId(newSelectedMediaIds);
+  };
 
   return (
     <section className="container px-4 mx-auto">
       <div className="sm:flex sm:items-center sm:justify-between">
         <h2 className="text-lg font-medium text-gray-800 dark:text-white">
-          Vos médias
+          Mes médias
         </h2>
 
         <div className="flex items-center mt-4 gap-x-3">
           <button
-            onClick={toggleModal}
-            className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-600"
+            onClick={() => toggleModal("upload")}
+            className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-blue-500 dark:bg-blue-800"
           >
             <Uploads />
-            <span>Upload</span>
+            <span>Ajouter</span>
+          </button>
+          <button
+            onClick={() => toggleModal("delete")}
+            className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-red-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-red-500 dark:bg-red-800"
+          >
+            <Trash />
+            <span>Supprimer</span>
           </button>
         </div>
       </div>
@@ -75,7 +101,7 @@ function ListMedias() {
                           type="checkbox"
                           className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
                         />
-                        <span>File name</span>
+                        <span>Nom du fichier</span>
                       </div>
                     </th>
 
@@ -83,28 +109,28 @@ function ListMedias() {
                       scope="col"
                       className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      File size
+                      Taille du fichier
                     </th>
 
                     <th
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Date uploaded
+                      Date d'ajout
                     </th>
 
                     <th
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Last updated
+                      Dernière modification
                     </th>
 
                     <th
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Uploaded by
+                      Ajouter par
                     </th>
 
                     <th scope="col" className="relative py-3.5 px-4">
@@ -119,6 +145,7 @@ function ListMedias() {
                         <div className="inline-flex items-center gap-x-3">
                           <input
                             type="checkbox"
+                            onChange={(e) => handleCheckboxChange(e, media.id)}
                             className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
                           />
 
@@ -170,7 +197,7 @@ function ListMedias() {
           className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
         >
           <LeftArrow />
-          <span>previous</span>
+          <span>précédent</span>
         </a>
 
         <div className="items-center hidden md:flex gap-x-3">
@@ -193,76 +220,39 @@ function ListMedias() {
           href="#"
           className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
         >
-          <span>Next</span>
+          <span>Suivant</span>
           <RightArrow />
         </a>
       </div>
 
-      {isUploadModalOpen && (
+      {modals.upload && (
         <div
-          onClick={toggleModal}
+          onClick={() => toggleModal("upload")}
           className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
         >
           <div
             onClick={(e) => e.stopPropagation()}
             className="bg-gray-800 rounded p-8 w-4/12"
           >
-            <h2 className="mb-4 text-gray-700 dark:text-gray-200">
-              Ajouter un média
-            </h2>
-            <form>
-              <div>
-                <label htmlFor="" className="text-gray-700 dark:text-gray-200">
-                  Titre
-                </label>
-                <input
-                  type="text"
-                  name="titre"
-                  id="titre"
-                  placeholder="titre"
-                  value="titre"
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
-                />
-              </div>
-              <div className="mt-6">
-                <label htmlFor="" className="text-gray-700 dark:text-gray-200">
-                  Description
-                </label>
-                <textarea
-                  type="test"
-                  name="Description"
-                  id="Description"
-                  placeholder="Description"
-                  value="Description"
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
-                />
-              </div>
-              <div className="mt-6">
-                <div className="flex justify-between mb-2">
-                  <label
-                    htmlFor="password"
-                    className="text-gray-700 dark:text-gray-200"
-                  >
-                    Fichier
-                  </label>
-                </div>
-                <input
-                  type="file"
-                  name="file"
-                  id="file"
-                  onChange={(e) => setFile(e.target.value)}
-                  className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
-                />
-              </div>
-              <div className="mt-6">
-                <button className="mr-5 px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600">
-                  Ajouter
-                </button>
-                <button onClick={toggleModal}>Fermer</button>
-              </div>
-            </form>
+            <UploadForm toggleModal={toggleModal} fetchMedias={fetchMedias} />
+          </div>
+        </div>
+      )}
+
+      {modals.delete && (
+        <div
+          onClick={() => toggleModal("delete")}
+          className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-gray-800 rounded p-8 w-4/12"
+          >
+            <DeleteForm
+              toggleModal={toggleModal}
+              fetchMedias={fetchMedias}
+              selectedMediaIds={selectMediaId}
+            />
           </div>
         </div>
       )}
