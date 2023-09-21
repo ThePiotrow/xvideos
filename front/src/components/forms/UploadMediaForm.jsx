@@ -3,7 +3,7 @@ import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function UploadForm({ toggleModal, fetchMedias }) {
+function UploadMediaForm({ toggleModal, fetchMedias }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState("");
@@ -98,4 +98,4 @@ function UploadForm({ toggleModal, fetchMedias }) {
   );
 }
 
-export default UploadForm;
+export default UploadMediaForm;

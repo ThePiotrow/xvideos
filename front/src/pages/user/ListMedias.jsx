@@ -11,21 +11,23 @@ import Details from "../../components/icons/Details";
 import LeftArrow from "../../components/icons/LeftArrow";
 import RightArrow from "../../components/icons/RightArrows";
 import Trash from "../../components/icons/Trash";
-import UploadForm from "../../components/forms/UploadForm";
-import DeleteForm from "../../components/forms/DeleteForm";
+import UploadMediaForm from "../../components/forms/UploadMediaForm";
+import DeleteMediaForm from "../../components/forms/DeleteMediaForm";
+import UpdateMediaForm from "../../components/forms/UpdateMediaForm";
 
 function ListMedias() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
   const { token, user } = useAuth();
   const [selectMediaId, setSelectMediaId] = useState(new Set());
+  const [updateMediaData, setUpdateMediaData] = useState(null);
   const [modals, setModals] = useState({
     upload: false,
     delete: false,
+    update: false,
   });
 
   const toggleModal = (modalId) => {
-    console.log("Toggling modal: ", modalId);
     setModals({
       ...modals,
       [modalId]: !modals[modalId],
@@ -178,7 +180,18 @@ function ListMedias() {
                         {user.username}
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
-                        <button className="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100">
+                        <button
+                          onClick={() => {
+                            toggleModal("update");
+                            setUpdateMediaData({
+                              id: media.id,
+                              title: media.title,
+                              description: media.description,
+                              path: media.path,
+                            });
+                          }}
+                          className="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100"
+                        >
                           <Details />
                         </button>
                       </td>
@@ -225,6 +238,7 @@ function ListMedias() {
         </a>
       </div>
 
+      {/* MODAL ADD */}
       {modals.upload && (
         <div
           onClick={() => toggleModal("upload")}
@@ -234,11 +248,15 @@ function ListMedias() {
             onClick={(e) => e.stopPropagation()}
             className="bg-gray-800 rounded p-8 w-4/12"
           >
-            <UploadForm toggleModal={toggleModal} fetchMedias={fetchMedias} />
+            <UploadMediaForm
+              toggleModal={toggleModal}
+              fetchMedias={fetchMedias}
+            />
           </div>
         </div>
       )}
 
+      {/* MODAL DELETE */}
       {modals.delete && (
         <div
           onClick={() => toggleModal("delete")}
@@ -248,10 +266,29 @@ function ListMedias() {
             onClick={(e) => e.stopPropagation()}
             className="bg-gray-800 rounded p-8 w-4/12"
           >
-            <DeleteForm
+            <DeleteMediaForm
               toggleModal={toggleModal}
               fetchMedias={fetchMedias}
               selectedMediaIds={selectMediaId}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* MODAL UPDATE */}
+      {modals.update && (
+        <div
+          onClick={() => toggleModal("update")}
+          className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-gray-800 rounded p-8 w-4/12"
+          >
+            <UpdateMediaForm
+              toggleModal={toggleModal}
+              fetchMedias={fetchMedias}
+              selectedMediaData={updateMediaData}
             />
           </div>
         </div>

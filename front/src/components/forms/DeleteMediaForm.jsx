@@ -1,9 +1,8 @@
-import { useState } from "react";
 import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function DeleteForm({ toggleModal, fetchMedias, selectedMediaIds }) {
+function DeleteMediaForm({ toggleModal, fetchMedias, selectedMediaIds }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -52,4 +51,4 @@ function DeleteForm({ toggleModal, fetchMedias, selectedMediaIds }) {
   );
 }
 
-export default DeleteForm;
+export default DeleteMediaForm;
