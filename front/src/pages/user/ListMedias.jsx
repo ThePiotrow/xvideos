@@ -36,11 +36,11 @@ function ListMedias() {
 
   const fetchMedias = () => {
     if (!user) return;
-    API.get(`/medias/user/${user.id}`, {
+    API.get(`/users/${user.id}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => {
-        setMedias(response.data.medias);
+        setMedias(response.data.user.medias);
       })
       .catch((error) => {
         toast.error("Erreur lors de la récupération des médias");
