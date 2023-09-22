@@ -50,5 +50,8 @@ MediaSchema.pre('validate', function (next) {
   if (this.isModified('user_id') && self.created_at) {
     this.invalidate('user_id', 'The field value can not be updated');
   }
+
+  self.updated_at = Date.now();
+
   next();
 });

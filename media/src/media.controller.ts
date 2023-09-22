@@ -10,6 +10,8 @@ import { IMediaCreateResponse } from './interfaces/media-create-response.interfa
 import { IMediaUpdateByIdResponse } from './interfaces/media-update-by-id-response.interface';
 import { IMediaSearchByIdResponse } from './interfaces/media-search-by-id-response.interface';
 
+import * as mongoose from 'mongoose';
+
 @Controller()
 export class MediaController {
   constructor(private readonly mediaService: MediaService) { }
@@ -74,9 +76,10 @@ export class MediaController {
       try {
         const media = await this.mediaService.getMediaById(params.id);
         if (media) {
-          if (media.user_id.toString() === params.user_id.toString()) {
-            const updatedMedia = Object.assign(media, params.media);
-            await updatedMedia.save();
+          if (media.user._id.toString() === params.user_id.toString()) {
+            delete media.user;
+            media.user_id = params.user_id;
+            const updatedMedia = await this.mediaService.updateMediaById(params.id, params.media);
             return {
               status: HttpStatus.OK,
               message: '✅ Media updated',
@@ -100,6 +103,7 @@ export class MediaController {
           };
         }
       } catch (e) {
+        console.log('e', e)
         return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: '⚠️ Media update failed',
