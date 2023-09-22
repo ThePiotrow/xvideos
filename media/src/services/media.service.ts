@@ -5,9 +5,10 @@ import { Model } from 'mongoose';
 import { IMedia } from '../interfaces/media.interface';
 import { IMediaUpdateParams } from '../interfaces/media-update-params.interface';
 
+import * as AWS from 'aws-sdk';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as fs from 'node:fs';
-import * as AWS from 'aws-sdk';
+import * as mongoose from 'mongoose';
 
 
 @Injectable()
@@ -70,7 +71,47 @@ export class MediaService {
   }
 
   public async getMediaById(id: string): Promise<IMedia> {
-    return await this.mediaModel.findById(id);
+    const result = await this.mediaModel.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) }
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: "$user"
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          description: 1,
+          path: 1,
+          thumbnail: 1,
+          created_at: 1,
+          updated_at: 1,
+          user: {
+            username: 1,
+            email: 1,
+            role: 1,
+            _id: 1
+          }
+        }
+      }
+    ]).exec();
+
+    console.log('result', result)
+
+    if (result && result.length > 0) {
+      return result[0];
+    } else {
+      return null;
+    }
   }
 
   public async removeMediaById(id: string) {
@@ -141,11 +182,55 @@ export class MediaService {
   }
 
   public async getAllMedias({ limit, offset }: { limit: number, offset: number }) {
-    return this.mediaModel.find()
-      .sort({ created_at: -1 })
-      .skip(offset)
-      .limit(limit)
-      .exec();
+    console.log('limit', limit)
+    console.log('offset', offset)
+    const result = await this.mediaModel.aggregate([
+      {
+        $match: {}
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: "$user"
+      },
+      {
+        $project: {
+          _id: 1,
+          title: 1,
+          description: 1,
+          path: 1,
+          thumbnail: 1,
+          created_at: 1,
+          updated_at: 1,
+          user: {
+            username: 1,
+            email: 1,
+            role: 1,
+            _id: 1
+          }
+        }
+      },
+      {
+        $skip: offset,
+      },
+      {
+        $limit: limit,
+      },
+    ]).exec();
+
+    console.log('result', result)
+
+    if (result && result.length > 0) {
+      return result;
+    } else {
+      return null;
+    }
   }
 
   public async getFile(path: string): Promise<StreamableFile> {

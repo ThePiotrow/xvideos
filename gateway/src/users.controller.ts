@@ -249,4 +249,25 @@ export class UsersController {
       data: null,
     };
   }
+
+  @Get('/:id')
+  @ApiOkResponse({
+    type: GetUserByTokenResponseDto,
+  })
+  public async getUserById(
+    @Param() params: { id: string },
+  ): Promise<GetUserByTokenResponseDto> {
+
+    const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
+      this.userServiceClient.send('user_get_by_id', params.id),
+    );
+
+    return {
+      message: userResponse.message,
+      data: {
+        user: userResponse.user,
+      },
+      errors: null,
+    };
+  }
 }

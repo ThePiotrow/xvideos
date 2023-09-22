@@ -3,6 +3,7 @@ import { IMedia } from '../interfaces/media.interface';
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id;
+  delete ret.__v;
 }
 
 export const MediaSchema = new mongoose.Schema(
@@ -13,7 +14,7 @@ export const MediaSchema = new mongoose.Schema(
     },
     description: String,
     user_id: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
       required: [true, 'User can not be empty'],
     },
     path: {

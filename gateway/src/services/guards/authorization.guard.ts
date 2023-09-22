@@ -31,20 +31,8 @@ export class AuthGuard implements CanActivate {
     let token = null;
 
     const request = context.switchToHttp().getRequest();
-    const authHeader = request.headers.authorization;
+    token = request.headers.authorization.split('Bearer ')[1];
 
-    //If token is a query Socket.io request
-    if (context.getType() === 'ws') {
-      const client = context.switchToWs().getClient();
-      token = client.handshake.query.token;
-    }
-
-    //If token is a query HTTP request
-    if (context.getType() === 'http') {
-
-      const request = context.switchToHttp().getRequest();
-      token = authHeader.split('Bearer ')[1];
-    }
     if (!token) {
       throw new HttpException(
         {
@@ -77,8 +65,12 @@ export class AuthGuard implements CanActivate {
     const userInfo = await firstValueFrom(
       this.userServiceClient.send('user_get_by_id', userTokenInfo.data.userId),
     );
+    const user = {
+      ...userInfo.user,
+      id: userInfo.user._id,
+    }
 
-    request.user = userInfo.user;
+    request.user = user;
     return true;
   }
 }

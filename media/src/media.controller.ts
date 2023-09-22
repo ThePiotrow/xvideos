@@ -189,7 +189,7 @@ export class MediaController {
     }
   ): Promise<IMediaSearchByUserResponse> {
     try {
-      const medias = await this.mediaService.getAllMedias({ limit: params.limit, offset: params.offset });
+      const medias = await this.mediaService.getAllMedias({ limit: params.limit ?? 10, offset: params.offset ?? 0 });
       return {
         status: HttpStatus.OK,
         message: '✅ Medias found',

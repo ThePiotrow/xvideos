@@ -118,7 +118,6 @@ export class MediasController {
 
   @Post()
   @Authorization(true)
-  @Permission('media_create')
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiCreatedResponse({

@@ -55,6 +55,8 @@ export class UserController {
 
       const user: IUser = users[0];
 
+      console.log('here')
+
       if (user) {
 
         delete user.password;
@@ -102,7 +104,6 @@ export class UserController {
       const user = await this.userService.searchUserById(id);
 
       if (user) {
-        delete user.password;
         return {
           status: HttpStatus.OK,
           message: '✅ User found',
@@ -272,6 +273,98 @@ export class UserController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: '⚠️ User not created',
+        user: null,
+        errors: null,
+      };
+    }
+  }
+
+  @MessagePattern('admin_create')
+  public async createAdmin(params: IUser): Promise<IUserCreateResponse> {
+    let errors: Partial<{
+      email:
+      { message: string, path: string },
+      username:
+      { message: string, path: string }
+    }> = {};
+
+    if (params) {
+      const users = [
+        ...await this.userService.searchUser({ email: params.email }),
+        ...await this.userService.searchUser({ username: params.username })
+      ];
+      const user: IUser | null = users[0];
+
+      if (user) {
+        if (user.email === params.email) {
+
+          errors.email = {
+            message: '⚠️ Email already exists',
+            path: 'email',
+          };
+        }
+
+        if (user.username === params.username) {
+          errors.username = {
+            message: '⚠️ Username already exists',
+            path: 'username',
+          };
+        }
+
+        return {
+          status: HttpStatus.CONFLICT,
+          message: '⚠️ User already exists',
+          user: null,
+          errors,
+        };
+      } else {
+        try {
+          params.is_confirmed = false;
+          params.role = 'ROLE_ADMIN'
+
+          const createdUser = await this.userService.createUser(params);
+          const userLink = await this.userService.createUserLink(
+            createdUser.id,
+          );
+
+          delete createdUser.password;
+
+          await firstValueFrom(this.mailerServiceClient
+            .send('mail_send', {
+              to: createdUser.email,
+              subject: 'Email confirmation',
+              html: `<center>
+            <b>Hello, ${createdUser.username}!</b>
+            <br>
+            Please confirm your email.
+            <br>
+            Use the following link for this.<br>
+            <a href="${this.userService.getConfirmationLink(
+                userLink.link,
+              )}"><b>Confirm The Email</b></a>
+            </center>`,
+            })
+          );
+
+          return {
+            status: HttpStatus.CREATED,
+            message: '✅ Admin created',
+            user: createdUser,
+            errors: null,
+          };
+        } catch (e) {
+          return {
+            status: HttpStatus.PRECONDITION_FAILED,
+            message: '⚠️ Admin not created',
+            user: null,
+            errors: e.errors,
+          };
+        }
+      }
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: '⚠️ Admin not created',
         user: null,
         errors: null,
       };

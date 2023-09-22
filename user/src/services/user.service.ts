@@ -6,6 +6,8 @@ import { ConfigService } from './config/config.service';
 import { IUser } from '../interfaces/user.interface';
 import { IUserLink } from '../interfaces/user-link.interface';
 
+import * as mongoose from 'mongoose';
+
 @Injectable()
 export class UserService {
   constructor(
@@ -19,8 +21,48 @@ export class UserService {
   }
 
   async searchUserById(id: string): Promise<IUser> {
-    return this.userModel.findById(id).exec();
+    let result = await this.userModel.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(id),
+        },
+      },
+      {
+        $lookup: {
+          from: 'media',
+          localField: '_id',
+          foreignField: 'user_id',
+          as: 'medias',
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          username: 1,
+          email: 1,
+          is_confirmed: 1,
+          role: 1,
+          medias: {
+            _id: 1,
+            title: 1,
+            description: 1,
+            path: 1,
+            thumbnail: 1,
+            created_at: 1,
+          },
+        },
+      },
+    ]).exec();
+
+    console.log(result[0])
+
+    if (result && result.length > 0) {
+      return result[0];
+    } else {
+      return null;
+    }
   }
+
 
   async updateUserById(
     id: string,
