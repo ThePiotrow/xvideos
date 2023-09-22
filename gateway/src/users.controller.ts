@@ -34,6 +34,7 @@ import { ConfirmUserResponseDto } from './interfaces/user/dto/confirm-user-respo
 import { CheckUsernameAvailabilityResponseDto } from './interfaces/user/dto/check-username-availability-response.dto';
 import { CheckUsernameAvailabilityDto } from './interfaces/user/dto/check-username-availability.dto';
 import { IServiceUsernameUserCheckAvailabilityDtoResponse } from './interfaces/user/service-check-username-response.interface';
+import { GetUserByIdDto } from './interfaces/user/dto/get-user-by-id.dto';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -255,7 +256,7 @@ export class UsersController {
     type: GetUserByTokenResponseDto,
   })
   public async getUserById(
-    @Param() params: { id: string },
+    @Param() params: GetUserByIdDto,
   ): Promise<GetUserByTokenResponseDto> {
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
