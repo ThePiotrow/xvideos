@@ -3,11 +3,14 @@ import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useContext } from "react";
+import { AuthContext } from "../../contexts/authContext";
 
 function Login() {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { setToken: setContextToken } = useContext(AuthContext);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -18,6 +21,7 @@ function Login() {
       .then((response) => {
         const token = response.data.token;
         localStorage.setItem("token", token);
+        setContextToken(token);
         toast("Vous êtes connecté!");
         navigate("/");
       })

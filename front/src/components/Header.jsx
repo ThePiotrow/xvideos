@@ -3,28 +3,14 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import API from "../api";
 import useToken from "../hooks/useToken";
+import { useAuth } from "../contexts/authContext";
 
 export default function Header() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const { token } = useToken();
+  const { user, setUser, token } = useAuth();
   const hasToken = localStorage.getItem("token");
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDropdown, setIsOpenDropdown] = useState(false);
-
-  useEffect(() => {
-    if (hasToken) {
-      API.get("/users", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => {
-          setUser(response.data.user);
-        })
-        .catch((error) => console.error(error));
-    }
-  }, [token]);
 
   const handleLogout = () => {
     API.put("/users/logout", {
@@ -158,18 +144,21 @@ export default function Header() {
                     {isOpenDropdown && (
                       <div className="absolute top-full left-0 mt-2 w-48 py-2 bg-white border rounded shadow dark:text-gray-200">
                         <Link
+                          onClick={() => setIsOpenDropdown(!isOpenDropdown)}
                           to="/medias"
                           className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                         >
                           Médias
                         </Link>
                         <Link
+                          onClick={() => setIsOpenDropdown(!isOpenDropdown)}
                           to="/profile"
                           className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                         >
                           Profil
                         </Link>
                         <Link
+                          onClick={() => setIsOpenDropdown(!isOpenDropdown)}
                           to="/lives/launch"
                           className="block px-4 py-2 text-gray-800 hover:bg-gray-200"
                         >

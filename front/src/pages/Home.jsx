@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
+import { useContext } from "react";
+import { AuthContext } from "../contexts/authContext";
 
 function Home() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
+  const { setToken: setContextToken } = useContext(AuthContext);
 
   useEffect(() => {
     API.get("/medias")
@@ -38,9 +41,11 @@ function Home() {
             <h3 className="mt-2 text-lg font-medium text-gray-600 truncate transition-all duration-500 ease-in-out">
               {media.title}
             </h3>
+
             <span className="block text-sm text-gray-600">
               {media.description}
             </span>
+            {media.path}
           </div>
         ))}
       </div>
