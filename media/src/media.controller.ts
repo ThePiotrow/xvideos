@@ -76,7 +76,7 @@ export class MediaController {
       try {
         const media = await this.mediaService.getMediaById(params.id);
         if (media) {
-          if (media.user._id.toString() === params.user_id.toString()) {
+          if (media.user.id.toString() === params.user_id.toString()) {
             delete media.user;
             media.user_id = params.user_id;
             const updatedMedia = await this.mediaService.updateMediaById(params.id, params.media);

@@ -8,7 +8,7 @@ export interface IMedia extends Document {
     username: string;
     email: string;
     role: string;
-    _id: string;
+    id: string;
   }
   path: string;
   thumbnail?: string | null;

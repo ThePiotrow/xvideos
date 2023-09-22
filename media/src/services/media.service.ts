@@ -87,8 +87,14 @@ export class MediaService {
         $unwind: "$user"
       },
       {
+        $addFields: {
+          id: "$_id"
+        }
+      },
+      {
         $project: {
-          _id: 1,
+          _id: 0,
+          id: 1,
           title: 1,
           description: 1,
           path: 1,
@@ -198,6 +204,11 @@ export class MediaService {
       },
       {
         $unwind: "$user"
+      },
+      {
+        $addFields: {
+          id: "$_id"
+        }
       },
       {
         $project: {

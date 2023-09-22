@@ -260,7 +260,28 @@ export class UsersController {
   ): Promise<GetUserByTokenResponseDto> {
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', params.id),
+      this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: false }),
+    );
+
+    return {
+      message: userResponse.message,
+      data: {
+        user: userResponse.user,
+      },
+      errors: null,
+    };
+  }
+
+  @Get('/:id/medias')
+  @ApiOkResponse({
+    type: GetUserByTokenResponseDto,
+  })
+  public async getUserByIdWithMedias(
+    @Param() params: GetUserByIdDto,
+  ): Promise<GetUserByTokenResponseDto> {
+
+    const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
+      this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: true }),
     );
 
     return {

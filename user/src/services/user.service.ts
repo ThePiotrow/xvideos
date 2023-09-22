@@ -19,21 +19,18 @@ export class UserService {
   async searchUser(data: { username?: string, email?: string, is_confirmed?: boolean }): Promise<IUser[] | null> {
     return this.userModel.find(data).exec();
   }
+  async searchUserById(data: { id: string, withMedias: boolean }): Promise<IUser> {
 
-  async searchUserById(id: string): Promise<IUser> {
-    let result = await this.userModel.aggregate([
+    let pipeline: any[] = [
       {
         $match: {
-          _id: new mongoose.Types.ObjectId(id),
+          _id: new mongoose.Types.ObjectId(data.id),
         },
       },
       {
-        $lookup: {
-          from: 'media',
-          localField: '_id',
-          foreignField: 'user_id',
-          as: 'medias',
-        },
+        $addFields: {
+          id: "$_id"
+        }
       },
       {
         $project: {
@@ -42,17 +39,33 @@ export class UserService {
           email: 1,
           is_confirmed: 1,
           role: 1,
-          medias: {
-            _id: 1,
-            title: 1,
-            description: 1,
-            path: 1,
-            thumbnail: 1,
-            created_at: 1,
-          },
-        },
-      },
-    ]).exec();
+        }
+      }
+    ];
+
+    if (data.withMedias) {
+      const lookupStage = {
+        $lookup: {
+          from: 'media',
+          localField: '_id',
+          foreignField: 'user_id',
+          as: 'medias',
+        }
+      };
+
+      pipeline.splice(2, 0, lookupStage); // Insert lookup before $project
+
+      pipeline[3].$project.medias = {
+        _id: 1,
+        title: 1,
+        description: 1,
+        path: 1,
+        thumbnail: 1,
+        created_at: 1
+      };
+    }
+
+    let result = await this.userModel.aggregate(pipeline).exec();
 
     console.log(result[0])
 
@@ -62,6 +75,7 @@ export class UserService {
       return null;
     }
   }
+
 
 
   async updateUserById(
