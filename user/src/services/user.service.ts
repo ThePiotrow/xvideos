@@ -19,7 +19,9 @@ export class UserService {
   async searchUser(data: { username?: string, email?: string, is_confirmed?: boolean }): Promise<IUser[] | null> {
     return this.userModel.find(data).exec();
   }
-  async searchUserById(data: { id: string, withMedias: boolean }): Promise<IUser> {
+  async searchUserById(data: { id: string, withMedias?: boolean }): Promise<IUser> {
+
+    data.withMedias = data.withMedias ?? false;
 
     let pipeline: any[] = [
       {
@@ -31,43 +33,53 @@ export class UserService {
         $addFields: {
           id: "$_id"
         }
-      },
-      {
-        $project: {
-          _id: 1,
-          username: 1,
-          email: 1,
-          is_confirmed: 1,
-          role: 1,
-        }
       }
     ];
 
     if (data.withMedias) {
-      const lookupStage = {
+      pipeline.push({
         $lookup: {
           from: 'media',
           localField: '_id',
           foreignField: 'user_id',
           as: 'medias',
         }
-      };
+      });
 
-      pipeline.splice(2, 0, lookupStage); // Insert lookup before $project
-
-      pipeline[3].$project.medias = {
-        _id: 1,
-        title: 1,
-        description: 1,
-        path: 1,
-        thumbnail: 1,
-        created_at: 1
-      };
+      pipeline.push({
+        $addFields: {
+          "medias.id": "$medias._id"
+        }
+      });
+      pipeline.push({
+        $project: {
+          "medias._id": 0
+        }
+      });
     }
 
-    let result = await this.userModel.aggregate(pipeline).exec();
+    const project = data.withMedias ?
+      {
+        id: 1,
+        username: 1,
+        email: 1,
+        is_confirmed: 1,
+        role: 1,
+        medias: 1
+      } :
+      {
+        id: 1,
+        username: 1,
+        email: 1,
+        is_confirmed: 1,
+        role: 1,
+      };
 
-    console.log(result[0])
+    pipeline.push({
+      $project: project
+    });
+
+    let result = await this.userModel.aggregate(pipeline).exec();
 
     if (result && result.length > 0) {
       return result[0];
@@ -76,11 +88,14 @@ export class UserService {
     }
   }
 
-
-
   async updateUserById(
     id: string,
-    userParams: { is_confirmed: boolean },
+    userParams: {
+      email?: string;
+      password?: string;
+      is_confirmed?: boolean;
+      role?: string;
+    },
   ): Promise<IUser> {
     return this.userModel.findOneAndUpdate({ _id: id }, userParams, { new: true }).exec();
   }

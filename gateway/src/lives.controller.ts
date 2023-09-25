@@ -119,7 +119,7 @@ export class LivesController {
   }
 
   @Post()
-  @Authorization(true)
+  @Authorization()
   // @Admin()
   @Permission('live_create')
   @ApiCreatedResponse({
@@ -160,7 +160,7 @@ export class LivesController {
 
 
   @Post(':id/stop')
-  @Authorization(true)
+  @Authorization()
   @Permission('live_stop')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
@@ -199,7 +199,7 @@ export class LivesController {
   }
 
   @Delete(':id')
-  @Authorization(true)
+  @Authorization()
   @Permission('live_delete_by_id')
   @ApiOkResponse({
     type: DeleteLiveResponseDto,
@@ -237,7 +237,7 @@ export class LivesController {
   }
 
   @Put(':id')
-  @Authorization(true)
+  @Authorization()
   @Permission('live_update_by_id')
   @ApiOkResponse({
     type: UpdateLiveResponseDto,

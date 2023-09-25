@@ -16,4 +16,6 @@ export interface IMedia extends Document {
   data?: string;
   created_at: number;
   updated_at: number;
+  isDeleted?: boolean;
+  deletedAt?: number;
 }

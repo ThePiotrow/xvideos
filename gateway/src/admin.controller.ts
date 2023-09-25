@@ -35,14 +35,18 @@ import { CheckUsernameAvailabilityResponseDto } from './interfaces/user/dto/chec
 import { CheckUsernameAvailabilityDto } from './interfaces/user/dto/check-username-availability.dto';
 import { IServiceUsernameUserCheckAvailabilityDtoResponse } from './interfaces/user/service-check-username-response.interface';
 import { GetUserByIdDto } from './interfaces/user/dto/get-user-by-id.dto';
+import { Admin } from './decorators/admin.decorator';
+import { UpdateUserResponseDto } from './interfaces/user/dto/update-user-response.dto';
+import { UpdateUserDto } from './interfaces/user/dto/update-user-by-id.dto';
 
-@Controller('users')
+@Controller('admin')
 @ApiBearerAuth()
-@ApiTags('users')
-export class UsersController {
+@ApiTags('admin')
+export class AdminController {
   constructor(
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
+    @Inject('MEDIA_SERVICE') private readonly mediaServiceClient: ClientProxy,
   ) { }
 
   @Get()
@@ -68,7 +72,9 @@ export class UsersController {
     };
   }
 
-  @Post()
+  @Post('/users')
+  @Authorization()
+  @Admin()
   @ApiCreatedResponse({
     type: CreateUserResponseDto,
   })
@@ -77,7 +83,7 @@ export class UsersController {
     @Req() request: IAuthorizedRequest,
   ): Promise<CreateUserResponseDto> {
     const createUserResponse: IServiceUserCreateResponse = await firstValueFrom(
-      this.userServiceClient.send('user_create', { ...body, role: 'ROLE_USER' }),
+      this.userServiceClient.send('user_create', { ...body, role: 'ROLE_ADMIN' }),
 
 
     );
@@ -110,126 +116,20 @@ export class UsersController {
     };
   }
 
-  @Post('/login')
+  @Put('/users/confirm/:id')
   @ApiCreatedResponse({
-    type: LoginUserResponseDto,
-  })
-  public async loginUser(
-    @Body() body: LoginUserDto,
-  ): Promise<LoginUserResponseDto> {
-    const getUserResponse: IServiceUserSearchResponse = await firstValueFrom(
-      this.userServiceClient.send('user_search_by_credentials', body),
-    );
-
-    if (getUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: getUserResponse.message,
-          data: null,
-          errors: null,
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    const createTokenResponse: IServiveTokenCreateResponse =
-      await firstValueFrom(
-        this.tokenServiceClient.send('token_create', {
-          userId: getUserResponse.user.id,
-          username: getUserResponse.user.username,
-        }),
-      );
-
-    return {
-      message: createTokenResponse.message,
-      data: {
-        token: createTokenResponse.token,
-      },
-      errors: null,
-    };
-  }
-
-  @Put('/logout')
-  @Authorization()
-  @ApiCreatedResponse({
-    type: LogoutUserResponseDto,
-  })
-  public async logoutUser(
-    @Req() request: IAuthorizedRequest,
-  ): Promise<LogoutUserResponseDto> {
-    const { user } = request;
-
-    const destroyTokenResponse: IServiceTokenDestroyResponse =
-      await firstValueFrom(
-        this.tokenServiceClient.send('token_destroy', {
-          userId: user.id,
-        }),
-      );
-
-    if (destroyTokenResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: destroyTokenResponse.message,
-          data: null,
-          errors: destroyTokenResponse.errors,
-        },
-        destroyTokenResponse.status,
-      );
-    }
-
-    return {
-      message: destroyTokenResponse.message,
-      errors: null,
-      data: null,
-    };
-  }
-
-  @Get('/username/check-availability/:username')
-  @ApiOkResponse({
-    type: CheckUsernameAvailabilityResponseDto,
-  })
-  public async checkUsernameUsernameAvailability(
-    @Param() params: CheckUsernameAvailabilityDto,
-  ): Promise<CheckUsernameAvailabilityResponseDto> {
-    const getUserResponse: IServiceUsernameUserCheckAvailabilityDtoResponse = await firstValueFrom(
-      this.userServiceClient.send('user_username_check_availability', {
-        username: params.username,
-      }),
-    );
-
-    if (getUserResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: getUserResponse.message,
-          data: null,
-
-          errors: getUserResponse.errors,
-        },
-        getUserResponse.status,
-      );
-    }
-
-    return {
-      message: getUserResponse.message,
-      data: {
-        available: getUserResponse.available,
-      },
-
-      errors: null,
-    };
-  }
-
-  @Get('/confirm/:link')
-  @ApiCreatedResponse({
-    type: ConfirmUserResponseDto,
+    type: UpdateUserResponseDto,
   })
   public async confirmUser(
-    @Param() params: ConfirmUserDto,
-  ): Promise<ConfirmUserResponseDto> {
-    const confirmUserResponse: IServiceUserConfirmResponse =
+    @Param() params: {
+      id: string;
+    },
+  ): Promise<UpdateUserResponseDto> {
+    const confirmUserResponse: IServiceUserGetByIdResponse =
       await firstValueFrom(
-        this.userServiceClient.send('user_confirm', {
-          link: params.link,
+        this.userServiceClient.send('user_update_by_id', {
+          id: params.id,
+          is_confirmed: true,
         }),
       );
 
@@ -237,8 +137,7 @@ export class UsersController {
       throw new HttpException(
         {
           message: confirmUserResponse.message,
-          data: null,
-          errors: confirmUserResponse.errors,
+          user: null,
         },
         confirmUserResponse.status,
       );
@@ -247,7 +146,49 @@ export class UsersController {
     return {
       message: confirmUserResponse.message,
       errors: null,
-      data: null,
+      data: {
+        user: confirmUserResponse.user
+      },
+    };
+  }
+
+
+  @Put('/users/:id')
+  @Authorization()
+  @Admin()
+  @ApiCreatedResponse({
+    type: UpdateUserResponseDto,
+  })
+  public async updateUser(
+    @Param() params: {
+      id: string;
+    },
+    @Body() body: UpdateUserDto,
+  ): Promise<UpdateUserResponseDto> {
+    const confirmUserResponse: IServiceUserGetByIdResponse =
+      await firstValueFrom(
+        this.userServiceClient.send('user_update_by_id', {
+          id: params.id,
+          ...body,
+        }),
+      );
+
+    if (confirmUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: confirmUserResponse.message,
+          user: null,
+        },
+        confirmUserResponse.status,
+      );
+    }
+
+    return {
+      message: confirmUserResponse.message,
+      errors: null,
+      data: {
+        user: confirmUserResponse.user
+      },
     };
   }
 

@@ -70,10 +70,20 @@ export class MediaService {
     return await mediaModel.save();
   }
 
-  public async getMediaById(id: string): Promise<IMedia> {
+  public async getMediaById({ id, all, isDeleted }: { id: string, all?: boolean, isDeleted?: boolean }): Promise<IMedia> {
+
+    const match = (all ?? false) ?
+      {
+        _id: new mongoose.Types.ObjectId(id),
+      } :
+      {
+        _id: new mongoose.Types.ObjectId(id),
+        isDeleted: isDeleted ?? false,
+      };
+
     const result = await this.mediaModel.aggregate([
       {
-        $match: { _id: new mongoose.Types.ObjectId(id) }
+        $match: match
       },
       {
         $lookup: {
@@ -88,7 +98,8 @@ export class MediaService {
       },
       {
         $addFields: {
-          id: "$_id"
+          id: "$_id",
+          "user.id": "$user._id"
         }
       },
       {
@@ -101,17 +112,17 @@ export class MediaService {
           thumbnail: 1,
           created_at: 1,
           updated_at: 1,
+          isDeleted: 1,
+          deletedAt: 1,
           user: {
             username: 1,
             email: 1,
             role: 1,
-            _id: 1
+            id: 1
           }
         }
       }
     ]).exec();
-
-    console.log('result', result)
 
     if (result && result.length > 0) {
       return result[0];
@@ -121,16 +132,23 @@ export class MediaService {
   }
 
   public async removeMediaById(id: string) {
-    return await this.mediaModel.findOneAndDelete({ _id: id });
+    const params = {
+      isDeleted: true,
+      deletedAt: Date.now()
+    };
+
+    await this.mediaModel.findOneAndUpdate({ _id: id }, params);
+
+    return this.getMediaById({ id });
   }
 
   public async updateMediaById(
     id: string,
     params: IMediaUpdateParams,
   ): Promise<IMedia> {
-    return await this.mediaModel.findOneAndUpdate({ _id: id }, params, {
-      new: true,
-    });
+    await this.mediaModel.findOneAndUpdate({ _id: id }, params);
+
+    return this.getMediaById({ id });
   }
 
   public async createThumbnail(file: Express.Multer.File): Promise<boolean> {
@@ -187,12 +205,23 @@ export class MediaService {
     return true;
   }
 
-  public async getAllMedias({ limit, offset }: { limit: number, offset: number }) {
-    console.log('limit', limit)
-    console.log('offset', offset)
+  public async getAllMedias({ all, isDeleted, limit, offset }: { all?: boolean, isDeleted?: boolean, limit: number, offset: number }) {
+
+    const match = (all ?? false) ?
+      {
+      } :
+      {
+        isDeleted: isDeleted ?? false,
+      };
+
     const result = await this.mediaModel.aggregate([
       {
-        $match: {}
+        $match: match
+      },
+      {
+        $addFields: {
+          id: "$_id"
+        }
       },
       {
         $lookup: {
@@ -207,23 +236,26 @@ export class MediaService {
       },
       {
         $addFields: {
-          id: "$_id"
+          id: "$_id",
+          "user.id": "$user._id"
         }
       },
       {
         $project: {
-          _id: 1,
+          id: 1,
           title: 1,
           description: 1,
           path: 1,
           thumbnail: 1,
           created_at: 1,
           updated_at: 1,
+          isDeleted: 1,
+          deletedAt: 1,
           user: {
             username: 1,
             email: 1,
             role: 1,
-            _id: 1
+            id: 1
           }
         }
       },
@@ -234,8 +266,6 @@ export class MediaService {
         $limit: limit,
       },
     ]).exec();
-
-    console.log('result', result)
 
     if (result && result.length > 0) {
       return result;

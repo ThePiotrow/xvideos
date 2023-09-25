@@ -37,11 +37,14 @@ export class MediaController {
   }
 
   @MessagePattern('media_search_by_id')
-  public async mediaSearchById(
-    id: string,
+  public async mediaSearchById(params: {
+    id: string;
+    all?: boolean;
+    isDeleted?: boolean;
+  }
   ): Promise<IMediaSearchByIdResponse> {
-    if (id) {
-      const media = await this.mediaService.getMediaById(id);
+    if (params.id) {
+      const media = await this.mediaService.getMediaById(params);
 
       if (media) {
         return {
@@ -74,26 +77,17 @@ export class MediaController {
   }): Promise<IMediaUpdateByIdResponse> {
     if (params.id) {
       try {
-        const media = await this.mediaService.getMediaById(params.id);
+        const media = await this.mediaService.getMediaById({ id: params.id });
         if (media) {
-          if (media.user.id.toString() === params.user_id.toString()) {
-            delete media.user;
-            media.user_id = params.user_id;
-            const updatedMedia = await this.mediaService.updateMediaById(params.id, params.media);
-            return {
-              status: HttpStatus.OK,
-              message: '✅ Media updated',
-              media: updatedMedia,
-              errors: null,
-            };
-          } else {
-            return {
-              status: HttpStatus.FORBIDDEN,
-              message: '⛔ Forbidden',
-              media: null,
-              errors: null,
-            };
-          }
+          delete media.user;
+          media.user_id = params.user_id;
+          const updatedMedia = await this.mediaService.updateMediaById(params.id, params.media);
+          return {
+            status: HttpStatus.OK,
+            message: '✅ Media updated',
+            media: updatedMedia,
+            errors: null,
+          };
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
@@ -188,12 +182,14 @@ export class MediaController {
   @MessagePattern('media_get_all')
   public async mediaGetAll(
     params: {
+      all: boolean;
+      isDeleted: boolean;
       limit: number;
       offset: number;
     }
   ): Promise<IMediaSearchByUserResponse> {
     try {
-      const medias = await this.mediaService.getAllMedias({ limit: params.limit ?? 10, offset: params.offset ?? 0 });
+      const medias = await this.mediaService.getAllMedias({ all: params.all ?? false, isDeleted: params.isDeleted ?? false, limit: params.limit ?? 10, offset: params.offset ?? 0 });
       return {
         status: HttpStatus.OK,
         message: '✅ Medias found',
@@ -211,35 +207,26 @@ export class MediaController {
 
   @MessagePattern('media_delete_by_id')
   public async mediaDeleteForUser(params: {
-    user_id: string;
+    media: IMedia;
     id: string;
   }): Promise<IMediaDeleteResponse> {
-    if (params && params.user_id && params.id) {
+    if (params && params.id && params.media) {
       try {
-        const media = await this.mediaService.getMediaById(params.id);
 
-        if (media) {
-          if (media.user_id === params.user_id) {
-            await this.mediaService.removeMediaById(params.id);
-            return {
-              status: HttpStatus.OK,
-              message: '✅ Media deleted',
-              errors: null,
-            };
-          } else {
-            return {
-              status: HttpStatus.FORBIDDEN,
-              message: '⛔ Forbidden',
-              errors: null,
-            };
-          }
-        } else {
+        if (params.media.isDeleted) {
           return {
-            status: HttpStatus.NOT_FOUND,
-            message: '⚠️ Media not found',
+            status: HttpStatus.OK,
+            message: '⚠️ Media already deleted',
             errors: null,
           };
         }
+
+        await this.mediaService.removeMediaById(params.id);
+        return {
+          status: HttpStatus.OK,
+          message: '✅ Media deleted',
+          errors: null,
+        };
       } catch (e) {
         return {
           status: HttpStatus.FORBIDDEN,

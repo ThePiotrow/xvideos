@@ -13,10 +13,12 @@ import { LivesController } from './lives.controller';
 
 import { EventsGateway } from './events.gateway';
 import { AdminGuard } from './services/guards/admin.guard';
+import { AdminController } from './admin.controller';
+import { OwnerGuard } from './services/guards/owner.guard';
 
 @Module({
   imports: [],
-  controllers: [UsersController, MediasController, LivesController],
+  controllers: [UsersController, MediasController, LivesController, AdminController],
   providers: [
     ConfigService,
     {
@@ -69,6 +71,10 @@ import { AdminGuard } from './services/guards/admin.guard';
     {
       provide: APP_GUARD,
       useClass: AdminGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: OwnerGuard,
     },
     EventsGateway,
   ],

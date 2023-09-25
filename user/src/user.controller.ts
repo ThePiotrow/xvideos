@@ -55,8 +55,6 @@ export class UserController {
 
       const user: IUser = users[0];
 
-      console.log('here')
-
       if (user) {
 
         delete user.password;
@@ -98,7 +96,7 @@ export class UserController {
   }
 
   @MessagePattern('user_get_by_id')
-  public async getUserById(params: { id: string, withMedias: boolean }): Promise<IUserSearchResponse> {
+  public async getUserById(params: { id: string, withMedias?: boolean }): Promise<IUserSearchResponse> {
 
     if (params.id) {
       const user = await this.userService.searchUserById(params);
@@ -228,7 +226,6 @@ export class UserController {
       } else {
         try {
           params.is_confirmed = false;
-          params.role = 'ROLE_USER'
 
           const createdUser = await this.userService.createUser(params);
           const userLink = await this.userService.createUserLink(
@@ -273,6 +270,45 @@ export class UserController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: '⚠️ User not created',
+        user: null,
+        errors: null,
+      };
+    }
+  }
+
+  @MessagePattern('user_update_by_id')
+  public async updateUserById(params:
+    {
+      id: string;
+    }
+    & Partial<IUser>
+  ): Promise<IUserCreateResponse> {
+    let result: IUserCreateResponse;
+
+    console.log(params);
+
+    if (params.id) {
+      const user = await this.userService.updateUserById(params.id, params);
+
+      if (user) {
+        return {
+          status: HttpStatus.OK,
+          message: '✅ User updated',
+          user,
+          errors: null,
+        };
+      } else {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: '⚠️ User not found',
+          user: null,
+          errors: null,
+        };
+      }
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: '⚠️ User not found',
         user: null,
         errors: null,
       };

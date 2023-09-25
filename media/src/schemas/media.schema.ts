@@ -25,6 +25,14 @@ export const MediaSchema = new mongoose.Schema(
       type: String,
       default: null,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false
+    },
+    deletedAt: {
+      type: Date,
+      default: null
+    }
   },
   {
     timestamps: {
@@ -51,7 +59,8 @@ MediaSchema.pre('validate', function (next) {
     this.invalidate('user_id', 'The field value can not be updated');
   }
 
-  self.updated_at = Date.now();
+  if (!this.isModified('deletedAt'))
+    self.updated_at = Date.now();
 
   next();
 });

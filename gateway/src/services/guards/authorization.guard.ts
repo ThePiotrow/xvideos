@@ -31,6 +31,19 @@ export class AuthGuard implements CanActivate {
     let token = null;
 
     const request = context.switchToHttp().getRequest();
+
+    if (!request.headers.authorization) {
+      throw new HttpException(
+        {
+          message: '[AuthGuard] You do not have permission to access this resource',
+          data: null,
+
+          errors: null,
+        },
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
     token = request.headers.authorization.split('Bearer ')[1];
 
     if (!token) {
@@ -63,11 +76,23 @@ export class AuthGuard implements CanActivate {
     }
 
     const userInfo = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', userTokenInfo.data.userId),
+      this.userServiceClient.send('user_get_by_id', { id: userTokenInfo.data.userId }),
     );
+
+    if (!userInfo || !userInfo.user) {
+      throw new HttpException(
+        {
+          message: userInfo.message,
+          data: null,
+          errors: null,
+        },
+        userInfo.status,
+      );
+    }
+
     const user = {
       ...userInfo.user,
-      id: userInfo.user._id,
+      id: userInfo.user.id,
     }
 
     request.user = user;

@@ -39,6 +39,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { IMedia } from './interfaces/media/media.interface';
 import { IServiceMediaSearchByIdResponse } from './interfaces/media/service-media-search-by-id-response.interface';
 import { GetMediaResponseDto } from './interfaces/media/dto/get-media-response.dto';
+import { Owner } from './decorators/owner.decorator';
 
 @Controller('medias')
 @ApiBearerAuth()
@@ -117,7 +118,7 @@ export class MediasController {
   }
 
   @Post()
-  @Authorization(true)
+  @Authorization()
   @UseInterceptors(FileInterceptor('file'))
   @ApiConsumes('multipart/form-data')
   @ApiCreatedResponse({
@@ -170,8 +171,8 @@ export class MediasController {
   }
 
   @Delete(':id')
-  @Authorization(true)
-  @Permission('media_delete_by_id')
+  @Authorization()
+  @Owner('media')
   @ApiOkResponse({
     type: DeleteMediaResponseDto,
   })
@@ -179,13 +180,13 @@ export class MediasController {
     @Req() request: IAuthorizedRequest,
     @Param() params: MediaIdDto,
   ): Promise<DeleteMediaResponseDto> {
-    const { user } = request;
+    const { resource } = request;
 
     const deleteMediaResponse: IServiceMediaDeleteResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_delete_by_id', {
           id: params.id,
-          user_id: user.id,
+          media: resource,
         }),
       );
 
@@ -208,8 +209,8 @@ export class MediasController {
   }
 
   @Put(':id')
-  @Authorization(true)
-  @Permission('media_update_by_id')
+  @Authorization()
+  @Owner('media')
   @ApiOkResponse({
     type: UpdateMediaResponseDto,
   })
@@ -218,12 +219,13 @@ export class MediasController {
     @Param() params: MediaIdDto,
     @Body() body: UpdateMediaDto,
   ): Promise<UpdateMediaResponseDto> {
-    const { user } = request;
+    const { resource } = request;
+
     const updateMediaResponse: IServiceMediaUpdateByIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_update_by_id', {
           id: params.id,
-          user_id: user.id,
+          user_id: resource.user.id,
           media: body,
         }),
       );
