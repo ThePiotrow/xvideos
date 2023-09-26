@@ -19,15 +19,22 @@ export class UserService {
   async searchUser(data: { username?: string, email?: string, is_confirmed?: boolean }): Promise<IUser[] | null> {
     return this.userModel.find(data).exec();
   }
-  async searchUserById(data: { id: string, withMedias?: boolean }): Promise<IUser> {
+  async searchUserById({ id, all, isDeleted, withMedias }: { id: string, all?: boolean, isDeleted?: boolean, withMedias?: boolean }): Promise<IUser> {
 
-    data.withMedias = data.withMedias ?? false;
+    const match = (all ?? false) ?
+      {
+        _id: new mongoose.Types.ObjectId(id),
+      } :
+      {
+        _id: new mongoose.Types.ObjectId(id),
+        isDeleted: isDeleted ?? false,
+      };
+
+    withMedias = withMedias ?? false;
 
     let pipeline: any[] = [
       {
-        $match: {
-          _id: new mongoose.Types.ObjectId(data.id),
-        },
+        $match: match,
       },
       {
         $addFields: {
@@ -36,7 +43,7 @@ export class UserService {
       }
     ];
 
-    if (data.withMedias) {
+    if (withMedias) {
       pipeline.push({
         $lookup: {
           from: 'media',
@@ -58,7 +65,7 @@ export class UserService {
       });
     }
 
-    const project = data.withMedias ?
+    const project = withMedias ?
       {
         id: 1,
         username: 1,
@@ -98,6 +105,17 @@ export class UserService {
     },
   ): Promise<IUser> {
     return this.userModel.findOneAndUpdate({ _id: id }, userParams, { new: true }).exec();
+  }
+
+  public async removeUserById(id: string) {
+    const params = {
+      isDeleted: true,
+      deletedAt: Date.now()
+    };
+
+    await this.userModel.findOneAndUpdate({ _id: id }, params);
+
+    return this.searchUserById({ id });
   }
 
   async createUser(user: IUser): Promise<IUser> {

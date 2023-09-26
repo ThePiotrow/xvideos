@@ -194,7 +194,7 @@ export class UserController {
       { message: string, path: string }
     }> = {};
 
-    if (params) {
+    if (params.username && params.email && params.password && params.role) {
       const users = [
         ...await this.userService.searchUser({ email: params.email }),
         ...await this.userService.searchUser({ username: params.username })
@@ -275,6 +275,7 @@ export class UserController {
       };
     }
   }
+
 
   @MessagePattern('user_update_by_id')
   public async updateUserById(params:
@@ -401,6 +402,38 @@ export class UserController {
       return {
         status: HttpStatus.BAD_REQUEST,
         message: '⚠️ Admin not created',
+        user: null,
+        errors: null,
+      };
+    }
+  }
+
+  @MessagePattern('user_delete_by_id')
+  public async deleteUserById(params: { id: string }): Promise<IUserCreateResponse> {
+    let result: IUserCreateResponse;
+
+    if (params.id) {
+      const user = await this.userService.removeUserById(params.id);
+
+      if (user) {
+        return {
+          status: HttpStatus.OK,
+          message: '✅ User deleted',
+          user,
+          errors: null,
+        };
+      } else {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: '⚠️ User not found',
+          user: null,
+          errors: null,
+        };
+      }
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: '⚠️ User not found',
         user: null,
         errors: null,
       };

@@ -9,6 +9,7 @@ import {
   HttpStatus,
   HttpException,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -84,8 +85,6 @@ export class AdminController {
   ): Promise<CreateUserResponseDto> {
     const createUserResponse: IServiceUserCreateResponse = await firstValueFrom(
       this.userServiceClient.send('user_create', { ...body, role: 'ROLE_ADMIN' }),
-
-
     );
     if (createUserResponse.status !== HttpStatus.CREATED) {
       throw new HttpException(
@@ -192,45 +191,40 @@ export class AdminController {
     };
   }
 
-  @Get('/:id')
-  @ApiOkResponse({
-    type: GetUserByTokenResponseDto,
+  @Delete('/users/:id')
+  @Authorization()
+  @Admin()
+  @ApiCreatedResponse({
+    type: UpdateUserResponseDto,
   })
-  public async getUserById(
-    @Param() params: GetUserByIdDto,
-  ): Promise<GetUserByTokenResponseDto> {
+  public async deleteUser(
+    @Param() params: {
+      id: string;
+    },
+  ): Promise<UpdateUserResponseDto> {
+    const confirmUserResponse: IServiceUserGetByIdResponse =
+      await firstValueFrom(
+        this.userServiceClient.send('user_delete_by_id', {
+          id: params.id,
+        }),
+      );
 
-    const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: false }),
-    );
+    if (confirmUserResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: confirmUserResponse.message,
+          user: null,
+        },
+        confirmUserResponse.status,
+      );
+    }
 
     return {
-      message: userResponse.message,
-      data: {
-        user: userResponse.user,
-      },
+      message: confirmUserResponse.message,
       errors: null,
-    };
-  }
-
-  @Get('/:id/medias')
-  @ApiOkResponse({
-    type: GetUserByTokenResponseDto,
-  })
-  public async getUserByIdWithMedias(
-    @Param() params: GetUserByIdDto,
-  ): Promise<GetUserByTokenResponseDto> {
-
-    const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: true }),
-    );
-
-    return {
-      message: userResponse.message,
       data: {
-        user: userResponse.user,
+        user: confirmUserResponse.user
       },
-      errors: null,
     };
   }
 }

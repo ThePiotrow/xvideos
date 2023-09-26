@@ -1,5 +1,6 @@
 import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcryptjs';
+import { IUser } from 'src/interfaces/user.interface';
 
 const SALT_ROUNDS = 10;
 
@@ -8,17 +9,7 @@ function transformValue(doc, ret: { [key: string]: any }) {
   delete ret.password;
 }
 
-export interface IUserSchema extends mongoose.Document {
-  username: string;
-  email: string;
-  password: string;
-  is_confirmed: boolean;
-  role: string;
-  comparePassword: (password: string) => Promise<boolean>;
-  getEncryptedPassword: (password: string) => Promise<string>;
-}
-
-export const UserSchema = new mongoose.Schema<IUserSchema>(
+export const UserSchema = new mongoose.Schema(
   {
     username: {
       type: String,
@@ -47,8 +38,20 @@ export const UserSchema = new mongoose.Schema<IUserSchema>(
       required: [true, 'Role can not be empty'],
       enum: ['ROLE_ADMIN', 'ROLE_USER'],
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
+    timestamps: {
+      createdAt: 'created_at',
+      updatedAt: 'updated_at',
+    },
     toObject: {
       virtuals: true,
       versionKey: false,
@@ -71,6 +74,15 @@ UserSchema.methods.getEncryptedPassword = (
 UserSchema.methods.compareEncryptedPassword = function (password: string) {
   return bcrypt.compare(password, this.password);
 };
+
+UserSchema.pre('validate', async function (next) {
+
+  const self = this as IUser;
+
+  if (!this.isModified('deletedAt'))
+    self.updated_at = Date.now();
+
+});
 
 UserSchema.pre('save', async function (next) {
   if (!this.isModified('password')) {

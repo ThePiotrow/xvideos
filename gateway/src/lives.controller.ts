@@ -31,6 +31,7 @@ import { CreateLiveDto } from './interfaces/live/dto/create-live.dto';
 import { UpdateLiveDto } from './interfaces/live/dto/update-live.dto';
 import { LiveIdDto } from './interfaces/live/dto/live-id.dto';
 import { Admin } from './decorators/admin.decorator';
+import { Owner } from './decorators/owner.decorator';
 
 @Controller('lives')
 @ApiBearerAuth()
@@ -120,7 +121,6 @@ export class LivesController {
 
   @Post()
   @Authorization()
-  // @Admin()
   @Permission('live_create')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
@@ -161,6 +161,7 @@ export class LivesController {
 
   @Post(':id/stop')
   @Authorization()
+  @Owner('live')
   @Permission('live_stop')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
@@ -200,6 +201,7 @@ export class LivesController {
 
   @Delete(':id')
   @Authorization()
+  @Owner('live')
   @Permission('live_delete_by_id')
   @ApiOkResponse({
     type: DeleteLiveResponseDto,
@@ -238,6 +240,7 @@ export class LivesController {
 
   @Put(':id')
   @Authorization()
+  @Owner('live')
   @Permission('live_update_by_id')
   @ApiOkResponse({
     type: UpdateLiveResponseDto,

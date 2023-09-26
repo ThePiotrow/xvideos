@@ -74,6 +74,16 @@ export class EventsGateway {
         }
     }
 
+    private sendError(message: string, live: any): any {
+        return {
+            message,
+            data: {
+                live
+            },
+            errors: null
+        };
+    }
+
     @WebSocketServer()
     server: Server;
 
