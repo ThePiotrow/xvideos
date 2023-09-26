@@ -5,6 +5,7 @@ import { MongoConfigService } from './services/config/mongo-config.service';
 import { MediaController } from './media.controller';
 import { MediaService } from './services/media.service';
 import { MediaSchema } from './schemas/media.schema';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -17,6 +18,10 @@ import { MediaSchema } from './schemas/media.schema';
         schema: MediaSchema,
       },
     ]),
+    // BullModule.registerQueue({
+    //   name: 'file_queue',
+    // }),
+
   ],
   controllers: [MediaController],
   providers: [MediaService],

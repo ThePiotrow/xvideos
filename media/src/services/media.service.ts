@@ -1,4 +1,4 @@
-import { Injectable, StreamableFile } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -24,7 +24,18 @@ export class MediaService {
     region: process.env.AWS_S3_REGION,
   });
 
-  async uploadFile(file: Express.Multer.File) {
+  private handleS3Error(e: any): void {
+    console.error("Failed to upload file to S3:", e.message);
+    throw new Error("Failed to upload file to S3");
+  }
+
+  public async uploadFile(file: Express.Multer.File) {
+    const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
+
+    file.originalname = file.originalname
+      .replace(/(\.[^\.]+)$/, `-${suffix}$1`)
+      .replace(/[^a-zA-Z0-9-.]/g, '-');
+
     return await this.s3_upload(
       file.buffer,
       file.mimetype,
@@ -32,7 +43,7 @@ export class MediaService {
     );
   }
 
-  async s3_upload(
+  private async s3_upload(
     buffer: Buffer,
     mimetype: string,
     file_name: string
@@ -51,13 +62,12 @@ export class MediaService {
 
     try {
       const res = await this.s3.upload(params).promise();
-
       return {
         url: res.Location,
         name: res.Key,
       };
     } catch (e) {
-      console.error("Failed to upload file to S3:", e.message);
+      this.handleS3Error(e);
     }
   }
 
@@ -67,7 +77,11 @@ export class MediaService {
 
   public async createMedia(mediaBody: IMedia): Promise<IMedia> {
     const mediaModel = new this.mediaModel(mediaBody);
-    return await mediaModel.save();
+    const media = await mediaModel.save();
+    console.log('media', media)
+    const res = await this.getMediaById({ id: media.id });
+    console.log('res', res)
+    return res;
   }
 
   public async getMediaById({ id, all, isDeleted }: { id: string, all?: boolean, isDeleted?: boolean }): Promise<IMedia> {
@@ -108,8 +122,9 @@ export class MediaService {
           id: 1,
           title: 1,
           description: 1,
-          path: 1,
-          thumbnail: 1,
+          urls: 1,
+          duration: 1,
+          type: 1,
           created_at: 1,
           updated_at: 1,
           isDeleted: 1,
@@ -148,35 +163,97 @@ export class MediaService {
   ): Promise<IMedia> {
     await this.mediaModel.findOneAndUpdate({ _id: id }, params);
 
-    return this.getMediaById({ id });
+    return await this.getMediaById({ id });
   }
 
-  public async createThumbnail(file: Express.Multer.File): Promise<boolean> {
+  public async generateThumbnail(file: { name: string; url: string; mimetype: string; duration: number; }): Promise<{ url: string; name: string }> {
+    const outputName = `${file.name.split('.')[0]}-thumbnail.jpg`;
+    const outputPath = `./uploads/thumbnails/${outputName}`;
 
-    const path = file.path;
-    const output = `${file.filename.split('.')[0]}.png`;
+    try {
+      const seekTime = file.duration * 0.05;
 
-    return new Promise((resolve, reject) => {
-      ffmpeg(path)
-        .screenshots({
-          timestamps: ['50%'],
-          filename: output,
-          folder: './uploads/thumbnails',
-          size: '320x240',
-        })
-        .on('end', (
-          files: { filename: string; timemarks: string }[],
-        ) => {
-          console.log('files', files)
-          console.log('Screenshots taken');
-          resolve(true);
-        })
-        .on('error', (err) => {
-          console.error(err);
-          reject(false);
-        });
-    });
+      await new Promise((resolve, reject) => {
+        ffmpeg(file.url)
+          .seekInput(seekTime)
+          .outputOptions('-vframes 1')
+          .outputOptions('-vf', 'scale=-1:500')
+          .output(outputPath)
+          .on('progress', progress => {
+            console.log('Processing: ' + progress.percent + '% done');
+          })
+          .on('end', () => {
+            console.log('Screenshots taken');
+            resolve(true);
+          })
+          .on('error', (err) => {
+            console.error(err);
+            reject(err);
+          })
+          .run();
+      });
+
+      const uploadResult = await this.s3_upload(
+        fs.readFileSync(outputPath),
+        'image/jpeg',
+        outputName
+      );
+
+      fs.unlinkSync(outputPath);
+
+      return uploadResult;
+    } catch (error) {
+      fs.unlinkSync(outputPath);
+      throw error;
+    }
   }
+
+
+  public async generateVideo(file: { name: string; url: string; mimetype: string; }, resolution: number): Promise<{ url: string; name: string }> {
+
+    const output = `${file.name.split('.')[0]}-${resolution}.${file.mimetype}`;
+    const outputPath = `./uploads/videos/${output}`;
+
+    try {
+
+      await new Promise((resolve, reject) => {
+
+        ffmpeg(file.url)
+          .size(`${resolution}x?`)
+          .format(`${file.mimetype}`)
+          .on('codecData', codecinfo => {
+            console.log("Input is from codec", codecinfo);
+          })
+          .on('progress', progress => {
+            console.log('Processing: ' + progress.percent + '% done');
+          })
+          .on('end', () => {
+            console.log('Video processing completed');
+            resolve(true);
+          })
+          .on('error', (err) => {
+            console.error('Error:', err);
+            reject(err);
+          })
+          .save(outputPath);
+      });
+
+      const uploadResult = await this.s3_upload(
+        fs.readFileSync(outputPath),
+        file.mimetype,
+        output,
+      );
+
+      fs.unlinkSync(outputPath);
+
+      return uploadResult;
+    }
+    catch (error) {
+      fs.unlinkSync(outputPath);
+      throw error;
+    }
+  }
+
 
   public async createFile(path: string, data: string): Promise<boolean> {
 
@@ -246,7 +323,8 @@ export class MediaService {
           title: 1,
           description: 1,
           path: 1,
-          thumbnail: 1,
+          urls: 1,
+          type: 1,
           created_at: 1,
           updated_at: 1,
           isDeleted: 1,
@@ -272,10 +350,5 @@ export class MediaService {
     } else {
       return null;
     }
-  }
-
-  public async getFile(path: string): Promise<StreamableFile> {
-    const stream = fs.createReadStream(path);
-    return new StreamableFile(stream);
   }
 }

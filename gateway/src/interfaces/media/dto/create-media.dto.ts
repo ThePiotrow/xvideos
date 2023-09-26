@@ -5,6 +5,4 @@ export class CreateMediaDto {
   title: string;
   @ApiProperty({ example: 'test media description' })
   description: string;
-  @ApiProperty({ type: 'string', format: 'binary' })
-  file: any;
 }

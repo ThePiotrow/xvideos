@@ -10,20 +10,121 @@ export const MediaSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-      required: [true, 'Title can not be empty'],
+      required: true,
     },
     description: String,
+    urls: {
+      original: {
+        type: String,
+        required: true
+      },
+      thumbnail: {
+        type: String,
+        required: false
+      },
+      '1080': [{
+        url: {
+          type: String,
+          required: false
+        },
+        mimetype: {
+          type: String,
+          required: false
+        },
+        available: {
+          type: Boolean,
+          required: false,
+          default: false
+        }
+      }],
+      '720': [{
+        url: {
+          type: String,
+          required: false
+        },
+        mimetype: {
+          type: String,
+          required: false
+        },
+        available: {
+          type: Boolean,
+          required: false,
+          default: false
+        }
+      }],
+      '480': [{
+        url: {
+          type: String,
+          required: false
+        },
+        mimetype: {
+          type: String,
+          required: false
+        },
+        available: {
+          type: Boolean,
+          required: false,
+          default: false
+        }
+      }],
+      '360': [{
+        url: {
+          type: String,
+          required: false
+        },
+        mimetype: {
+          type: String,
+          required: false
+        },
+        available: {
+          type: Boolean,
+          required: false,
+          default: false
+        }
+      }],
+      '240': [{
+        url: {
+          type: String,
+          required: false
+        },
+        mimetype: {
+          type: String,
+          required: false
+        },
+        available: {
+          type: Boolean,
+          required: false,
+          default: false
+        }
+      }],
+      '144': [{
+        url: {
+          type: String,
+          required: false
+        },
+        mimetype: {
+          type: String,
+          required: false
+        },
+        available: {
+          type: Boolean,
+          required: false,
+          default: false
+        }
+      }],
+    },
+    type: {
+      type: String,
+      required: [true, 'Type can not be empty'],
+      enum: ['image', 'video'],
+    },
+    duration: {
+      type: Number,
+      required: false,
+    },
     user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: [true, 'User can not be empty'],
-    },
-    path: {
-      type: String,
-      required: [true, 'Path can not be empty'],
-    },
-    thumbnail: {
-      type: String,
-      default: null,
     },
     isDeleted: {
       type: Boolean,

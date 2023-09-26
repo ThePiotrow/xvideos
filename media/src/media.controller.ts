@@ -10,7 +10,7 @@ import { IMediaCreateResponse } from './interfaces/media-create-response.interfa
 import { IMediaUpdateByIdResponse } from './interfaces/media-update-by-id-response.interface';
 import { IMediaSearchByIdResponse } from './interfaces/media-search-by-id-response.interface';
 
-import * as mongoose from 'mongoose';
+import * as ffmpeg from 'fluent-ffmpeg';
 
 @Controller()
 export class MediaController {
@@ -118,16 +118,27 @@ export class MediaController {
   @MessagePattern('media_create')
   public async mediaCreate(body: IMedia): Promise<IMediaCreateResponse> {
 
-    if (body && body.file) {
+    if (body && body.media) {
       try {
+        const types = {
+          media: body.media.mimetype.split('/')[0],
+          thumbnail: body.thumbnail ? body.thumbnail.mimetype.split('/')[0] : null,
+        }
 
-        const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`
+        let thumbnail = null;
 
-        body.file.originalname = body.file.originalname
-          .replace(/(\.[^\.]+)$/, `-${suffix}$1`)
-          .replace(/[^a-zA-Z0-9-.]/g, '-');
+        let urls = {
+          original: null,
+          thumbnail: null,
+          '1080': [],
+          '720': [],
+          '480': [],
+          '360': [],
+          '240': [],
+          '144': [],
+        }
 
-        if (!body.file.mimetype.includes('image') && !body.file.mimetype.includes('video')) {
+        if (!['image', 'video'].includes(types.media) || (body.thumbnail && !['image'].includes(types.thumbnail))) {
           return {
             status: HttpStatus.BAD_REQUEST,
             message: '🚫 Media type not allowed',
@@ -136,15 +147,9 @@ export class MediaController {
           };
         }
 
-        // if video, create thumbnail
-        if (body.file.mimetype.includes('video')) {
-          const thumbnail = await this.mediaService.createThumbnail(body.file);
-          // body.thumbnail = thumbnail;
-        }
+        const original = await this.mediaService.uploadFile(body.media);
 
-        const uploadedFile = await this.mediaService.uploadFile(body.file);
-
-        if (!uploadedFile?.url)
+        if (!original || !original?.url)
           return {
             status: HttpStatus.BAD_REQUEST,
             message: '⚠️ Media create failed',
@@ -152,8 +157,65 @@ export class MediaController {
             errors: null,
           };
 
-        body.path = uploadedFile.url;
+        urls.original = original.url;
+
+        if (types.media === 'image') {
+          thumbnail = await this.mediaService.uploadFile(body.media);
+        }
+
+        if (types.media === 'video') {
+
+          const { duration, height } = await new Promise<{ duration: number; height: any }>((resolve, reject) => {
+            ffmpeg.ffprobe(original.url, (err, metadata) => {
+              if (err) reject(err);
+              else resolve({
+                duration: metadata.format.duration,
+                height: metadata.streams[0].height
+              });
+            });
+          });
+
+          body.duration = duration;
+
+          if (body.thumbnail)
+            thumbnail = await this.mediaService.uploadFile(body.thumbnail);
+          else
+            thumbnail = await this.mediaService.generateThumbnail({ ...original, mimetype: body.media?.mimetype, duration });
+
+          for (const resolution of [/*'1080', '720'*/, '480', '360', '240', '144']) {
+            if (resolution === 'original' || resolution === 'thumbnail' || !resolution || height && height < Number(resolution))
+              continue;
+
+            for (const mimetype of ['mp4', 'webm']) {
+              const { url } = await this.mediaService.generateVideo({ ...original, mimetype }, Number(resolution));
+              console.log('url', url)
+              if (!url)
+                return {
+                  status: HttpStatus.BAD_REQUEST,
+                  message: '⚠️ Media create failed',
+                  media: null,
+                  errors: null,
+                };
+              console.log('urls', urls)
+              urls[resolution].push({
+                url: url,
+                mimetype: mimetype,
+                available: true,
+              });
+              console.log('urls', urls)
+            }
+          }
+        }
+
+        urls.thumbnail = thumbnail.url;
+        body.urls = urls;
+        body.type = types.media as 'image' | 'video';
+
+
+        console.log('body', body)
+
         const media = await this.mediaService.createMedia(body);
+
         return {
           status: HttpStatus.CREATED,
           message: '✅ Media created',

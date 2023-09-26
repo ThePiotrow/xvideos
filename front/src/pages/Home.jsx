@@ -9,6 +9,7 @@ function Home() {
   useEffect(() => {
     API.get("/medias")
       .then((response) => {
+        console.log("response", response)
         setMedias(response.data.medias);
       })
       .catch((error) => {
@@ -25,23 +26,20 @@ function Home() {
             key={media.id}
             onClick={() => navigate(`/media/${media.id}`)}
           >
-            <video
+            <img
               className="w-full h-44 bg-gray-300 bg-center bg-cover rounded-xl transition-all group-hover:rounded-none hover:duration-700 easy-in-out shadow-lg group-hover:shadow-xl"
-              src={media.path}
+              src={media.urls.thumbnail}
               preload="metadata"
-              muted
-              controlsList="nodownload nofullscreen noremoteplayback"
-              onLoadedMetadata={(e) => {
-                e.target.currentTime = 5; // Charge une frame à 5 secondes de la vidéo pour la prévisualisation
-              }}
             />
             <h3 className="mt-2 text-lg font-medium text-gray-600 truncate transition-all duration-500 ease-in-out">
               {media.title}
             </h3>
-
             <span className="block text-sm text-gray-600">
               {media.description}
             </span>
+            <p className="block text-sm text-gray-600">
+              {media.user.username}
+            </p>
           </div>
         ))}
       </div>

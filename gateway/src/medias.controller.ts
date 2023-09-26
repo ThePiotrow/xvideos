@@ -14,6 +14,7 @@ import {
   UploadedFile,
   Res,
   StreamableFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -33,10 +34,11 @@ import { UpdateMediaResponseDto } from './interfaces/media/dto/update-media-resp
 import { CreateMediaDto } from './interfaces/media/dto/create-media.dto';
 import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileFieldsInterceptor, FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { IServiceMediaSearchByIdResponse } from './interfaces/media/service-media-search-by-id-response.interface';
 import { GetMediaResponseDto } from './interfaces/media/dto/get-media-response.dto';
 import { Owner } from './decorators/owner.decorator';
+import { IMedia } from './interfaces/media/media.interface';
 
 @Controller('medias')
 @ApiBearerAuth()
@@ -96,7 +98,12 @@ export class MediasController {
 
   @Post()
   @Authorization()
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileFieldsInterceptor(
+    [
+      { name: 'media', maxCount: 1 },
+      { name: 'thumbnail', maxCount: 1 },
+    ],
+  ))
   @ApiConsumes('multipart/form-data')
   @ApiCreatedResponse({
     type: CreateMediaResponseDto,
@@ -104,16 +111,16 @@ export class MediasController {
   public async createMedia(
     @Req() request: IAuthorizedRequest,
     @Body() body: CreateMediaDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: { media?: Express.Multer.File[], thumbnail?: Express.Multer.File[] },
   ): Promise<CreateMediaResponseDto> {
     const { user } = request;
 
-    const media = Object.assign(
+    const media: IMedia = Object.assign(
       body,
       {
         user_id: user.id,
-        file: file,
-        data: file.buffer,
+        media: files.media[0],
+        thumbnail: files.thumbnail ? files.thumbnail[0] : null,
       }
     );
 
@@ -121,9 +128,7 @@ export class MediasController {
       await firstValueFrom(
         this.mediaServiceClient.send(
           'media_create',
-          {
-            ...media,
-          }
+          media
         ),
       );
 
