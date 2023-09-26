@@ -17,7 +17,6 @@ services:
             - live
             - token
             - mailer
-            - permission
             - user
 
     media:
@@ -65,18 +64,6 @@ services:
             - .env
         ports:
             - ${MAILER_SERVICE_PORT}:${MAILER_SERVICE_PORT}
-        networks:
-            - backend
-
-    permission:
-        build: ./permission
-        restart: always
-        volumes:
-          - ./permission:/var/www/permission
-        env_file:
-            - .env
-        ports:
-            - ${PERMISSION_SERVICE_PORT}:${PERMISSION_SERVICE_PORT}
         networks:
             - backend
 
