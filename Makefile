@@ -1,4 +1,4 @@
-DIRS := front gateway live mailer media permission token user  # List all directories
+DIRS := front gateway live mailer media token user  # List all directories
 
 .PHONY: all $(DIRS)
 

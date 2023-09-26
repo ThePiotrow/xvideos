@@ -4,17 +4,16 @@ import { ClientProxyFactory } from '@nestjs/microservices';
 
 import { UsersController } from './users.controller';
 import { MediasController } from './medias.controller';
+import { LivesController } from './lives.controller';
+import { AdminController } from './admin.controller';
 
 import { AuthGuard } from './services/guards/authorization.guard';
-import { PermissionGuard } from './services/guards/permission.guard';
-
-import { ConfigService } from './services/config/config.service';
-import { LivesController } from './lives.controller';
+import { AdminGuard } from './services/guards/admin.guard';
+import { OwnerGuard } from './services/guards/owner.guard';
 
 import { EventsGateway } from './events.gateway';
-import { AdminGuard } from './services/guards/admin.guard';
-import { AdminController } from './admin.controller';
-import { OwnerGuard } from './services/guards/owner.guard';
+
+import { ConfigService } from './services/config/config.service';
 
 @Module({
   imports: [],
@@ -52,21 +51,8 @@ import { OwnerGuard } from './services/guards/owner.guard';
       inject: [ConfigService],
     },
     {
-      provide: 'PERMISSION_SERVICE',
-      useFactory: (configService: ConfigService) => {
-        return ClientProxyFactory.create(
-          configService.get('permissionService'),
-        );
-      },
-      inject: [ConfigService],
-    },
-    {
       provide: APP_GUARD,
       useClass: AuthGuard,
-    },
-    {
-      provide: APP_GUARD,
-      useClass: PermissionGuard,
     },
     {
       provide: APP_GUARD,

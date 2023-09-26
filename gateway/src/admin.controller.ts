@@ -18,24 +18,12 @@ import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nest
 import { Authorization } from './decorators/authorization.decorator';
 import { IAuthorizedRequest } from './interfaces/common/authorized-request.interface';
 import { IServiceUserCreateResponse } from './interfaces/user/service-user-create-response.interface';
-import { IServiceUserSearchResponse } from './interfaces/user/service-user-search-response.interface';
 import { IServiveTokenCreateResponse } from './interfaces/token/service-token-create-response.interface';
-import { IServiceTokenDestroyResponse } from './interfaces/token/service-token-destroy-response.interface';
-import { IServiceUserConfirmResponse } from './interfaces/user/service-user-confirm-response.interface';
 import { IServiceUserGetByIdResponse } from './interfaces/user/service-user-get-by-id-response.interface';
 
 import { GetUserByTokenResponseDto } from './interfaces/user/dto/get-user-by-token-response.dto';
 import { CreateUserDto } from './interfaces/user/dto/create-user.dto';
 import { CreateUserResponseDto } from './interfaces/user/dto/create-user-response.dto';
-import { LoginUserDto } from './interfaces/user/dto/login-user.dto';
-import { LoginUserResponseDto } from './interfaces/user/dto/login-user-response.dto';
-import { LogoutUserResponseDto } from './interfaces/user/dto/logout-user-response.dto';
-import { ConfirmUserDto } from './interfaces/user/dto/confirm-user.dto';
-import { ConfirmUserResponseDto } from './interfaces/user/dto/confirm-user-response.dto';
-import { CheckUsernameAvailabilityResponseDto } from './interfaces/user/dto/check-username-availability-response.dto';
-import { CheckUsernameAvailabilityDto } from './interfaces/user/dto/check-username-availability.dto';
-import { IServiceUsernameUserCheckAvailabilityDtoResponse } from './interfaces/user/service-check-username-response.interface';
-import { GetUserByIdDto } from './interfaces/user/dto/get-user-by-id.dto';
 import { Admin } from './decorators/admin.decorator';
 import { UpdateUserResponseDto } from './interfaces/user/dto/update-user-response.dto';
 import { UpdateUserDto } from './interfaces/user/dto/update-user-by-id.dto';

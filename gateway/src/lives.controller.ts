@@ -16,7 +16,6 @@ import { ClientProxy } from '@nestjs/microservices';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 import { Authorization } from './decorators/authorization.decorator';
-import { Permission } from './decorators/permission.decorator';
 
 import { IAuthorizedRequest } from './interfaces/common/authorized-request.interface';
 import { IServiceLiveCreateResponse } from './interfaces/live/service-live-create-response-interface';
@@ -30,7 +29,6 @@ import { UpdateLiveResponseDto } from './interfaces/live/dto/update-live-respons
 import { CreateLiveDto } from './interfaces/live/dto/create-live.dto';
 import { UpdateLiveDto } from './interfaces/live/dto/update-live.dto';
 import { LiveIdDto } from './interfaces/live/dto/live-id.dto';
-import { Admin } from './decorators/admin.decorator';
 import { Owner } from './decorators/owner.decorator';
 
 @Controller('lives')
@@ -121,7 +119,6 @@ export class LivesController {
 
   @Post()
   @Authorization()
-  @Permission('live_create')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
   })
@@ -162,7 +159,6 @@ export class LivesController {
   @Post(':id/stop')
   @Authorization()
   @Owner('live')
-  @Permission('live_stop')
   @ApiCreatedResponse({
     type: CreateLiveResponseDto,
   })
@@ -202,7 +198,6 @@ export class LivesController {
   @Delete(':id')
   @Authorization()
   @Owner('live')
-  @Permission('live_delete_by_id')
   @ApiOkResponse({
     type: DeleteLiveResponseDto,
   })
@@ -241,7 +236,6 @@ export class LivesController {
   @Put(':id')
   @Authorization()
   @Owner('live')
-  @Permission('live_update_by_id')
   @ApiOkResponse({
     type: UpdateLiveResponseDto,
   })

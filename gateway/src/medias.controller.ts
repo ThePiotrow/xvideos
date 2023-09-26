@@ -18,10 +18,8 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
 import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
-import { Response } from 'express';
 
 import { Authorization } from './decorators/authorization.decorator';
-import { Permission } from './decorators/permission.decorator';
 
 import { IAuthorizedRequest } from './interfaces/common/authorized-request.interface';
 import { IServiceMediaCreateResponse } from './interfaces/media/service-media-create-response-interface';
@@ -36,7 +34,6 @@ import { CreateMediaDto } from './interfaces/media/dto/create-media.dto';
 import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { IMedia } from './interfaces/media/media.interface';
 import { IServiceMediaSearchByIdResponse } from './interfaces/media/service-media-search-by-id-response.interface';
 import { GetMediaResponseDto } from './interfaces/media/dto/get-media-response.dto';
 import { Owner } from './decorators/owner.decorator';
