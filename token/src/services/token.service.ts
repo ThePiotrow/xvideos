@@ -41,47 +41,78 @@ export class TokenService {
   }
 
   public async decodeToken(token: string) {
-    // const tokenModel = await this.tokenModel.find({
-    //   token,
-    // });
-    // let return null;
-
-    // if (tokenModel && tokenModel[0]) {
-    //   try {
-    //     const tokenData = this.jwtService.decode(tokenModel[0].token) as {
-    //       exp: number;
-    //       userId: any;
-    //     };
-    //     if (!tokenData || tokenData.exp <= Math.floor(+new Date() / 1000)) {
-    //       return null;
-    //     } else {
-    //       return {
-    //         userId: tokenData.userId,
-    //       };
-    //     }
-    //   } catch (e) {
-    //     return null;
-    //   }
-    // }
-    // return result;
     if (!token) {
       return null;
     }
-    token = token.replace("Bearer ", ""); // Suppression du préfixe
-    const tokenModel = await this.tokenModel.findOne({ token });
 
-    if (!tokenModel) return null;
+    token = token.replace("Bearer ", "");
+
+    let res: IToken = null;
+
+    const tokenModel = await this.tokenModel.aggregate([
+      {
+        $match: {
+          token: token,
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'user_id',
+          foreignField: '_id',
+          as: 'user',
+        }
+      },
+      {
+        $unwind: '$user'
+      },
+      {
+        $addFields: {
+          "user.id": { $toString: "$user._id" }
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          token: 1,
+          user: {
+            id: 1,
+            username: 1,
+            email: 1,
+            role: 1,
+          }
+        }
+      }
+    ]).exec();
+
+    if (tokenModel && tokenModel.length > 0)
+      res = tokenModel[0];
+
+
+    if (!res) return null;
 
     try {
-      const tokenData = this.jwtService.verify(tokenModel.token) as {
+      const tokenData = this.jwtService.verify(res.token) as {
         exp: number;
         username: string;
         userId: any;
       };
 
-      return {
+      if (tokenData.exp * 1000 < Date.now()) {
+        await this.tokenModel.deleteMany({
+          token: token,
+        });
+        return null;
+      }
+
+      console.log({
         userId: tokenData.userId,
-        username: tokenData.username,
+        remainingTime: tokenData.exp * 1000 - Date.now(),
+      })
+
+      return {
+        user: res.user,
+        remainingTime: tokenData.exp * 1000 - Date.now(),
       };
     } catch (e) {
       return null;

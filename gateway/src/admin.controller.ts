@@ -27,6 +27,9 @@ import { CreateUserResponseDto } from './interfaces/user/dto/create-user-respons
 import { Admin } from './decorators/admin.decorator';
 import { UpdateUserResponseDto } from './interfaces/user/dto/update-user-response.dto';
 import { UpdateUserDto } from './interfaces/user/dto/update-user-by-id.dto';
+import { GetMediaResponseDto } from './interfaces/media/dto/get-media-response.dto';
+import { IServiceMediaSearchByIdResponse } from './interfaces/media/service-media-search-by-id-response.interface';
+import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
 
 @Controller('admin')
 @ApiBearerAuth()
@@ -213,6 +216,34 @@ export class AdminController {
       data: {
         user: confirmUserResponse.user
       },
+    };
+  }
+
+  @Get('medias/:id')
+  @Authorization()
+  @Admin()
+  @ApiOkResponse({
+    type: GetMediaResponseDto,
+  })
+  public async getMediaById(
+    @Param() params: MediaIdDto,
+  ): Promise<GetMediaResponseDto> {
+    const mediasResponse: IServiceMediaSearchByIdResponse =
+      await firstValueFrom(
+        this.mediaServiceClient.send('media_search_by_id',
+          {
+            id: params.id,
+            all: true
+          }
+        ),
+      );
+
+    return {
+      message: mediasResponse.message,
+      data: {
+        media: mediasResponse.media,
+      },
+      errors: null,
     };
   }
 }

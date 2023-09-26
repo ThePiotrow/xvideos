@@ -46,28 +46,6 @@ export class MediasController {
     @Inject('MEDIA_SERVICE') private readonly mediaServiceClient: ClientProxy,
   ) { }
 
-  @Get('/user/:id')
-  @ApiOkResponse({
-    type: GetMediasResponseDto,
-  })
-  public async getMediasByUser(
-    @Param() params: MediaIdDto,
-  ): Promise<GetMediasResponseDto> {
-
-    const mediasResponse: IServiceMediaSearchByUserIdResponse =
-      await firstValueFrom(
-        this.mediaServiceClient.send('media_search_by_user_id', params.id),
-      );
-
-    return {
-      message: mediasResponse.message,
-      data: {
-        medias: mediasResponse.medias,
-      },
-      errors: null,
-    };
-  }
-
   @Get('/:id')
   @ApiOkResponse({
     type: GetMediaResponseDto,
@@ -77,7 +55,7 @@ export class MediasController {
   ): Promise<GetMediaResponseDto> {
     const mediasResponse: IServiceMediaSearchByIdResponse =
       await firstValueFrom(
-        this.mediaServiceClient.send('media_search_by_id', params.id),
+        this.mediaServiceClient.send('media_search_by_id', { id: params.id }),
       );
 
     return {
@@ -94,12 +72,14 @@ export class MediasController {
     type: GetMediasResponseDto,
   })
   public async getMedias(
-    @Body() body: { limit?: number; offset?: number },
+    @Body() body: { all?: boolean; isDeleted: boolean; limit?: number; offset?: number },
   ): Promise<GetMediasResponseDto> {
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all', {
+          all: body.all,
+          isDeleted: body.isDeleted,
           limit: body.limit,
           offset: body.offset,
         }),

@@ -19,6 +19,7 @@ export class UserService {
   async searchUser(data: { username?: string, email?: string, is_confirmed?: boolean }): Promise<IUser[] | null> {
     return this.userModel.find(data).exec();
   }
+
   async searchUserById({ id, all, isDeleted, withMedias }: { id: string, all?: boolean, isDeleted?: boolean, withMedias?: boolean }): Promise<IUser> {
 
     const match = (all ?? false) ?
@@ -55,12 +56,23 @@ export class UserService {
 
       pipeline.push({
         $addFields: {
-          "medias.id": "$medias._id"
-        }
-      });
-      pipeline.push({
-        $project: {
-          "medias._id": 0
+          medias: {
+            $map: {
+              input: "$medias",
+              as: "media",
+              in: {
+                id: "$$media._id",
+                title: "$$media.title",
+                description: "$$media.description",
+                path: "$$media.path",
+                thumbnail: "$$media.thumbnail",
+                isDeleted: "$$media.isDeleted",
+                deletedAt: "$$media.deletedAt",
+                updated_at: "$$media.updated_at",
+                created_at: "$$media.created_at"
+              }
+            }
+          }
         }
       });
     }
@@ -94,6 +106,7 @@ export class UserService {
       return null;
     }
   }
+
 
   async updateUserById(
     id: string,

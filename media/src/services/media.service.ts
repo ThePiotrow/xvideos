@@ -252,10 +252,10 @@ export class MediaService {
           isDeleted: 1,
           deletedAt: 1,
           user: {
+            id: 1,
             username: 1,
             email: 1,
             role: 1,
-            id: 1
           }
         }
       },

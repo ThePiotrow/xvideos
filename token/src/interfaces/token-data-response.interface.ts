@@ -1,5 +1,12 @@
 export interface ITokenDataResponse {
   status: number;
   message: string;
-  data: { userId: string, username: string } | null;
+  data: {
+    user: {
+      username: string;
+      email: string;
+      role: string;
+      id: string;
+    } | null;
+  }
 }

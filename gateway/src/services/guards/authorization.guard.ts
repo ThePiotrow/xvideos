@@ -44,7 +44,7 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    token = request.headers.authorization.split('Bearer ')[1];
+    token = request.headers.authorization;
 
     if (!token) {
       throw new HttpException(
@@ -75,24 +75,20 @@ export class AuthGuard implements CanActivate {
       );
     }
 
-    const userInfo = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', { id: userTokenInfo.data.userId }),
-    );
-
-    if (!userInfo || !userInfo.user) {
+    if (!userTokenInfo.data || !userTokenInfo.data.user) {
       throw new HttpException(
         {
-          message: userInfo.message,
+          message: userTokenInfo.message,
           data: null,
           errors: null,
         },
-        userInfo.status,
+        userTokenInfo.status,
       );
     }
 
     const user = {
-      ...userInfo.user,
-      id: userInfo.user.id,
+      ...userTokenInfo.data.user,
+      id: userTokenInfo.data.user.id,
     }
 
     request.user = user;

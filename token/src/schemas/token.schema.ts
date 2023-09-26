@@ -2,21 +2,18 @@ import * as mongoose from 'mongoose';
 
 function transformValue(doc, ret: { [key: string]: any }) {
   delete ret._id;
+  delete ret.__v;
 }
 
 export const TokenSchema = new mongoose.Schema(
   {
-    user_id: {
-      type: String,
-      required: [true, 'User can not be empty'],
-    },
-    username: {
-      type: String,
-      required: [true, 'Username can not be empty'],
-    },
     token: {
       type: String,
       required: [true, 'Token can not be empty'],
+    },
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: [true, 'User can not be empty'],
     },
   },
   {
