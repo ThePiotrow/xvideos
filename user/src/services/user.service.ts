@@ -64,6 +64,7 @@ export class UserService {
                 id: "$$media._id",
                 title: "$$media.title",
                 description: "$$media.description",
+                duration: "$$media.duration",
                 thumbnail: "$$media.urls.thumbnail",
                 type: "$$media.type",
                 isDeleted: "$$media.isDeleted",

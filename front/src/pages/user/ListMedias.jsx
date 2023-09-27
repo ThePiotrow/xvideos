@@ -36,7 +36,7 @@ function ListMedias() {
 
   const fetchMedias = () => {
     if (!user) return;
-    API.get(`/users/${user.id}`, {
+    API.get(`/users/${user.id}/medias`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((response) => {
@@ -111,7 +111,7 @@ function ListMedias() {
                       scope="col"
                       className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Taille du fichier
+                      Durée
                     </th>
 
                     <th
@@ -153,7 +153,7 @@ function ListMedias() {
 
                           <div className="flex items-center gap-x-2">
                             <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
-                              <MediaIcon path={media.path} />
+                              <MediaIcon type={media.type} />
                             </div>
 
                             <div>
@@ -161,14 +161,14 @@ function ListMedias() {
                                 {media.title}
                               </h2>
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                720 MB
+                                {media.description ? media.description.split(" ").splice(0, 5).join(" ") + "..." : "N/A"}
                               </p>
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
-                        720 MB
+                        {media.duration ? formatDuration(media.duration) : "N/A"}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}

@@ -40,9 +40,11 @@ export const VideoJS = ({ hls, thumbnail }) => {
   };
 
   return (
-    <div className="relative rounded-xl overflow-hidden">
-      <video ref={videoRef} controls poster={thumbnail} width="100%" height="100%" crossOrigin='anonymous' />
+    <>
+      <div className="relative rounded-xl overflow-hidden">
+        <video ref={videoRef} controls poster={thumbnail} width="100%" height="100%" crossOrigin='anonymous' />
 
+      </div>
       <div className="quality-controls">
         {levels.map((level, index) => (
           <button
@@ -54,6 +56,6 @@ export const VideoJS = ({ hls, thumbnail }) => {
           </button>
         ))}
       </div>
-    </div>
+    </>
   );
 }
