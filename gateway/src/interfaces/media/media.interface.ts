@@ -13,36 +13,7 @@ export interface IMedia {
   urls?: {
     original: string;
     thumbnail?: string;
-    '1080'?: {
-      url: string;
-      mimetype: string;
-      available: boolean;
-    }
-    '720'?: {
-      url: string;
-      mimetype: string;
-      available: boolean;
-    }
-    '480'?: {
-      url: string;
-      mimetype: string;
-      available: boolean;
-    }
-    '360'?: {
-      url: string;
-      mimetype: string;
-      available: boolean;
-    }
-    '240'?: {
-      url: string;
-      mimetype: string;
-      available: boolean;
-    }
-    '144'?: {
-      url: string;
-      mimetype: string;
-      available: boolean;
-    }
+    hls?: string;
   };
   type?: 'image' | 'video';
   duration?: number;

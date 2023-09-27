@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import API from "../../api";
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
 import { VideoJS } from "../../components/VideoJS";
 
 function MediaViewer() {
@@ -23,10 +21,16 @@ function MediaViewer() {
       });
   }, [id]);
 
-  const handlePlayerReady = (player) => {
-    // Handle player events here if necessary
-    player.on('waiting', () => videojs.log('player is waiting'));
-    player.on('dispose', () => videojs.log('player will dispose'));
+  const handlePlayerReady = () => {
+    const player = playerRef.current;
+    if (player && player.getInternalPlayer) {
+      const internalPlayer = player.getInternalPlayer();
+
+      if (internalPlayer && internalPlayer.on) {
+        internalPlayer.on('waiting', () => console.log('player is waiting'));
+        internalPlayer.on('dispose', () => console.log('player will dispose'));
+      }
+    }
   };
 
   window.HELP_IMPROVE_VIDEOJS = false;
@@ -36,11 +40,11 @@ function MediaViewer() {
       {media ? (
         <div className="block px-4 py-2 z-50 max-w-7xl">
           {media.type === 'video' ? (
-            <VideoJS media={media} onReady={handlePlayerReady} />
+            <VideoJS hls={media.urls.hls} thumbnail={media.urls.thumbnail} />
           ) : media.type === 'image' ? (
             <img
               className="w-full rounded-lg"
-              src={media.path}
+              src={media.urls.original}
               alt={media.title}
             />
           ) : (

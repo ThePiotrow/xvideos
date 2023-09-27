@@ -8,6 +8,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    if (!token) return;
     API.get("/users", {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -16,7 +17,7 @@ export const AuthProvider = ({ children }) => {
       .then((response) => {
         setUser(response.data.user);
       })
-      .catch((error) => console.error(error));
+      .catch((error) => { localStorage.removeItem("token") });
   }, [token]);
 
   return (

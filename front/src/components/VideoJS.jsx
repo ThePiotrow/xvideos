@@ -1,54 +1,59 @@
-import React from 'react';
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
+import React, { useState, useEffect, useRef } from 'react';
+import Hls from 'hls.js';
 
-export const VideoJS = ({ media, onReady }) => {
-  const videoRef = React.useRef(null);
-  const playerRef = React.useRef(null);
+export const VideoJS = ({ hls, thumbnail }) => {
+  const [levels, setLevels] = useState([]);
+  const [currentLevel, setCurrentLevel] = useState(-1); // -1 pour auto
+  const videoRef = useRef(null);
 
-  const options = {
-    autoplay: true,
-    controls: true,
-    responsive: true,
-    fluid: true,
+  useEffect(() => {
+    if (Hls.isSupported()) {
+      const hlsPlayer = new Hls();
+      hlsPlayer.loadSource(hls);
+      hlsPlayer.attachMedia(videoRef.current);
 
-    sources: Object.keys(media.urls).map(resolution => ({
-      src: media.urls[resolution],
-      type: 'video/mp4'
-    }))
-  };
-
-  React.useEffect(() => {
-    if (!playerRef.current) {
-      const videoElement = document.createElement("video-js");
-      videoElement.classList.add('vjs-big-play-centered');
-      videoRef.current.appendChild(videoElement);
-
-      const player = playerRef.current = videojs(videoElement, options, () => {
-        videojs.log('player is ready');
-        onReady && onReady(player);
+      hlsPlayer.on(Hls.Events.MANIFEST_PARSED, function (event, data) {
+        // Récupérer les niveaux de qualité
+        setLevels(hlsPlayer.levels);
       });
 
-    } else {
-      const player = playerRef.current;
-      player.autoplay(options.autoplay);
-      player.src(options.sources);
-    }
-  }, [options, videoRef]);
+      hlsPlayer.on(Hls.Events.LEVEL_SWITCHED, function (event, data) {
+        setCurrentLevel(data.level);
+      });
 
-  React.useEffect(() => {
-    const player = playerRef.current;
-    return () => {
-      if (player && !player.isDisposed()) {
-        player.dispose();
-        playerRef.current = null;
-      }
-    };
-  }, [playerRef]);
+      videoRef.current.hls = hlsPlayer; // store the hls instance on the videoRef
+
+      console.log(hlsPlayer)
+      console.log(videoRef.current)
+
+      return () => {
+        hlsPlayer.destroy();
+        videoRef.current.hls = null; // clean up the reference
+      };
+    }
+  }, [hls]);
+
+
+  const handleQualityChange = (levelIndex) => {
+    const hlsPlayer = videoRef.current.hls;
+    hlsPlayer.currentLevel = levelIndex;
+  };
 
   return (
-    <div data-vjs-player>
-      <div ref={videoRef} />
+    <div className="relative rounded-xl overflow-hidden">
+      <video ref={videoRef} controls poster={thumbnail} width="100%" height="100%" crossOrigin='anonymous' />
+
+      <div className="quality-controls">
+        {levels.map((level, index) => (
+          <button
+            key={index}
+            className={`quality-btn ${currentLevel === index ? 'active' : ''}`}
+            onClick={() => handleQualityChange(index)}
+          >
+            {level.height}p
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

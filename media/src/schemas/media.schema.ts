@@ -22,96 +22,10 @@ export const MediaSchema = new mongoose.Schema(
         type: String,
         required: false
       },
-      '1080': [{
-        url: {
-          type: String,
-          required: false
-        },
-        mimetype: {
-          type: String,
-          required: false
-        },
-        available: {
-          type: Boolean,
-          required: false,
-          default: false
-        }
-      }],
-      '720': [{
-        url: {
-          type: String,
-          required: false
-        },
-        mimetype: {
-          type: String,
-          required: false
-        },
-        available: {
-          type: Boolean,
-          required: false,
-          default: false
-        }
-      }],
-      '480': [{
-        url: {
-          type: String,
-          required: false
-        },
-        mimetype: {
-          type: String,
-          required: false
-        },
-        available: {
-          type: Boolean,
-          required: false,
-          default: false
-        }
-      }],
-      '360': [{
-        url: {
-          type: String,
-          required: false
-        },
-        mimetype: {
-          type: String,
-          required: false
-        },
-        available: {
-          type: Boolean,
-          required: false,
-          default: false
-        }
-      }],
-      '240': [{
-        url: {
-          type: String,
-          required: false
-        },
-        mimetype: {
-          type: String,
-          required: false
-        },
-        available: {
-          type: Boolean,
-          required: false,
-          default: false
-        }
-      }],
-      '144': [{
-        url: {
-          type: String,
-          required: false
-        },
-        mimetype: {
-          type: String,
-          required: false
-        },
-        available: {
-          type: Boolean,
-          required: false,
-          default: false
-        }
-      }],
+      hls: {
+        type: String,
+        required: false
+      }
     },
     type: {
       type: String,
