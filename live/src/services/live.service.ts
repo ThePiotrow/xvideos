@@ -24,16 +24,57 @@ export class LiveService {
     );
   }
 
-  public async getAllLives({ limit, offset }: { limit: number, offset: number }) {
-    return this.liveModel.find(
+  public async getAllLives({ limit, offset }: { limit: number, offset: number }): Promise<ILive[]> {
+    const result = this.liveModel.aggregate([
       {
-        end_time: null
-      }
-    )
-      .sort({ created_at: -1 })
-      .skip(offset)
-      .limit(limit)
-      .exec();
+        $match: {
+          end_time: null,
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user_id",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: "$user",
+      },
+      {
+        $addFields: {
+          id: "$_id",
+          "user.id": "$user._id",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          title: 1,
+          start_time: 1,
+          created_at: 1,
+          user: {
+            id: 1,
+            username: 1,
+            email: 1,
+            role: 1,
+          },
+        },
+      },
+      {
+        $sort: { created_at: -1 },
+      },
+      {
+        $skip: offset,
+      },
+      {
+        $limit: limit,
+      },
+    ]).exec();
+
+    return result;
   }
 
   public async createLive(liveBody: ILive): Promise<ILive> {

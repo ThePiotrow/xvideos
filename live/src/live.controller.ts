@@ -25,8 +25,8 @@ export class LiveController {
 
     try {
       const lives = await this.liveService.getAllLives({
-        limit: 0 ?? params.limit,
-        offset: 0 ?? params.offset,
+        limit: params.limit ?? 10,
+        offset: params.offset ?? 0,
       })
 
       return {
