@@ -40,9 +40,6 @@ function Home() {
           <h3 className="mt-2 text-lg font-medium text-gray-600 truncate transition-all duration-500 ease-in-out">
             {media.title}
           </h3>
-          <span className="block text-sm text-gray-600">
-            {media.description}
-          </span>
           <p className="block text-sm text-gray-600">
             {media.user.username}
           </p>

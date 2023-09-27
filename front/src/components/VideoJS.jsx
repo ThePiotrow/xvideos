@@ -81,7 +81,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
   }, []);
 
   useEffect(() => {
-    if (Hls.isSupported()) {
+    if (Hls.isSupported() && hls) {
       const hlsPlayer = new Hls();
       hlsPlayer.loadSource(hls);
       hlsPlayer.attachMedia(videoRef.current);
@@ -109,14 +109,17 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
           }
         }
       });
-
       videoRef.current.hls = hlsPlayer;
+
 
       toggleControlsVisibility(true);
 
       return () => {
         hlsPlayer.destroy();
-        videoRef.current.hls = null;
+        if (videoRef.current) {
+          videoRef.current.hls = null;
+        }
+
       };
     }
   }, [hls]);
@@ -136,6 +139,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
   const handleQualityChange = (e, levelIndex) => {
     e.preventDefault();
     e.stopPropagation();
+    console.log(videoRef.current.hls)
     if (!videoRef.current || !videoRef.current.hls) {
       console.error("HLS player not available");
       return;
@@ -242,7 +246,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
   return (
     <div
       ref={videoContainerRef}
-      className="relative rounded-xl overflow-hidden aspect-video bg-black"
+      className="relative rounded-xl overflow-hidden aspect-video bg-black shadow-2xl"
       onClick={(e) => {
         togglePlay(e);
         toggleControlsVisibility(true);  // Show controls when video is clicked
@@ -254,9 +258,8 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
     >
       <video ref={videoRef} poster={thumbnail} width="100%" height="100%" crossOrigin='anonymous' className='aspect-video z-10' />
 
-      <div className={[styles.fadeEffect, `video-controls z-50 absolute bottom-0 right-0 left-0 w-full p-3 flex flex-col group bg-gradient-to-t from-black/80 pt-24 duration-500 ${isControlsVisible ?
-        'visible opacity-100' : 'opacity-0 bottom-[-50px]'}`
-      ]}>
+      <div className={`video-controls z-50 absolute bottom-0 right-0 left-0 w-full p-3 flex flex-col group bg-gradient-to-t from-black/80 pt-24 duration-500 ${isControlsVisible ?
+        'visible opacity-100' : 'opacity-0 bottom-[-50px]'} ${styles.fadeEffect}`}>
         <div className={styles.progressBarPlayerContainerParent}>
           <div className={styles.progressBarPlayerContainer}
             onClick={(e) => handleProgressClick(e)}
@@ -312,7 +315,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
                     <li key={index}>
                       <button onClick={
                         (e) => handleQualityChange(e, index)
-                      } className={`flex items-center justify-center gap-1 backdrop-blur-xl bg-slate-500/10 w-20 h-10 text-sm text-center p-0 outline-none border-none focus:outline-none focus:border-none ${currentLevel === index ? 'bg-slate-500/20' : ''}`
+                      } className={`z-50 flex items-center justify-center gap-1 backdrop-blur-xl bg-slate-500/10 w-20 h-10 text-sm text-center p-0 outline-none border-none focus:outline-none focus:border-none ${currentLevel === index ? 'bg-slate-500/20' : ''}`
                       }>
                         <span className="text-[8px]">
                           {currentLevel === index &&
@@ -326,7 +329,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
                   <li>
                     <button onClick={
                       (e) => handleQualityChange(e, -1)
-                    } className={`flex items-center justify-center gap-1 backdrop-blur-xl bg-slate-500/10 w-20 h-10 text-sm text-center p-0 outline-none border-none focus:outline-none focus:border-none ${currentLevel === -1 ? 'bg-slate-500/20' : ''}`
+                    } className={`z-50 flex items-center justify-center gap-1 backdrop-blur-xl bg-slate-500/10 w-20 h-10 text-sm text-center p-0 outline-none border-none focus:outline-none focus:border-none ${currentLevel === -1 ? 'bg-slate-500/20' : ''}`
                     }>
                       <span className="text-[8px]">
                         {currentLevel === -1 &&
@@ -353,9 +356,11 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
           </div>
         </div>
       </div>
-
-      <div className={!isPlaying ? 'absolute top-0 right-0 bottom-0 left-0 bg-slate-900/30 backdrop-blur-md' : 'hidden'} onClick={togglePlay}>
-        <div className='absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2'>
+      <div className={
+        `absolute inset-0 z-30 flex items-center justify-center backdrop-blur-xl ${isPlaying ? `opacity-0 bottom-[-50px]'}` : 'visible opacity-100  cursor-pointer duration-300'} ${styles.fadeEffect} `
+      }
+        onClick={togglePlay}>
+        <div className='absolute top-1/2 left-1/2 mt-[-30px] transform -translate-x-1/2 -translate-y-1/2 '>
           <FontAwesomeIcon icon={['fa', 'play']} className='text-white text-6xl' />
         </div>
       </div>

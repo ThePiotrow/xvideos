@@ -38,7 +38,7 @@ function MediaViewer() {
   return (
     <div>
       {media ? (
-        <div className="block px-4 py-2 z-50 max-w-7xl">
+        <>
           {media.type === 'video' ? (
             <VideoJS hls={media.urls.hls} thumbnail={media.urls.thumbnail} duration={media.duration} />
           ) : media.type === 'image' ? (
@@ -57,7 +57,7 @@ function MediaViewer() {
             <p className="mt-4 text-gray-600">Publié par : {media.user.username}</p>
           )}
           <p className="mt-2 text-gray-500">{media.description}</p>
-        </div>
+        </>
       ) : (
         <p>Chargement...</p>
       )

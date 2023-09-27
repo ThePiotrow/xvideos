@@ -7,11 +7,11 @@ import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./contexts/authContext";
 import { Container } from "./components/Container";
 import { library } from '@fortawesome/fontawesome-svg-core';
-import { faPlay, faPause, faGear, faExpand, faCompress, faVolumeUp, faCheck, faCircle } from '@fortawesome/free-solid-svg-icons';
+import { faPlay, faPause, faGear, faExpand, faCompress, faVolumeUp, faCheck, faCircle, faPowerOff, faVideo } from '@fortawesome/free-solid-svg-icons';
 
 function App() {
 
-  library.add(faPlay, faPause, faGear, faExpand, faCompress, faVolumeUp, faCheck, faCircle);
+  library.add(faPlay, faPause, faGear, faExpand, faCompress, faVolumeUp, faCheck, faCircle, faPowerOff, faVideo);
   return (
     <AuthProvider>
       <BrowserRouter>
