@@ -367,6 +367,9 @@ export class MediaService {
 
     const result = await this.mediaModel.aggregate([
       {
+        $match: match
+      },
+      {
         $lookup: {
           from: "users",
           localField: "user_id",
@@ -403,6 +406,17 @@ export class MediaService {
             id: 1
           }
         }
+      },
+      {
+        $sort: {
+          created_at: -1
+        }
+      },
+      {
+        $skip: offset
+      },
+      {
+        $limit: limit
       }
     ]).exec();
 

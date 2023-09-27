@@ -36,11 +36,11 @@ function MediaViewer() {
   window.HELP_IMPROVE_VIDEOJS = false;
 
   return (
-    <div className="ml-20">
+    <div>
       {media ? (
         <div className="block px-4 py-2 z-50 max-w-7xl">
           {media.type === 'video' ? (
-            <VideoJS hls={media.urls.hls} thumbnail={media.urls.thumbnail} />
+            <VideoJS hls={media.urls.hls} thumbnail={media.urls.thumbnail} duration={media.duration} />
           ) : media.type === 'image' ? (
             <img
               className="w-full rounded-lg"

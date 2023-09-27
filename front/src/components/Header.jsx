@@ -27,14 +27,14 @@ export default function Header() {
   };
 
   return (
-    <header>
+    <header className="w-full">
       <nav
         x-data="{ isOpen: false }"
         className="relative bg-white dark:bg-gray-800 transparent"
       >
-        <div className="container px-6 py-4 mx-auto">
+        <div className="container py-4 mx-auto">
           <div className="lg:flex lg:items-center lg:justify-between">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between lg:hidden">
               <div className="flex lg:hidden">
                 <button
                   x-cloak="true"
@@ -80,9 +80,9 @@ export default function Header() {
             <div
               x-cloak="true"
               className={
-                isOpen
-                  ? "translate-x-0 opacity-100 absolute inset-x-0 z-20 w-full px-6 py-4 transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:bg-transparent lg:w-auto lg:opacity-100 lg:translate-x-0 lg:flex lg:items-center"
-                  : "opacity-0 -translate-x-full absolute inset-x-0 z-20 w-full px-6 py-4 transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:bg-transparent lg:w-auto lg:opacity-100 lg:translate-x-0 lg:flex lg:items-center"
+                [isOpen
+                  ? "translate-x-0 opacity-100"
+                  : "opacity-0 -translate-x-full", "flex-grow absolute inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:bg-transparent lg:w-auto lg:opacity-100 lg:translate-x-0 lg:flex lg:items-center"]
               }
             >
               <div className="flex flex-col -mx-6 lg:flex-row lg:items-center lg:mx-8">

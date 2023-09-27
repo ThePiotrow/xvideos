@@ -17,79 +17,82 @@ function AppRoutes() {
   const token = localStorage.getItem("token");
 
   return (
-    <Routes>
-      <Route exact path="/" element={<Home />} />
-      <Route path="/signup" element={<SignUp />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/live" element={<Live />} />
-      <Route path="/media/:id" element={<MediaViewer />} />
+    <div className="mt-8">
 
-      {/* IS AUTHENTICATED */}
+      <Routes>
+        <Route exact path="/" element={<Home />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/live" element={<Live />} />
+        <Route path="/media/:id" element={<MediaViewer />} />
 
-      {/* MEDIAS */}
-      <Route
-        path="/medias"
-        element={
-          <AuthGuard>
-            <ListMedias />
-          </AuthGuard>
-        }
-      />
-      <Route
-        path="/medias/edit"
-        element={
-          <AuthGuard>
-            <ListMedias />
-          </AuthGuard>
-        }
-      />
-      <Route
-        path="/medias/create"
-        element={
-          <AuthGuard>
-            <CreateMedias />
-          </AuthGuard>
-        }
-      />
+        {/* IS AUTHENTICATED */}
 
-      {/* LIVES */}
-      <Route
-        path="/lives/launch"
-        element={
-          <AuthGuard>
-            <LaunchLive />
-          </AuthGuard>
-        }
-      />
+        {/* MEDIAS */}
+        <Route
+          path="/medias"
+          element={
+            <AuthGuard>
+              <ListMedias />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/medias/edit"
+          element={
+            <AuthGuard>
+              <ListMedias />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/medias/create"
+          element={
+            <AuthGuard>
+              <CreateMedias />
+            </AuthGuard>
+          }
+        />
 
-      {/* PROFILE USER */}
-      <Route
-        path="/profile"
-        element={
-          <AuthGuard>
-            <Profile />
-          </AuthGuard>
-        }
-      />
+        {/* LIVES */}
+        <Route
+          path="/lives/launch"
+          element={
+            <AuthGuard>
+              <LaunchLive />
+            </AuthGuard>
+          }
+        />
 
-      {/* IS AUTHENTICATED && IS ADMIN */}
-      <Route
-        path="/admin"
-        element={
-          <AuthGuard>
-            <HomePage />
-          </AuthGuard>
-        }
-      />
-      <Route
-        path="/admin/users"
-        element={
-          <AuthGuard>
-            <Users />
-          </AuthGuard>
-        }
-      />
-    </Routes>
+        {/* PROFILE USER */}
+        <Route
+          path="/profile"
+          element={
+            <AuthGuard>
+              <Profile />
+            </AuthGuard>
+          }
+        />
+
+        {/* IS AUTHENTICATED && IS ADMIN */}
+        <Route
+          path="/admin"
+          element={
+            <AuthGuard>
+              <HomePage />
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/users"
+          element={
+            <AuthGuard>
+              <Users />
+            </AuthGuard>
+          }
+        />
+      </Routes>
+    </div>
   );
 }
 
