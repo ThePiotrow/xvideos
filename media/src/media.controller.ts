@@ -97,7 +97,6 @@ export class MediaController {
           };
         }
       } catch (e) {
-        console.log('e', e)
         return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: '⚠️ Media update failed',
@@ -192,9 +191,6 @@ export class MediaController {
 
         const media = await this.mediaService.createMedia(body);
 
-        console.log('media', media);
-        console.log('body', body);
-
         return {
           status: HttpStatus.CREATED,
           message: '✅ Media created',
@@ -230,7 +226,7 @@ export class MediaController {
     }
   ): Promise<IMediaSearchByUserResponse> {
     try {
-      const medias = await this.mediaService.getAllMedias({ all: params.all ?? false, isDeleted: params.isDeleted ?? false, limit: params.limit ?? 10, offset: params.offset ?? 0 });
+      const medias = await this.mediaService.getAllMedias({ all: params.all ?? false, isDeleted: params.isDeleted ?? false, limit: params.limit ?? 20, offset: params.offset ?? 0 });
       return {
         status: HttpStatus.OK,
         message: '✅ Medias found',

@@ -5,14 +5,11 @@ import API from "../api";
 import useToken from "../hooks/useToken";
 import { useAuth } from "../contexts/authContext";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFaceSmile, faFilm, faPowerOff, faVideo } from "@fortawesome/free-solid-svg-icons";
+import { faArrowLeft, faFaceSmile, faFilm, faPowerOff, faVideo, faXmark } from "@fortawesome/free-solid-svg-icons";
 
-export default function Header() {
+export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDropdown }) {
   const navigate = useNavigate();
-  const { user, setUser, token } = useAuth();
-  const hasToken = localStorage.getItem("token");
-  const [isOpen, setIsOpen] = useState(false);
-  const [isOpenDropdown, setIsOpenDropdown] = useState(false);
+  const { user, setUser, token, setToken } = useAuth();
 
   const location = useLocation();
 
@@ -23,18 +20,20 @@ export default function Header() {
       },
     })
       .then(() => {
-        localStorage.removeItem("token");
+        setToken(null);
         setUser(null);
         navigate("/login");
       })
       .catch((error) => console.error(error));
   };
 
-  document.addEventListener("click", (e) => {
-    if (isOpenDropdown && !e.target.closest(".relative")) {
-      setIsOpenDropdown(false);
-    }
-  });
+
+
+  //On navigate, set isOpen and isOpenDropdown to false
+  useEffect(() => {
+    setIsOpen(false);
+    setIsOpenDropdown(false);
+  }, [location])
 
   return (
     <header className="w-full z-[100] pt-3">
@@ -50,7 +49,7 @@ export default function Header() {
                   x-cloak="true"
                   onClick={() => setIsOpen(!isOpen)}
                   type="button"
-                  className="text-gray-500 dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 focus:outline-none focus:text-gray-600 dark:focus:text-gray-400"
+                  className="text-slate-500 dark:text-slate-200 hover:text-slate-600 dark:hover:text-slate-400 focus:outline-none focus:text-slate-600 dark:focus:text-slate-400"
                   aria-label="toggle menu"
                 >
                   <svg
@@ -91,28 +90,37 @@ export default function Header() {
               x-cloak="true"
               className={
                 `${isOpen
-                  ? "translate-x-0 opacity-100"
-                  : "opacity-0 -translate-x-full"} justify-between flex-grow absolute inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-white dark:bg-gray-800 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:bg-transparent lg:w-auto lg:opacity-100 lg:translate-x-0 lg:flex lg:items-center`
+                  ? "translate-y-0 opacity-100"
+                  : "opacity-0 -translate-y-full"}  absolute overflow-y-auto lg:overflow-visible justify-between flex-grow h-screen lg:h-fit top-0 left-0 right-0 inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-slate-900 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:w-auto lg:opacity-100 lg:translate-y-0 lg:flex lg:items-center`
               }
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                <Link
-                  to="/"
-                  className={`px-4 py-3 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100 ${location.pathname === '/' ? 'bg-slate-100 text-slate-900 active' : ''}`}
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(!isOpen)}
+                  className="lg:hidden self-start"
                 >
-                  Accueil
+                  <FontAwesomeIcon icon={faXmark} className="text-2xl" />
+                </button>
+                <Link
+                  onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                  to="/"
+                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname === '/' ? 'bg-slate-50 text-slate-900 hover:text-slate-900 active' : 'bg-slate-800'}`}
+                >
+                  Vidéos
                 </Link>
                 <Link
+                  onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
                   to="/live"
-                  className={`px-4 py-3 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100 ${location.pathname === '/live' ? 'bg-slate-100 text-slate-900 active' : ''}`}
+                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname === '/live' ? 'bg-slate-50 text-slate-900 hover:text-slate-900 active' : 'bg-slate-800'}`}
                 >
-                  Live
+                  Lives
                 </Link>
 
                 <div className="relative mt-4 lg:mt-0 lg:mx-4">
                   <span className="absolute inset-y-0 left-0 flex items-center pl-3">
                     <svg
-                      className="w-4 h-4 text-gray-600"
+                      className="w-4 h-4 text-slate-600"
                       viewBox="0 0 24 24"
                       fill="none"
                     >
@@ -128,31 +136,48 @@ export default function Header() {
 
                   <input
                     type="text"
-                    className="w-full py-1 pl-10 pr-4 text-gray-200 placeholder-gray-200 border-b border-gray-200 bg-transparent lg:w-56 lg:border-transparent focus:outline-none focus:border-gray-200"
+                    className="w-full py-1 pl-10 pr-4 text-slate-200 placeholder-slate-200 border-b border-slate-200 bg-transparent lg:w-56 lg:border-transparent focus:outline-none focus:border-slate-200"
                     placeholder="Search"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-center mt-6 lg:flex lg:mt-0">
+              <div className={`flex lg:justify-center mt-10 lg:flex lg:mt-0 
+              ${isOpen ?
+                  'justify-end' :
+                  ''}`}>
                 {user ? (
-                  <div className="flex items-center mt-4 lg:mt-0 relative">
+                  <div className="flex items-center mt-4 lg:mt-0 relative flex-grow justify-end w-full">
                     <button
-                      onClick={() => setIsOpenDropdown(!isOpenDropdown)}
-                      className={`z-[100] border-none overflow-hidden w-fit max-w-[450px] outline-none focus:outline-none focus:border-none px-4 py-3 text-slate-100 bg-slate-900 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100 cursor-pointer font-bold ${isOpenDropdown ? "bg-slate-100 text-slate-900 active" : ""}`}
+                      onClick={() => { setIsOpenDropdown(!isOpenDropdown) }}
+                      className={`
+                      z-[100] border-none overflow-hidden w-fit max-w-[450px] outline-none 
+                      focus:outline-none focus:border-none px-4 py-4 lg:py-2 text-slate-100 
+                      transition-colors duration-300 transform rounded-md lg:mt-0 
+                      [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100 
+                      cursor-pointer font-bold me-5 lg:me-0 
+                      ${isOpenDropdown
+                          ? "bg-slate-50 text-slate-900 active"
+                          : " bg-slate-800"
+                        } }
+                      `}
                     >
                       @{user.username}
                     </button>
 
-                    <div className={`z-[99] absolute -top-4 -right-5 flex p-5 flex-col gap-1 w-fit min-w-[350px] max-w-[520px] bg-slate-700/20 backdrop-blur-xl rounded-lg text-gray-200 duration-500 shadow-2xl ${isOpenDropdown
-                      ? "opacity-100 visible pt-5 pb-5"
-                      : "opacity-0 translate-y-12 invisible pb-10"
+                    <div className={`z-[99] absolute -top-4 -right-5 me-5 lg:me-0 flex p-5 flex-col gap-1 lg:w-fit 
+                    lg:min-w-[350px] lg:max-w-[520px] w-full bg-slate-700/20 backdrop-blur-xl rounded-2xl 
+                    text-slate-200 duration-500 shadow-2xl 
+                    ${isOpenDropdown ?
+                        "opacity-100 visible pt-5 pb-5" :
+                        "lg:opacity-0 lg:translate-y-12 lg:invisible lg:pb-10"
                       }`}>
 
-                      <div className={`z-[100] flex justify-between flex-row-reverse gap-5 duration-500 mb-5 ${isOpenDropdown
-                        ? ""
-                        : "mb-0"
-                        }`}>
+                      <div className={`z-[100] flex justify-between flex-row-reverse gap-5 duration-500 mb-5 
+                      ${isOpenDropdown
+                          ? ""
+                          : "mb-0"
+                        } `}>
                         <button
                           onClick={() => setIsOpenDropdown(!isOpenDropdown)}
                           className={`opacity-0 duration-500`}
@@ -162,35 +187,34 @@ export default function Header() {
                       </div>
 
 
-                      <div className="grid grid-cols-2 gap-5">
-
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-5">
                         <Link
-                          onClick={() => setIsOpenDropdown(!isOpenDropdown)}
+                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
                           to="/medias"
-                          className="flex flex-col justify-center gap-4 h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-md duration-200"
+                          className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
                         >
                           <FontAwesomeIcon icon={faFilm} className="text-2xl" />
                           Médias
                         </Link>
                         <Link
-                          onClick={() => setIsOpenDropdown(!isOpenDropdown)}
+                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
                           to="/profile"
-                          className="flex flex-col justify-center gap-4 h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-md duration-200"
+                          className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
                         >
                           <FontAwesomeIcon icon={faFaceSmile} className="text-2xl" />
                           Profil
                         </Link>
                         <Link
-                          onClick={() => setIsOpenDropdown(!isOpenDropdown)}
-                          to="/lives/launch"
-                          className="flex flex-col justify-center gap-4 h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-md duration-200"
+                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                          to="/live/launch"
+                          className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
                         >
                           <FontAwesomeIcon icon={faVideo} className="text-2xl" />
                           Lancer un live
                         </Link>
                         <Link
-                          onClick={() => setIsOpenDropdown(!isOpenDropdown) && handleLogout()}
-                          className="flex flex-col justify-center gap-4 h-28 text-center text-red-100 hover:text-red-100 hover:bg-red-800 bg-red-500/80 shadow-2xl rounded-md duration-200"
+                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); handleLogout() }}
+                          className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-red-100 hover:text-red-100 hover:bg-red-800 bg-red-500/80 shadow-2xl rounded-lg duration-200"
                         >
                           <FontAwesomeIcon icon={faPowerOff} className="text-2xl" />
                           Se déconnecter
@@ -200,12 +224,22 @@ export default function Header() {
 
                   </div>
                 ) : (
-                  <Link
-                    to="/login"
-                    className="px-3 py-2 mx-3 mt-2 text-gray-700 transition-colors duration-300 transform rounded-md lg:mt-0 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Se connecter
-                  </Link>
+                  <div className="flex gap-3">
+                    <Link
+                      onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                      to="/signup"
+                      className="px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 hover:text-slate-100 hover:bg-slate-800 border-2 border-slate-600"
+                    >
+                      S'inscrire
+                    </Link>
+                    <Link
+                      onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                      to="/login"
+                      className="px-4 py-4 lg:py-2 text-slate-900 transition-colors duration-300 transform rounded-md lg:mt-0 hover:text-slate-900 bg-slate-200 hover:bg-slate-50"
+                    >
+                      Se connecter
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

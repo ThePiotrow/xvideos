@@ -56,7 +56,7 @@ function AppRoutes() {
 
         {/* LIVES */}
         <Route
-          path="/lives/launch"
+          path="/live/launch"
           element={
             <AuthGuard>
               <LaunchLive />

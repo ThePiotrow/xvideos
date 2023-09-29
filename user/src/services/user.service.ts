@@ -20,7 +20,7 @@ export class UserService {
     return this.userModel.find(data).exec();
   }
 
-  async searchUserById({ id, all, isDeleted, withMedias }: { id: string, all?: boolean, isDeleted?: boolean, withMedias?: boolean }): Promise<IUser> {
+  async searchUserById({ id, all, isDeleted, media }: { id: string, all?: boolean, isDeleted?: boolean, media?: boolean }): Promise<IUser> {
 
     const match = (all ?? false) ?
       {
@@ -31,7 +31,7 @@ export class UserService {
         isDeleted: isDeleted ?? false,
       };
 
-    withMedias = withMedias ?? false;
+    media = media ?? false;
 
     let pipeline: any[] = [
       {
@@ -41,10 +41,65 @@ export class UserService {
         $addFields: {
           id: "$_id"
         }
+      },
+      //add last live with end_time = null
+      {
+        $lookup: {
+          from: "lives",
+          let: { user_id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$user_id", "$$user_id"] },
+                    { $eq: ["$end_time", null] }
+                  ]
+                }
+              }
+            },
+            {
+              $sort: { start_time: -1 }
+            },
+            {
+              $limit: 1
+            }
+          ],
+          as: "live"
+        }
+      },
+      {
+        $unwind: {
+          path: "$live",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          "live.id": "$live._id",
+          "live.user_id": "$live.user_id",
+          "live.title": "$live.title",
+          "live.start_time": "$live.start_time",
+          "live.end_time": "$live.end_time",
+          "live.created_at": "$live.created_at",
+          "live.updated_at": "$live.updated_at",
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          username: 1,
+          email: 1,
+          is_confirmed: 1,
+          role: 1,
+          live: 1
+        }
       }
+
     ];
 
-    if (withMedias) {
+    if (media) {
       pipeline.push({
         $lookup: {
           from: 'media',
@@ -78,13 +133,14 @@ export class UserService {
       });
     }
 
-    const project = withMedias ?
+    const project = media ?
       {
         id: 1,
         username: 1,
         email: 1,
         is_confirmed: 1,
         role: 1,
+        live: 1,
         medias: 1
       } :
       {
@@ -93,6 +149,7 @@ export class UserService {
         email: 1,
         is_confirmed: 1,
         role: 1,
+        live: 1
       };
 
     pipeline.push({

@@ -3,13 +3,17 @@ import { MessagePattern } from '@nestjs/microservices';
 
 import { LiveService } from './services/live.service';
 import { ILive } from './interfaces/live.interface';
-import { ILiveUpdateParams } from './interfaces/live-update-params.interface';
 import { ILiveSearchByUserResponse } from './interfaces/live-search-by-user-response.interface';
 import { ILiveDeleteResponse } from './interfaces/live-delete-response.interface';
 import { ILiveCreateResponse } from './interfaces/live-create-response.interface';
 import { ILiveUpdateByIdResponse } from './interfaces/live-update-by-id-response.interface';
 import { ILiveSearchByIdResponse } from './interfaces/live-search-by-id-response.interface';
 import { threadId } from 'worker_threads';
+import * as ffmpeg from 'fluent-ffmpeg';
+import * as tmp from 'tmp';
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import { ILiveUpdateParams } from './interfaces/live-update-params.interface';
 
 @Controller()
 export class LiveController {
@@ -17,16 +21,20 @@ export class LiveController {
 
   @MessagePattern('get_all_lives')
   public async liveGetAll(
-    params: {
-      limit: number
-      offset: number,
+    body: {
+      all: boolean;
+      onAir: boolean;
+      limit: number;
+      offset: number;
     }
   ): Promise<ILiveSearchByUserResponse> {
 
     try {
       const lives = await this.liveService.getAllLives({
-        limit: params.limit ?? 10,
-        offset: params.offset ?? 0,
+        all: body.all ?? false,
+        onAir: body.onAir ?? true,
+        limit: body.limit ?? 10,
+        offset: body.offset ?? 0,
       })
 
       return {
@@ -45,40 +53,16 @@ export class LiveController {
     }
   }
 
-  @MessagePattern('live_search_by_user_id')
-  public async liveSearchByUserId(
-    params: {
-      user_id: string,
-      on_air?: boolean,
-    }
-  ): Promise<ILiveSearchByUserResponse> {
-    let result: ILiveSearchByUserResponse;
-
-    if (params.user_id) {
-      const lives = await this.liveService.getLivesByUserId(params.user_id, params.on_air);
-      return {
-        status: HttpStatus.OK,
-        message: '✅ Lives found',
-        lives,
-      };
-    }
-    return {
-      status: HttpStatus.BAD_REQUEST,
-      message: '⚠️ Lives not found',
-      lives: null,
-    };
-  }
-
   @MessagePattern('live_search_by_id')
-  public async liveSearchById(params: {
-    live_id: string,
+  public async liveSearchById(body: {
+    id: string,
     on_air?: boolean,
   }
   ): Promise<ILiveSearchByIdResponse> {
     let result: ILiveSearchByIdResponse;
 
-    if (params.live_id) {
-      const live = await this.liveService.findLiveById(params.live_id, params.on_air);
+    if (body.id) {
+      const live = await this.liveService.findLiveById({ id: body.id, onAir: body.on_air });
 
       if (live)
         return {
@@ -96,21 +80,18 @@ export class LiveController {
   }
 
   @MessagePattern('live_update_by_id')
-  public async liveUpdateById(params: {
+  public async liveUpdateById(body: {
     live: ILiveUpdateParams;
     id: string;
     user_id: string;
   }): Promise<ILiveUpdateByIdResponse> {
     let result: ILiveUpdateByIdResponse;
-    if (params.id) {
+    if (body.id) {
       try {
-        const live = await this.liveService.findLiveById(params.id);
+        const live = await this.liveService.findLiveById({ id: body.id });
         if (live) {
-          if (live.user_id.toString() === params.user_id.toString()) {
-            if (params.live.end_date) {
-              //socket io destroy
-            }
-            const updatedLive = Object.assign(live, params.live);
+          if (live.user_id.toString() === body.user_id.toString()) {
+            const updatedLive = Object.assign(live, body.live);
             await updatedLive.save();
             return {
               status: HttpStatus.OK,
@@ -146,6 +127,90 @@ export class LiveController {
     return {
       status: HttpStatus.BAD_REQUEST,
       message: '⚠️ Live update failed',
+      live: null,
+      errors: null,
+    };
+  }
+
+  @MessagePattern('live_stream')
+  public async liveStream(body: {
+    id: string;
+    live: ILive;
+    stream: Express.Multer.File;
+  }): Promise<ILiveUpdateByIdResponse> {
+    let result: ILiveUpdateByIdResponse;
+    const { live } = body;
+    if (body.id) {
+      try {
+        if (live) {
+          const { user, ...liveReq } = live;
+          const liveCheck = await this.liveService.findLiveById({ id: body.id });
+
+
+          if (liveCheck.end_time) {
+            return {
+              status: HttpStatus.BAD_REQUEST,
+              message: '⚠️ Live ended',
+              live: null,
+              errors: null,
+            };
+          }
+
+          const streams = [
+            720,
+            540,
+            360,
+            180
+          ];
+          const { name, url } = await this.liveService.uploadFile(body.stream);
+
+          console.log(name, url);
+
+          // Puis utilisez tmpFile.name comme chemin d'accès pour ffmpeg
+          const { duration, height } = await new Promise<{ duration: number; height: any }>((resolve, reject) => {
+            ffmpeg.ffprobe(url, (err, metadata) => {
+              console.log(metadata)
+              if (err) reject(err);
+              else resolve({
+                duration: metadata.format.duration,
+                height: metadata.streams[0].height
+              });
+            })
+          });
+
+          console.log(duration, height)
+
+          const resolutions = streams.filter(stream => stream <= height);
+          const videoData = await this.liveService.generateVideo({ name, url, mimetype: 'video/webm' }, resolutions);
+
+          console.log(videoData)
+
+          return {
+            status: HttpStatus.OK,
+            message: '✅ Live stream',
+            url: videoData.url,
+            errors: null,
+          };
+        } else {
+          return {
+            status: HttpStatus.NOT_FOUND,
+            message: '⚠️ Live not found',
+            url: null,
+            errors: null,
+          };
+        }
+      } catch (e) {
+        return {
+          status: HttpStatus.PRECONDITION_FAILED,
+          message: '⚠️ Live stream failed',
+          url: null,
+          errors: e.errors,
+        };
+      }
+    }
+    return {
+      status: HttpStatus.BAD_REQUEST,
+      message: '⚠️ Live stream failed',
       live: null,
       errors: null,
     };
@@ -195,32 +260,34 @@ export class LiveController {
   }
 
   @MessagePattern('live_stop')
-  public async liveStop(params: {
-    user_id: string;
+  public async liveStop(body: {
     id: string;
+    live: ILive;
   }): Promise<ILiveUpdateByIdResponse> {
     let result: ILiveUpdateByIdResponse;
-    if (params.id) {
+    const { live } = body;
+    if (body.id) {
       try {
-        const live: ILive = await this.liveService.findLiveById(params.id);
         if (live) {
-          if (live.user_id === params.user_id) {
-            live.end_time = +new Date();
-            await live.save();
+          console.log(live)
+          const { user, ...liveReq } = live;
+          const liveCheck = await this.liveService.findLiveById({ id: body.id });
+          if (liveCheck.end_time) {
             return {
-              status: HttpStatus.OK,
-              message: '✅ Live stopped',
-              live,
-              errors: null,
-            };
-          } else {
-            return {
-              status: HttpStatus.FORBIDDEN,
-              message: '⛔ Forbidden',
+              status: HttpStatus.BAD_REQUEST,
+              message: '⚠️ Live already stopped',
               live: null,
               errors: null,
             };
           }
+          const l = await this.liveService.updateLiveById(live.id, { end_time: +new Date() });
+          console.log(l)
+          return {
+            status: HttpStatus.OK,
+            message: '✅ Live stopped',
+            live: l,
+            errors: null,
+          };
         } else {
           return {
             status: HttpStatus.NOT_FOUND,
@@ -230,6 +297,7 @@ export class LiveController {
           };
         }
       } catch (e) {
+        console.log(e);
         return {
           status: HttpStatus.PRECONDITION_FAILED,
           message: '⚠️ Live stop failed',
@@ -247,19 +315,19 @@ export class LiveController {
   }
 
   @MessagePattern('live_delete_by_id')
-  public async liveDeleteForUser(params: {
+  public async liveDeleteForUser(body: {
     user_id: string;
     id: string;
   }): Promise<ILiveDeleteResponse> {
     let result: ILiveDeleteResponse;
 
-    if (params && params.user_id && params.id) {
+    if (body && body.user_id && body.id) {
       try {
-        const live = await this.liveService.findLiveById(params.id);
+        const live = await this.liveService.findLiveById({ id: body.id });
 
         if (live) {
-          if (live.user_id === params.user_id) {
-            await this.liveService.removeLiveById(params.id);
+          if (live.user_id === body.user_id) {
+            await this.liveService.removeLiveById(body.id);
             return {
               status: HttpStatus.OK,
               message: '✅ Live deleted',

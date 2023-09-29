@@ -51,7 +51,6 @@ export class OwnerGuard implements CanActivate {
       const id = request.params.id;
 
       switch (type) {
-
         case 'media':
           const response: IServiceMediaSearchByIdResponse =
             await firstValueFrom(

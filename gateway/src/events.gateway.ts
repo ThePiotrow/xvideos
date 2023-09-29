@@ -170,7 +170,6 @@ export class EventsGateway {
 
             const live = Array.isArray(livesResponse) ? livesResponse[0].live : livesResponse.live;
 
-            console.log('live', live, livesResponse)
 
             if (live === null)
                 return { status: '⚠️ Not found', room: null, client: client.id };
@@ -232,7 +231,6 @@ export class EventsGateway {
                 return { status: '✅ Live joined', room: live.id, client: client.id };
             }
             catch (e) {
-                console.log(e)
                 return { status: 'error', room: null, client: client.id };
             }
         }
@@ -260,8 +258,6 @@ export class EventsGateway {
         const live = await firstValueFrom(stopResponse);
 
         client.leave(data.live_id);
-
-        console.log('live', live)
 
         const clientsInRoom = this.server.sockets.adapter.rooms.get(data.live_id);
         if (clientsInRoom) {

@@ -35,6 +35,8 @@ import { CheckUsernameAvailabilityResponseDto } from './interfaces/user/dto/chec
 import { CheckUsernameAvailabilityDto } from './interfaces/user/dto/check-username-availability.dto';
 import { IServiceUsernameUserCheckAvailabilityDtoResponse } from './interfaces/user/service-check-username-response.interface';
 import { GetUserByIdDto } from './interfaces/user/dto/get-user-by-id.dto';
+import { GetAllUsersResponseDto } from './interfaces/user/dto/get-all-users-response.dto';
+import { IUserGetAllResponse } from './interfaces/user/user-get-all-response.interface';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -45,7 +47,7 @@ export class UsersController {
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
   ) { }
 
-  @Get()
+  @Get('/me')
   @Authorization()
   @ApiOkResponse({
     type: GetUserByTokenResponseDto,
@@ -63,6 +65,27 @@ export class UsersController {
       message: userResponse.message,
       data: {
         user: userResponse.user,
+      },
+      errors: null,
+    };
+  }
+
+  @Get()
+  @ApiOkResponse({
+    type: GetAllUsersResponseDto,
+  })
+  public async getAllUsers(
+    @Req() request: IAuthorizedRequest,
+  ): Promise<GetAllUsersResponseDto> {
+
+    const usersResponse: IUserGetAllResponse = await firstValueFrom(
+      this.userServiceClient.send('user_get_all', {}),
+    );
+
+    return {
+      message: usersResponse.message,
+      data: {
+        users: usersResponse.users,
       },
       errors: null,
     };

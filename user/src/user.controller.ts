@@ -286,8 +286,6 @@ export class UserController {
   ): Promise<IUserCreateResponse> {
     let result: IUserCreateResponse;
 
-    console.log(params);
-
     if (params.id) {
       const user = await this.userService.updateUserById(params.id, params);
 

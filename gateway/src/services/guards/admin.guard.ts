@@ -27,8 +27,6 @@ export class AdminGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
 
-    console.log('request.user', request.user);
-
     if (request.user.role !== 'ROLE_ADMIN') {
       throw new HttpException(
         {

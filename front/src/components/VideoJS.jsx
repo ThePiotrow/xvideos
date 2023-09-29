@@ -22,9 +22,15 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
   const videoContainerRef = useRef(null);
   const controlsTimeoutRef = useRef(null);
 
+  // If qualityChangeToggle is true, never hide controls
+  useEffect(() => {
+    if (qualityChangeToggle) {
+      setIsControlsVisible(true);
+    }
+  }, [isControlsVisible]);
+
   const toggleControlsVisibility = useCallback((state) => {
     if (videoRef.current.paused || videoRef.current.ended) { setIsControlsVisible(true); return }
-
 
     if (controlsTimeoutRef.current) {
       clearTimeout(controlsTimeoutRef.current);
@@ -35,7 +41,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
     if (state) {
       controlsTimeoutRef.current = setTimeout(() => {
         setIsControlsVisible(false);
-      }, 3000);
+      }, 500);
     }
   }, []);
 
@@ -357,7 +363,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
         </div>
       </div>
       <div className={
-        `absolute inset-0 z-30 flex items-center justify-center backdrop-blur-xl ${isPlaying ? `opacity-0 bottom-[-50px]'}` : 'visible opacity-100  cursor-pointer duration-300'} ${styles.fadeEffect} `
+        `absolute inset-0 z-20 flex items-center justify-center backdrop-blur-xl ${isPlaying ? `opacity-0 bottom-[-50px]'}` : 'visible opacity-100  cursor-pointer duration-300'} ${styles.fadeEffect} `
       }
         onClick={togglePlay}>
         <div className='absolute top-1/2 left-1/2 mt-[-30px] transform -translate-x-1/2 -translate-y-1/2 '>

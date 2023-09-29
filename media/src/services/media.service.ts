@@ -150,7 +150,6 @@ export class MediaService {
   public async createMedia(mediaBody: IMedia): Promise<IMedia> {
     const mediaModel = new this.mediaModel(mediaBody);
     const media = await mediaModel.save();
-    console.log("media", media)
     const res = await this.getMediaById({ id: media.id });
     return res;
   }

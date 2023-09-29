@@ -10,10 +10,12 @@ import {
   Req,
   HttpException,
   HttpStatus,
+  UseInterceptors,
+  UploadedFiles,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
-import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOkResponse, ApiCreatedResponse, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 import { Authorization } from './decorators/authorization.decorator';
 
@@ -30,6 +32,7 @@ import { CreateLiveDto } from './interfaces/live/dto/create-live.dto';
 import { UpdateLiveDto } from './interfaces/live/dto/update-live.dto';
 import { LiveIdDto } from './interfaces/live/dto/live-id.dto';
 import { Owner } from './decorators/owner.decorator';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('lives')
 @ApiBearerAuth()
@@ -64,54 +67,48 @@ export class LivesController {
     };
   }
 
-  @Get('user/:id')
-  @ApiOkResponse({
-    type: GetLivesResponseDto,
+  @Post('stream/:id')
+  @Authorization()
+  @Owner('live')
+  @UseInterceptors(FileFieldsInterceptor(
+    [
+      { name: 'segment', maxCount: 1 },
+    ],
+  ))
+  @ApiConsumes('multipart/form-data')
+  @ApiCreatedResponse({
+    type: CreateLiveResponseDto,
   })
-  public async getUserLive(
+  public async createStream(
     @Req() request: IAuthorizedRequest,
     @Param() params: LiveIdDto,
-  ): Promise<GetLivesResponseDto> {
-    const { user } = request;
-
-    const livesResponse: IServiceLiveSearchByUserIdResponse =
+    @UploadedFiles() files: { segment?: Express.Multer.File[] },
+  ) {
+    const { user, resource } = request;
+    const stream = files.segment[0];
+    const createLiveResponse: IServiceLiveCreateResponse =
       await firstValueFrom(
-        this.liveServiceClient.send('live_search_by_user_id', {
-          user_id: params.id,
-        }),
+        this.liveServiceClient.send(
+          'live_stream',
+          Object.assign({ id: params.id, stream, live: resource }),
+        ),
       );
 
-    return {
-      message: livesResponse.message,
-      data: {
-        lives: livesResponse.lives,
-      },
-      errors: null,
-    };
-  }
-
-  @Get('user/:id/lives')
-  @ApiOkResponse({
-    type: GetLivesResponseDto,
-  })
-  public async getAllUserLive(
-    @Req() request: IAuthorizedRequest,
-    @Param() params: LiveIdDto,
-  ): Promise<GetLivesResponseDto> {
-    const { user } = request;
-
-    const livesResponse: IServiceLiveSearchByUserIdResponse =
-      await firstValueFrom(
-        this.liveServiceClient.send('live_search_by_id', {
-          user_id: user.id,
-          live_id: params.id,
-        }),
+    if (createLiveResponse.status !== HttpStatus.CREATED) {
+      throw new HttpException(
+        {
+          message: createLiveResponse.message,
+          data: null,
+          errors: createLiveResponse.errors,
+        },
+        createLiveResponse.status,
       );
+    }
 
     return {
-      message: livesResponse.message,
+      message: createLiveResponse.message,
       data: {
-        lives: livesResponse.lives,
+        live: createLiveResponse.live,
       },
       errors: null,
     };
@@ -165,17 +162,17 @@ export class LivesController {
   public async stopLive(
     @Req() request: IAuthorizedRequest,
     @Param() params: LiveIdDto,
-  ): Promise<CreateLiveResponseDto> {
-    const { user } = request;
+  ): Promise<any> {
+    const { resource } = request;
     const createLiveResponse: IServiceLiveCreateResponse =
       await firstValueFrom(
         this.liveServiceClient.send(
           'live_stop',
-          Object.assign(params, { user_id: user.id, id: params.id }),
+          Object.assign({ live: resource, id: params.id }),
         ),
       );
 
-    if (createLiveResponse.status !== HttpStatus.CREATED) {
+    if (createLiveResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
           message: createLiveResponse.message,
@@ -251,6 +248,45 @@ export class LivesController {
           id: params.id,
           userId: user.id,
           live: body,
+        }),
+      );
+
+    if (updateLiveResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: updateLiveResponse.message,
+          errors: updateLiveResponse.errors,
+          data: null,
+        },
+        updateLiveResponse.status,
+      );
+    }
+
+    return {
+      message: updateLiveResponse.message,
+      data: {
+        live: updateLiveResponse.live,
+      },
+      errors: null,
+    };
+  }
+
+  @Get(':id')
+  @Authorization()
+  @Owner('live')
+  @ApiOkResponse({
+    type: UpdateLiveResponseDto,
+  })
+  public async getLive(
+    @Req() request: IAuthorizedRequest,
+    @Param() params: LiveIdDto,
+  ): Promise<UpdateLiveResponseDto> {
+    const { user } = request;
+    const updateLiveResponse: IServiceLiveUpdateByIdResponse =
+      await firstValueFrom(
+        this.liveServiceClient.send('live_search_by_id', {
+          id: params.id,
+          userId: user.id,
         }),
       );
 

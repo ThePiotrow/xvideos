@@ -105,11 +105,6 @@ export class TokenService {
         return null;
       }
 
-      console.log({
-        userId: tokenData.userId,
-        remainingTime: tokenData.exp * 1000 - Date.now(),
-      })
-
       return {
         user: res.user,
         remainingTime: tokenData.exp * 1000 - Date.now(),

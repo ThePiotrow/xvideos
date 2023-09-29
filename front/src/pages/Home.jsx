@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
-import { formatDuration } from "../utils/mediaUtils";
+import { formatDuration, formatCreatedAt } from "../utils/mediaUtils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
+import dayjs from "dayjs";
 
 function Home() {
   const navigate = useNavigate();
@@ -19,10 +22,10 @@ function Home() {
   }, []);
 
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 ">
+    <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 ">
       {medias.map((media) => (
         <div
-          className="cursor-pointer relative group w-fit"
+          className="cursor-pointer relative group w-full bg-slate-800 rounded-xl"
           key={media.id}
           onClick={() => navigate(`/media/${media.id}`)}
         >
@@ -37,12 +40,17 @@ function Home() {
                 {formatDuration(media.duration)}
               </p>)}
           </div>
-          <h3 className="mt-2 text-lg font-medium text-gray-600 truncate transition-all duration-500 ease-in-out">
+          <h3 className="mt-2 text-md font-medium text-slate-200 truncate transition-all duration-500 ease-in-out px-3">
             {media.title}
           </h3>
-          <p className="block text-sm text-gray-600">
-            {media.user.username}
-          </p>
+          <div className="text-xs text-slate-500 flex gap-2 px-3 py-2 items-center justify-between">
+            <p>
+              {formatCreatedAt(dayjs(dayjs()).diff(media.created_at, "seconds"))}
+            </p>
+            <p>
+              @{media.user.username}
+            </p>
+          </div>
         </div>
       ))}
     </div>
