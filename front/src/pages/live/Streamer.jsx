@@ -3,11 +3,14 @@ import API from "../../api";
 import { toast } from "react-toastify";
 import { formatDuration } from "../../utils/mediaUtils";
 import dayjs from "dayjs";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleNotch, faEye, faPlus, faSync, faSyncAlt, faCheck as fasCheck, faCircle as fasCircle, faDesktop as fasDesktop, faMicrophone as fasMicrophone, faPlay as fasPlay, faQuestion as fasQuestion, faShare as fasShare, faSquare as fasSquare, faTrash as fasTrash, faVideo as fasVideo } from "@fortawesome/free-solid-svg-icons";
+import { faCircle } from "@fortawesome/free-regular-svg-icons";
+import "../../components/css/pulse.css"
+
 import { io } from "socket.io-client";
 import { useAuth } from "../../contexts/authContext";
-import { useParams } from "react-router-dom";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
+
 
 const pc_config = {
   iceServers: [
@@ -17,35 +20,29 @@ const pc_config = {
   ],
 };
 
-function Viewer() {
-  const { username } = useParams();
+function Streamer() {
   const { user, token } = useAuth();
 
   const [live, setLive] = useState({ elapsedTime: formatDuration(0) });
-  const [title, setTitle] = useState("");
-  const [streamer, setStreamer] = useState(null);
   const [users, setUsers] = useState([]);
 
+
+  const localUser = useRef(null);
   const socketRef = useRef();
   const pcsRef = useRef({});
   const videoRef = useRef(null);
-  const streamRef = useRef(null);
+  const streamRef = useRef();
 
   useEffect(() => {
-    API.get(`/users/live/${username}`)
+    API.get("/users/me")
       .then((response) => {
-        if (!socketRef.current) {
-          console.error("Socket not initialized");
-          return;
-        }
         const currentLive = response.user?.live;
+        localUser.current = { username: 'admin' }
 
         if (currentLive) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
           setLive({ ...currentLive, elapsedTime, username: response.user.username });
-          setTitle(currentLive.title);
         }
-        setStreamer(response.data);
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération du live", error);
@@ -54,7 +51,7 @@ function Viewer() {
   }, []);
 
   useEffect(() => {
-    if (!live.start_time) return;
+    if (!live.start_time) return
     const intervalId = setInterval(() => {
       setLive(prevLive => ({
         ...prevLive,
@@ -65,10 +62,17 @@ function Viewer() {
     return () => clearInterval(intervalId);
   }, [live]);
 
+
   const getLocalStream = useCallback(async () => {
     try {
+      const localStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: true,
+      });
+      streamRef.current = localStream;
+      videoRef.current.srcObject = localStream;
       if (!socketRef.current) return;
-      socketRef.current.emit('room:join', { room: 'admin', username: user?.username ?? null });
+      socketRef.current.emit('room:join', { room: localUser.current.username, username: localUser.current.username });
     } catch (e) {
       console.error(`getUserMedia error: ${e}`);
     }
@@ -93,18 +97,15 @@ function Viewer() {
 
       pc.ontrack = (e) => {
         console.log('on track');
-        if (videoRef.current) {
-          videoRef.current.srcObject = e.streams[0];
-        }
+        // if (!videoRef.current) return;
         setUsers((oldUsers) => {
           if (oldUsers.some((user) => user.id === id)) return oldUsers;
           return [...oldUsers, { id, username, stream: e.streams[0] }];
         });
       }
 
-      if (!streamRef.current) {
-        console.log("no stream");
-      } else {
+      if (!streamRef.current) console.log("no stream");
+      else {
         streamRef.current.getTracks().forEach((track) => {
           pc.addTrack(track, streamRef.current);
         });
@@ -125,9 +126,38 @@ function Viewer() {
 
     getLocalStream();
 
+    socketRef.current.on('users:all', ({ roomUsers }) => {
+      roomUsers.forEach(async (user) => {
+        if (!streamRef.current) return;
+        const pc = createPeerConnection(user.id, user.username);
+        if (!(pc && socketRef.current)) return;
+        pcsRef.current = { ...pcsRef.current, [user.id]: pc };
+        try {
+          const localSdp = await pc.createOffer({
+            offerToReceiveAudio: true,
+            offerToReceiveVideo: true,
+          });
+          console.log('create offer success');
+          await pc.setLocalDescription(new RTCSessionDescription(localSdp));
+          socketRef.current.emit('offer:make', {
+            sdp: localSdp,
+            offerSendId: socketRef.current.id,
+            offerSendUsername: localUser.current.username ?? socketRef.current.id,
+            offerReceiveId: user.id,
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    });
+
     socketRef.current.on(
       'offer:get',
-      async ({ sdp, offerSendId, offerSendUsername }) => {
+      async ({
+        sdp,
+        offerSendId,
+        offerSendUsername,
+      }) => {
         console.log('get offer');
         if (!streamRef.current) return;
         const pc = createPeerConnection(offerSendId, offerSendUsername);
@@ -173,10 +203,24 @@ function Viewer() {
       },
     );
 
+    socketRef.current.on(
+      'users:exit',
+      ({ id }) => {
+        if (!pcsRef.current[id]) return;
+        pcsRef.current[id].close();
+        delete pcsRef.current[id];
+        setUsers((oldUsers) => oldUsers.filter((user) => user.id !== id));
+      });
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
+      users.forEach((user) => {
+        if (!pcsRef.current[user.id]) return;
+        pcsRef.current[user.id].close();
+        delete pcsRef.current[user.id];
+      });
     };
   }, [createPeerConnection, getLocalStream]);
 
@@ -196,8 +240,12 @@ function Viewer() {
               <h3
                 className="font-semibold text-white"
               >Titre</h3>
-              <h2
-                value={title}
+              <input
+                type="text"
+                name="title"
+                id="title"
+                placeholder="Mon live trop cool"
+                value={""}
                 onChange={(e) => setTitle(e.target.value)}
 
                 className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-800 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
@@ -209,7 +257,12 @@ function Viewer() {
               <div
                 className="self-center 2xl:self-start relative rounded-xl overflow-hidden aspect-video w-full h-fit"
               >
-                <video ref={videoRef} autoPlay muted></video>
+                <video
+                  id="video"
+                  ref={videoRef}
+                  autoPlay={true}
+                  className="aspect-video w-full bg-black"
+                ></video>
                 <div className="absolute bottom-3 right-4 text-sm flex gap-2 items-center">
                   <p
                     className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center"
@@ -231,6 +284,37 @@ function Viewer() {
                 </div>
 
               </div>
+
+
+              {/* <div className=" max-w-[300px]">
+                  <h3
+                    className="mb-4 font-semibold text-white"
+                  >Périphériques audio</h3>
+                  <ul
+                    className="text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-xl dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+                  >
+                    {devices.audio.map(device => (
+                      <li
+                        className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
+                        key={device.deviceId}>
+                        <div
+                          className="flex items-center pl-3"
+                        >
+                          <input type="checkbox"
+                            checked={storedAudioDevices.find(stream => stream.deviceId === device.deviceId)}
+                            disabled={storedAudioDevices.find(stream => stream.deviceId === device.deviceId)}
+                            onClick={() => handeStoreSource(device.deviceId, 'audio')}
+                            name="audio" id={`pre-${device.deviceId}`}
+                            className="w-6 h-6 text-blue-600 bg-slate-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 focus:ring-1"
+                          />
+                          <label htmlFor={`pre-${device.deviceId}`}
+                            className="w-full py-3 ml-2 text-sm font-medium text-gray-300"
+                          >{device.label}</label>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div> */}
 
             </div>
           </div>
@@ -259,4 +343,4 @@ function Viewer() {
   );
 }
 
-export default Viewer;
+export default Streamer;

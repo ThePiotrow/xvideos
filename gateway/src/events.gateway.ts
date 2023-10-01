@@ -56,13 +56,16 @@ export class EventsGateway {
     @WebSocketServer()
     server: Server;
 
-    @SubscribeMessage('join:room')
+    @SubscribeMessage('room:join')
     async onJoinRoom(
         @ConnectedSocket() client: Socket,
-        @MessageBody() { room }: { room: string, username: string },
+        @MessageBody() { room, username }: { room: string, username: string },
     ): Promise<WsResponse<any>> {
         try {
             const { id, username } = await this.validateUser(client);
+            console.log(`[${room}]: ${id} enter`)
+
+            console.log(`[${room}]: ${id} enter`)
 
             if (this.users[room])
                 this.users[room].push({ id, username });

@@ -10,9 +10,9 @@ import Live from "./pages/live/Live";
 import Profile from "./pages/user/Profile";
 import ListMedias from "./pages/user/ListMedias";
 import CreateMedias from "./pages/medias/CreateMedias";
-import LaunchLive from "./pages/live/LaunchLive";
 import MediaViewer from "./pages/medias/MediaViewer";
 import Viewer from "./pages/live/Viewer";
+import Streamer from "./pages/live/Streamer";
 
 function AppRoutes() {
   const token = localStorage.getItem("token");
@@ -23,7 +23,7 @@ function AppRoutes() {
         <Route exact path="/" element={<Home />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/live" element={<Live />} />
+        <Route path="/lives" element={<Live />} />
         <Route path="/media/:id" element={<MediaViewer />} />
 
         {/* IS AUTHENTICATED */}
@@ -56,10 +56,10 @@ function AppRoutes() {
 
         {/* LIVES */}
         <Route
-          path="/live/launch"
+          path="/live"
           element={
             <AuthGuard>
-              <LaunchLive />
+              <Streamer />
             </AuthGuard>
           }
         />
