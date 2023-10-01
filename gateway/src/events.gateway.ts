@@ -141,7 +141,9 @@ export class EventsGateway {
                 return;
             }
         }
-        client.to(roomId).emit('users:exit', { id: client.id });
+        client.to(roomId).emit('room:users', {
+            roomUsers: this.users[room];
+        });
     }
 
 }

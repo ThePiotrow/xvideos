@@ -82,8 +82,8 @@ function Viewer() {
   const createPeerConnection = useCallback(
     (id, username) => {
       const pc = new RTCPeerConnection(pc_config);
-
       pc.onicecandidate = (e) => {
+        console.log('onicecandidate');
         if (!(socketRef.current && e.candidate)) return;
         socketRef.current.emit('candidate:make', {
           candidate: e.candidate,
@@ -97,13 +97,20 @@ function Viewer() {
       };
 
       pc.ontrack = (e) => {
-        console.log('ontrack', e);
-        if (!videoRef.current) return;
+        console.log('ontrack success');
+        setUsers((oldUsers) =>
+          oldUsers
+            .filter((user) => user.id !== id)
+            .concat({
+              id: id,
+              username,
+              stream: e.streams[0],
+            }),
+        );
+        console.log(users)
         videoRef.current.srcObject = e.streams[0];
-      }
-
-      if (!streamRef.current) console.log("no stream");
-      else {
+      };
+      if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => {
           pc.addTrack(track, streamRef.current);
         });
@@ -125,29 +132,7 @@ function Viewer() {
     getLocalStream();
 
     socketRef.current.on('room:users', ({ roomUsers }) => {
-      roomUsers.forEach(async (_user) => {
-        if (!streamRef.current) return;
-        const pc = createPeerConnection(_user.id, _user.username);
-        if (!(pc && socketRef.current)) return;
-        pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
-        try {
-          const localSdp = await pc.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-          });
-          console.log('create offer success');
-          await pc.setLocalDescription(new RTCSessionDescription(localSdp));
-          console.log(_user.id)
-          socketRef.current.emit('offer:make', {
-            sdp: localSdp,
-            offerSendId: socketRef.current.id,
-            offerSendUsername: localUser.current.username,
-            offerReceiveId: _user.id,
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      });
+      setUsers(roomUsers)
     });
 
     socketRef.current.on(
@@ -268,7 +253,7 @@ function Viewer() {
                     className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center"
                   >
                     <FontAwesomeIcon className="text-xs" icon={faEye} />
-                    {users.length + 1 ?? 0}
+                    {users.length ?? 0}
                   </p>
                   <p
                     className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center"

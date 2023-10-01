@@ -84,6 +84,7 @@ function Streamer() {
 
       pc.onicecandidate = (e) => {
         if (!(socketRef.current && e.candidate)) return;
+        console.log('onicecandidate');
         socketRef.current.emit('candidate:make', {
           candidate: e.candidate,
           candidateSendId: socketRef.current.id,
@@ -96,16 +97,19 @@ function Streamer() {
       };
 
       pc.ontrack = (e) => {
-        console.log('on track');
-        if (!videoRef.current) return;
-        setUsers((oldUsers) => {
-          if (oldUsers.some((user) => user.id === id)) return oldUsers;
-          return [...oldUsers, { id, username, stream: e.streams[0] }];
-        });
-      }
+        console.log('ontrack success');
+        setUsers((oldUsers) =>
+          oldUsers
+            .filter((user) => user.id !== id)
+            .concat({
+              id,
+              username,
+              stream: e.streams[0],
+            }),
+        );
+      };
 
-      if (!streamRef.current) console.log("no stream");
-      else {
+      if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => {
           pc.addTrack(track, streamRef.current);
         });
@@ -127,11 +131,13 @@ function Streamer() {
     getLocalStream();
 
     socketRef.current.on('room:users', ({ roomUsers }) => {
+      setUsers(roomUsers);
       roomUsers.forEach(async (_user) => {
         if (!streamRef.current) return;
         const pc = createPeerConnection(_user.id, _user.username);
         if (!(pc && socketRef.current)) return;
         pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
+        console.log('Updated pcsRef:', pcsRef.current);
         try {
           const localSdp = await pc.createOffer({
             offerToReceiveAudio: true,
