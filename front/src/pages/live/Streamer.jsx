@@ -36,26 +36,26 @@ function Streamer() {
   useEffect(() => {
     API.get("/users/me")
       .then((response) => {
-        const currentLive = response.user?.live;
-        localUser.current = { username: 'admin' }
+        const currentLive = response.data?.user?.live;
+        localUser.current = response.data?.user
 
         if (currentLive) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
-          setLive({ ...currentLive, elapsedTime, username: response.user.username });
+          setLive({ ...currentLive, elapsedTime, username: response.data.user.username });
         }
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération du live", error);
         toast.error("Erreur lors de la récupération du live !");
       });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (!live.start_time) return
     const intervalId = setInterval(() => {
       setLive(prevLive => ({
         ...prevLive,
-        elapsedTime: formatDuration(dayjs(dayjs()).diff(prevLive.start_time, "seconds"))
+        elapsedTime: formatDuration(dayjs(dayjs()).diff(prevLive.start_time, "milliseconds") / 1000)
       }));
     }, 800);
 
@@ -97,7 +97,7 @@ function Streamer() {
 
       pc.ontrack = (e) => {
         console.log('on track');
-        // if (!videoRef.current) return;
+        if (!videoRef.current) return;
         setUsers((oldUsers) => {
           if (oldUsers.some((user) => user.id === id)) return oldUsers;
           return [...oldUsers, { id, username, stream: e.streams[0] }];
@@ -116,7 +116,7 @@ function Streamer() {
 
   useEffect(() => {
     socketRef.current = io.connect(
-      "http://localhost:3000",
+      "ws://localhost:3000",
       {
         query: {
           token: token ?? null
@@ -126,12 +126,12 @@ function Streamer() {
 
     getLocalStream();
 
-    socketRef.current.on('users:all', ({ roomUsers }) => {
-      roomUsers.forEach(async (user) => {
+    socketRef.current.on('room:users', ({ roomUsers }) => {
+      roomUsers.forEach(async (_user) => {
         if (!streamRef.current) return;
-        const pc = createPeerConnection(user.id, user.username);
+        const pc = createPeerConnection(_user.id, _user.username);
         if (!(pc && socketRef.current)) return;
-        pcsRef.current = { ...pcsRef.current, [user.id]: pc };
+        pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
         try {
           const localSdp = await pc.createOffer({
             offerToReceiveAudio: true,
@@ -139,11 +139,12 @@ function Streamer() {
           });
           console.log('create offer success');
           await pc.setLocalDescription(new RTCSessionDescription(localSdp));
+          console.log(_user.id)
           socketRef.current.emit('offer:make', {
             sdp: localSdp,
             offerSendId: socketRef.current.id,
-            offerSendUsername: localUser.current.username ?? socketRef.current.id,
-            offerReceiveId: user.id,
+            offerSendUsername: localUser.current.username,
+            offerReceiveId: _user.id,
           });
         } catch (e) {
           console.error(e);
@@ -197,6 +198,7 @@ function Streamer() {
       async ({ candidate, candidateSendId }) => {
         console.log('get candidate');
         const pc = pcsRef.current[candidateSendId];
+        console.log(candidateSendId, pcsRef.current)
         if (!pc) return;
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
         console.log('candidate add success');
@@ -268,7 +270,7 @@ function Streamer() {
                     className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center"
                   >
                     <FontAwesomeIcon className="text-xs" icon={faEye} />
-                    {users.length + 1 ?? 0}
+                    {users.length ?? 0}
                   </p>
                   <p
                     className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center"

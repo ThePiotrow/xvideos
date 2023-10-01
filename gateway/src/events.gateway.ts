@@ -17,6 +17,7 @@ import { ClientProxy } from '@nestjs/microservices';
     },
 })
 export class EventsGateway {
+    private verifiedUsers: any = {};
     private users: any = {};
     private socketRoom: any = {};
 
@@ -25,27 +26,28 @@ export class EventsGateway {
         @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     ) { }
 
-    private async validateUser(client: Socket): Promise<{ id: string, username: string | null }> {
+    private async validateUser(client: Socket, username?: string): Promise<{ _id: string, _username: string | null }> {
         try {
 
             const { id, handshake: { query: { token } } } = client;
 
             if (!token) {
-                this.users[id] = null;
+                this.verifiedUsers[id] = username ?? null;
             }
 
-            if (!this.users[id] && token) {
+            if (!this.verifiedUsers[id]) {
                 const t = await firstValueFrom(
                     this.tokenServiceClient.send('token_decode', {
                         token,
                     }),
                 );
                 const { data } = t;
-                this.users[id] = data?.user?.username || null;
+                this.verifiedUsers[id] = data?.user?.username || null;
             }
+
             return {
-                id,
-                username: this.users[id]
+                _id: id,
+                _username: username ?? this.verifiedUsers[id]
             };
         }
         catch (e) {
@@ -60,26 +62,24 @@ export class EventsGateway {
     async onJoinRoom(
         @ConnectedSocket() client: Socket,
         @MessageBody() { room, username }: { room: string, username: string },
-    ): Promise<WsResponse<any>> {
+    ): Promise<any> {
         try {
-            const { id, username } = await this.validateUser(client);
-            console.log(`[${room}]: ${id} enter`)
+            const { _id, _username } = await this.validateUser(client, username);
 
-            console.log(`[${room}]: ${id} enter`)
-
-            if (this.users[room])
-                this.users[room].push({ id, username });
+            if (this.users[room]) {
+                if (!this.users[room].find(({ id }) => id === _id))
+                    this.users[room].push({ id: _id, username: _username });
+            }
             else
-                this.users[room] = [{ id, username }];
+                this.users[room] = [{ id: _id, username: _username }];
 
-            this.socketRoom[id] = room;
-
+            this.socketRoom[_id] = room;
             client.join(room);
-            console.log(`[${this.socketRoom[id]}]: ${id} enter`);
 
-            const roomUsers = this.users[room].map(({ id }) => id);
+            const roomUsers = this.users[room];
 
-            return { event: 'users:all', data: { roomUsers } };
+
+            this.server.sockets.to(room).emit('room:users', { username, roomUsers });
         }
         catch (e) {
             console.error(e);
@@ -92,7 +92,8 @@ export class EventsGateway {
         @MessageBody() { sdp, offerSendId, offerReceiveId, offerSendUsername }: { sdp: string, offerSendId: string, offerReceiveId: string, offerSendUsername: string },
     ): Promise<any> {
         try {
-            client.to(offerReceiveId).emit('offer:get', { sdp, offerSendId, offerSendUsername });
+            console.log(`[${this.socketRoom[offerSendId]}]: ${offerSendId} offer to ${offerReceiveId}`);
+            this.server.to(offerReceiveId).emit('offer:get', { sdp, offerSendId, offerSendUsername });
         }
         catch (e) {
             console.error(e);
@@ -105,6 +106,7 @@ export class EventsGateway {
         @MessageBody() { sdp, answerSendId, answerReceiveId }: { sdp: string, answerSendId: string, answerReceiveId: string, },
     ): Promise<any> {
         try {
+            console.log(`[${this.socketRoom[answerSendId]}]: ${answerSendId} answer to ${answerReceiveId}`)
             client.to(answerReceiveId).emit('answer:get', { sdp, answerSendId });
         }
         catch (e) {
@@ -115,9 +117,10 @@ export class EventsGateway {
     @SubscribeMessage('candidate:make')
     async onCandidate(
         @ConnectedSocket() client: Socket,
-        @MessageBody() { candidate, candidateSendId, candidateReceiveId }: { candidate: string, candidateSendId: string, candidateReceiveId: string },
+        @MessageBody() { candidate, candidateSendId, candidateReceiveId }: { candidate: any, candidateSendId: string, candidateReceiveId: string },
     ): Promise<any> {
         try {
+            console.log(`[${this.socketRoom[candidateSendId]}]: ${candidateSendId} candidate to ${candidateReceiveId}`)
             client.to(candidateReceiveId).emit('candidate:get', { candidate, candidateSendId });
         }
         catch (e) {
