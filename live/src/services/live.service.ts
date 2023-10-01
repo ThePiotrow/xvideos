@@ -96,30 +96,35 @@ export class LiveService {
     });
   }
 
-  private OUTPUT_BASE = "./uploads/videos/";
+  private OUTPUT_BASE = "uploads/live/";
 
-  public async uploadFile(file: Express.Multer.File): Promise<{ url: string, name: string }> {
+  public async uploadFile(file: Express.Multer.File, liveId: string): Promise<{ url: string, name: string }> {
     return new Promise((resolve, reject) => {
-      console.log(file)
+
+      // path: 'uploads/live/{liveId}/{segmentNumber}.webm'
+
       const suffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-      const modifiedName = file.originalname
+      const modifiedName = 'segment' + '.webm'
         .replace(/(\.[^\.]+)$/, `-${suffix}$1`)
         .replace(/[^a-zA-Z0-9-.]/g, '-');
 
-      console.log('modifiedName', modifiedName)
+      const outputFolder = path.join(this.OUTPUT_BASE, liveId)
 
-      const filepath = path.join('/uploads/live', modifiedName);
+      if (!fs.existsSync(outputFolder)) {
+        fs.mkdirSync(outputFolder);
+      }
 
-      // Écrire le fichier sur le disque
-      fs.writeFile(filepath, file.buffer, (err) => {
+      const filepath = path.join(this.OUTPUT_BASE, liveId, modifiedName);
+
+      fs.writeFile(filepath, Buffer.from(file.buffer), (err) => {
         if (err) {
+          console.log('err', err)
           reject(err);
-          return; // Assurez-vous de sortir de la fonction après avoir rejeté la promesse
+          return;
         }
 
-        const baseUrl = "/uploads/live";
-        const fileUrl = path.join(baseUrl, modifiedName);  // Utilisez path.join pour garantir que les slashes sont correctement ajoutés
-
+        const fileUrl = path.join(this.OUTPUT_BASE, liveId, modifiedName);
+        console.log('fileUrl', fileUrl)
         resolve({
           url: fileUrl,
           name: modifiedName
@@ -130,18 +135,19 @@ export class LiveService {
 
   public async generateVideo(
     file: { name: string; url: string; mimetype: string; },
-    resolutions: number[]
+    resolutions: number[],
+    liveId: string
   ): Promise<{ url: string }> {
-    const masterFile = `${this.OUTPUT_BASE}${file.name.split('.')[0]}-master.m3u8`;
+    const masterFile = `${this.OUTPUT_BASE}master.m3u8`;
     let masterPlaylist: string[] = fs.existsSync(masterFile) ? fs.readFileSync(masterFile, 'utf-8').split('\n') : ['#EXTM3U'];
 
     for (const resolution of resolutions) {
-      const outputName = `${file.name.split('.')[0]}-${resolution}`;
-      const outputFolder = path.join(this.OUTPUT_BASE, outputName);
+      const outputName = `${resolution}/${file.name.split('.')[0]}`;
+      const outputFolder = path.join(this.OUTPUT_BASE, liveId, outputName);
       const playlistFile = `${outputName}.m3u8`;
 
-      if (!fs.existsSync(outputFolder)) {
-        fs.mkdirSync(outputFolder);
+      if (fs.existsSync(outputFolder)) {
+        fs.rmdirSync(outputFolder, { recursive: true });
       }
 
       try {
@@ -169,7 +175,15 @@ export class LiveService {
 
         masterPlaylist.push(`#EXT-X-STREAM-INF:PROGRAM-ID=1,BANDWIDTH=${bandwidth},RESOLUTION=${this.config[resolution].resolution},CODECS="${this.config[resolution].codec}",FRAME-RATE=${frameRateValue},CLOSED-CAPTIONS=NONE`);
         masterPlaylist.push(variantUrl);
-        fs.writeFileSync(masterFile, masterPlaylist.join('\n'));  // Mise à jour du master à chaque fois
+
+        if (!fs.existsSync(masterFile)) {
+          fs.writeFileSync(masterFile, masterPlaylist.join('\n'));
+        } else {
+          const masterPlaylistContent = fs.readFileSync(masterFile, 'utf-8');
+          if (!masterPlaylistContent.includes(variantUrl)) {
+            fs.appendFileSync(masterFile, '\n' + masterPlaylist.join('\n'));
+          }
+        }
 
       } catch (error) {
         console.error("Error processing resolution:", resolution, "Error:", error);

@@ -37,6 +37,7 @@ import { IServiceUsernameUserCheckAvailabilityDtoResponse } from './interfaces/u
 import { GetUserByIdDto } from './interfaces/user/dto/get-user-by-id.dto';
 import { GetAllUsersResponseDto } from './interfaces/user/dto/get-all-users-response.dto';
 import { IUserGetAllResponse } from './interfaces/user/user-get-all-response.interface';
+import { GetUserByUsernameDto } from './interfaces/user/dto/get-user-by-username.dto';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -284,6 +285,27 @@ export class UsersController {
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
       this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: false }),
+    );
+
+    return {
+      message: userResponse.message,
+      data: {
+        user: userResponse.user,
+      },
+      errors: null,
+    };
+  }
+
+  @Get('/live/:username')
+  @ApiOkResponse({
+    type: GetUserByTokenResponseDto,
+  })
+  public async getUserByUsername(
+    @Param() params: GetUserByUsernameDto,
+  ): Promise<GetUserByTokenResponseDto> {
+
+    const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
+      this.userServiceClient.send('user_get_by_username', { username: params.username, withMedias: false }),
     );
 
     return {

@@ -14,10 +14,13 @@ import * as tmp from 'tmp';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { ILiveUpdateParams } from './interfaces/live-update-params.interface';
+import { RTCPeerConnection, RTCSessionDescription } from 'wrtc';
 
 @Controller()
 export class LiveController {
   constructor(private readonly liveService: LiveService) { }
+
+  private senderStream;
 
   @MessagePattern('get_all_lives')
   public async liveGetAll(
@@ -132,89 +135,10 @@ export class LiveController {
     };
   }
 
-  @MessagePattern('live_stream')
-  public async liveStream(body: {
-    id: string;
-    live: ILive;
-    stream: Express.Multer.File;
-  }): Promise<ILiveUpdateByIdResponse> {
-    let result: ILiveUpdateByIdResponse;
-    const { live } = body;
-    if (body.id) {
-      try {
-        if (live) {
-          const { user, ...liveReq } = live;
-          const liveCheck = await this.liveService.findLiveById({ id: body.id });
+  private handleTrackEvent(e, peer) {
+    this.senderStream = e.streams[0];
+  };
 
-
-          if (liveCheck.end_time) {
-            return {
-              status: HttpStatus.BAD_REQUEST,
-              message: '⚠️ Live ended',
-              live: null,
-              errors: null,
-            };
-          }
-
-          const streams = [
-            720,
-            540,
-            360,
-            180
-          ];
-          const { name, url } = await this.liveService.uploadFile(body.stream);
-
-          console.log(name, url);
-
-          // Puis utilisez tmpFile.name comme chemin d'accès pour ffmpeg
-          const { duration, height } = await new Promise<{ duration: number; height: any }>((resolve, reject) => {
-            ffmpeg.ffprobe(url, (err, metadata) => {
-              console.log(metadata)
-              if (err) reject(err);
-              else resolve({
-                duration: metadata.format.duration,
-                height: metadata.streams[0].height
-              });
-            })
-          });
-
-          console.log(duration, height)
-
-          const resolutions = streams.filter(stream => stream <= height);
-          const videoData = await this.liveService.generateVideo({ name, url, mimetype: 'video/webm' }, resolutions);
-
-          console.log(videoData)
-
-          return {
-            status: HttpStatus.OK,
-            message: '✅ Live stream',
-            url: videoData.url,
-            errors: null,
-          };
-        } else {
-          return {
-            status: HttpStatus.NOT_FOUND,
-            message: '⚠️ Live not found',
-            url: null,
-            errors: null,
-          };
-        }
-      } catch (e) {
-        return {
-          status: HttpStatus.PRECONDITION_FAILED,
-          message: '⚠️ Live stream failed',
-          url: null,
-          errors: e.errors,
-        };
-      }
-    }
-    return {
-      status: HttpStatus.BAD_REQUEST,
-      message: '⚠️ Live stream failed',
-      live: null,
-      errors: null,
-    };
-  }
 
   @MessagePattern('live_create')
   public async liveCreate(body: ILive): Promise<ILiveCreateResponse> {
@@ -269,10 +193,8 @@ export class LiveController {
     if (body.id) {
       try {
         if (live) {
-          console.log(live)
-          const { user, ...liveReq } = live;
           const liveCheck = await this.liveService.findLiveById({ id: body.id });
-          if (liveCheck.end_time) {
+          if (liveCheck?.end_time) {
             return {
               status: HttpStatus.BAD_REQUEST,
               message: '⚠️ Live already stopped',
@@ -281,7 +203,6 @@ export class LiveController {
             };
           }
           const l = await this.liveService.updateLiveById(live.id, { end_time: +new Date() });
-          console.log(l)
           return {
             status: HttpStatus.OK,
             message: '✅ Live stopped',

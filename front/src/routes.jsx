@@ -12,6 +12,7 @@ import ListMedias from "./pages/user/ListMedias";
 import CreateMedias from "./pages/medias/CreateMedias";
 import LaunchLive from "./pages/live/LaunchLive";
 import MediaViewer from "./pages/medias/MediaViewer";
+import Viewer from "./pages/live/Viewer";
 
 function AppRoutes() {
   const token = localStorage.getItem("token");
@@ -91,6 +92,7 @@ function AppRoutes() {
             </AuthGuard>
           }
         />
+        <Route path="/live/:username" element={<Viewer />} />
       </Routes>
     </div>
   );

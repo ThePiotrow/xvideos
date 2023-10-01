@@ -17,4 +17,7 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+  node: {
+    global: true,
+  }
 }

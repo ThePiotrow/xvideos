@@ -8,42 +8,105 @@ import { faCircleNotch, faPlus, faSync, faSyncAlt, faCheck as fasCheck, faCircle
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import "../../components/css/pulse.css"
 
-const SEGMENT_TIME = 10000; // 10 seconds in milliseconds
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3000", {
+  query: {
+    token: localStorage.getItem("token") ?? null
+  }
+});
+
+const SEGMENT_TIME = 1000;
 
 function LaunchLive() {
   const [live, setLive] = useState({ elapsedTime: formatDuration(0) });
   const [title, setTitle] = useState("");
   const [mediaStream, setMediaStream] = useState(null);
   const [devices, setDevices] = useState({ video: [], audio: [] });
+  const [recorder, setRecorder] = useState(null);
   const [storedVideoDevices, setStoredVideoDevices] = useState([]);
   const [storedAudioDevices, setStoredAudioDevices] = useState([]);
-  const [recorder, setRecorder] = useState(null);
-  const [chunks, setChunks] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [chunks, setChunks] = useState([]);
+  const [isConnected, setIsConnected] = useState(false);
   const [segmentTimer, setSegmentTimer] = useState(null);
 
+  const videoRef = useRef();
   const chunksRef = useRef(chunks);
 
   useEffect(() => {
     API.get("/users/me")
       .then((response) => {
         const currentLive = response.data.user?.live;
-        console.log("currentLive", currentLive, response)
         if (currentLive) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
-          setLive({ ...currentLive, elapsedTime });
-
-          console.log("currentLive", currentLive)
-
+          setLive({ ...currentLive, elapsedTime, username: response.data.user.username });
           if (currentLive.title) {
             setTitle(currentLive.title);
           }
+
+          socket.emit('live.streamer.connect', { liveId: live.id })
+          socket.on('live.streamer.connect', ({ connected }) => setIsConnected(connected))
         }
       })
       .catch((error) => {
-        console.error("Erreur lors de la récupération du live ou de l'utilisateur", error);
+        console.error("Erreur lors de la récupération du live", error);
+        handleError("Erreur lors de la récupération du live !");
       });
   }, []);
+
+  useEffect(() => {
+    chunksRef.current = chunks;
+  }, [chunks]);
+
+  useEffect(() => {
+    let timer;
+    if (recorder) {
+      recorder.ondataavailable = (event) => {
+        setChunks(prevChunks => {
+          const newChunks = [...prevChunks, event.data];
+          console.log("newChunks", newChunks)
+          return newChunks;
+        });
+      };
+
+      timer = setInterval(async () => {
+
+        if (recorder.state === "inactive") return;
+
+        const blob = new Blob(chunksRef.current, { type: "video/webm" });
+        if (blob.size > 0) {
+          const arrayBuffer = await blob.arrayBuffer();
+          console.log("arrayBuffer", arrayBuffer)
+          socket.emit('live.streamer.stream', { stream: arrayBuffer });
+          setChunks([]);
+        }
+      }, SEGMENT_TIME);
+
+      recorder.onstop = async () => {
+        const blob = new Blob(chunksRef.current, { type: "video/webm" });
+        if (blob.size > 0) {
+          console.log("arrayBuffer", arrayBuffer)
+          const arrayBuffer = await blob.arrayBuffer();
+          socket.emit('live.streamer.stream', { stream: arrayBuffer });
+
+          setChunks([]);
+        }
+
+      };
+
+      setSegmentTimer(timer)
+    }
+
+    return () => {
+      if (recorder) {
+        recorder.ondataavailable = null;
+        recorder.onstop = null;
+      }
+      clearInterval(segmentTimer);
+    }
+  }, [recorder]);
 
   useEffect(() => {
     if (!live.start_time) return
@@ -52,7 +115,7 @@ function LaunchLive() {
         ...prevLive,
         elapsedTime: formatDuration(dayjs(dayjs()).diff(prevLive.start_time, "seconds"))
       }));
-    }, 1000);
+    }, 500);
 
     return () => clearInterval(intervalId);
   }, [live]);
@@ -84,54 +147,8 @@ function LaunchLive() {
       });
   }, []);
 
-  useEffect(() => {
-    chunksRef.current = chunks;
-  }, [chunks]);
-
-  useEffect(() => {
-    let timer;
-    if (recorder) {
-      recorder.ondataavailable = (event) => {
-        setChunks(prevChunks => {
-          const newChunks = [...prevChunks, event.data];
-          console.log("newChunks", newChunks)
-          return newChunks;
-        });
-      };
-
-      timer = setInterval(async () => {
-
-        if (recorder.state === "inactive") return;
-
-        const blob = new Blob(chunksRef.current, { type: "video/webm" });
-
-        if (blob.size > 0) {
-          console.log(blob);
-          await sendToBackend(blob);
-        }
-      }, SEGMENT_TIME);
-
-      recorder.onstop = async () => {
-        const blob = new Blob(chunksRef.current, { type: "video/webm" });
-        console.log(blob);
-        await sendToBackend(blob); // Envoyer le blob final au backend si vous en avez besoin
-      };
-
-      setSegmentTimer(timer)
-    }
-
-    return () => {
-      if (recorder) {
-        recorder.ondataavailable = null;
-        recorder.onstop = null;
-      }
-      clearInterval(segmentTimer);
-    }
-  }, [recorder]);
-
   const handleError = (errorMessage) => (err) => {
     toast.error(errorMessage);
-    console.error("Erreur :", err);
   };
 
   const handleVideoStream = (stream, deviceId, kind, name) => {
@@ -149,37 +166,28 @@ function LaunchLive() {
         handleStopUsingStream(deviceId, kind);
       };
     }
-
     setLoader(deviceId, false);
-
   };
 
   const handleAudioStream = (stream, deviceId, kind, name) => {
     if (!storedAudioDevices.find(d => d.deviceId === deviceId)) {
       const device = devices.audio.find(d => d.deviceId === deviceId);
-      console.log("device", device)
       setStoredAudioDevices(prev => [...prev, { deviceId, stream, kind: "audioinput", label: device.label }]);
     }
 
   };
 
-  const handleRenameSource = (deviceId, name) => {
-    setStoredVideoDevices(prev => prev.map(stream =>
-      stream.deviceId === deviceId ? { ...stream, name } : stream
-    ));
-  };
-
   const switchToStream = (deviceId, type) => {
+    console.log("switchToStream", deviceId, type)
     if (type === 'audio') { }
 
     if (type === 'video') { }
-    const stream = storedVideoDevices.find(s => s.deviceId === deviceId);
-    if (stream) {
-      setMediaStream(stream.stream);
-      setSelectedVideo(stream);
-      const videoElement = document.getElementById("video");
-      videoElement.srcObject = stream.stream;
-      // toast.success(`${stream.name || devices.video.find(stream => stream.deviceId === deviceId)?.label} affiché(e)`);
+    const device = storedVideoDevices.find(s => s.deviceId === deviceId);
+    console.log("device", device)
+    if (device) {
+      videoRef.current.srcObject = device.stream;
+      setMediaStream(device.stream);
+      setSelectedVideo(device);
     }
   };
 
@@ -188,7 +196,6 @@ function LaunchLive() {
     if (kind === 'audio') {
       navigator.mediaDevices.getUserMedia({ audio: { deviceId: deviceId } })
         .then(stream => {
-          console.log("stream", stream)
           handleAudioStream(stream, deviceId, "audioinput", devices.audio.find(d => d.deviceId === deviceId).label);
           toast.success(`${devices.audio.find(d => d.deviceId === deviceId).label} stocké(e)`);
         })
@@ -199,82 +206,69 @@ function LaunchLive() {
           .then(stream => {
             handleVideoStream(stream, deviceId, "screen");
             toast.success(`${devices.video.find(d => d.deviceId === deviceId).label} stocké(e)`);
-            const videoPreview = document.getElementById(`preview-${deviceId}`);
-            if (videoPreview) {
-              videoPreview.srcObject = mediaStream;
-            }
           })
           .catch(handleError("Erreur lors de la capture d'écran"));
       } else {
         navigator.mediaDevices.getUserMedia({ video: { deviceId: deviceId }, audio: true })
           .then(stream => {
             handleVideoStream(stream, deviceId, "videoinput");
+            console.log("stream", stream)
             toast.success(`${devices.video.find(d => d.deviceId === deviceId).label} stocké(e)`);
-            const videoPreview = document.getElementById(`preview-${deviceId}`);
-            if (videoPreview) {
-              videoPreview.srcObject = mediaStream;
-            }
           })
           .catch(handleError("Failed to get user media"));
       }
     }
   };
 
-  // update devices and storedDevices when a device is removed
-  useEffect(() => {
-    navigator.mediaDevices.addEventListener('devicechange', () => {
-      navigator.mediaDevices.enumerateDevices()
-        .then(deviceList => {
-          const video = deviceList
-            .filter(device => device.kind === 'videoinput')
-            .map(({ deviceId, kind, label, groupId }) => ({
-              deviceId,
-              kind,
-              label,
-              groupId,
-              loading: false
-            }));
+  // useEffect(() => {
+  //   navigator.mediaDevices.addEventListener('devicechange', () => {
+  //     navigator.mediaDevices.enumerateDevices()
+  //       .then(deviceList => {
+  //         const video = deviceList
+  //           .filter(device => device.kind === 'videoinput')
+  //           .map(({ deviceId, kind, label, groupId }) => ({
+  //             deviceId,
+  //             kind,
+  //             label,
+  //             groupId,
+  //             loading: false
+  //           }));
 
-          const audio = deviceList
-            .filter(device => device.kind === 'audioinput')
-            .map(({ deviceId, kind, label, groupId }) => ({
-              deviceId,
-              kind,
-              label,
-              groupId,
-              loading: false
-            }));
+  //         const audio = deviceList
+  //           .filter(device => device.kind === 'audioinput')
+  //           .map(({ deviceId, kind, label, groupId }) => ({
+  //             deviceId,
+  //             kind,
+  //             label,
+  //             groupId,
+  //             loading: false
+  //           }));
 
-          setDevices({ video, audio });
-          setStoredVideoDevices(prev => prev.filter(stream => video.some(device => device.deviceId === stream.deviceId)));
+  //         setDevices({ video, audio });
+  //         setStoredVideoDevices(prev => prev.filter(stream => video.some(device => device.deviceId === stream.deviceId)));
+  //         setStoredAudioDevices(prev => prev.filter(stream => audio.some(device => device.deviceId === stream.deviceId)));
+  //       });
+  //   });
+  // }, []);
 
-          setStoredAudioDevices(prev => prev.filter(stream => audio.some(device => device.deviceId === stream.deviceId)));
-        });
-    });
-  }, []);
-
-  const handleStopUsingStream = (deviceId, kind) => {
-    console.log("handleStopUsingStream", deviceId, kind)
-    console.log("device", deviceId, mergeDevicesArray(devices.video, storedVideoDevices))
-    const device = mergeDevicesArray(devices, storedVideoDevices).find(stream => stream.deviceId === deviceId);
-    toast.success(`${device?.label || device?.name || device.deviceId} supprimé(e)`);
-    setStoredVideoDevices(prev => prev.filter(stream => stream.deviceId !== deviceId));
-    const streamToStop = storedVideoDevices.find(stream => stream.deviceId === deviceId);
-    console.log("streamToStop", streamToStop)
-    if (streamToStop) {
-      streamToStop.stream.getTracks().forEach(track => track.stop());
-      if (kind === "screen")
-        setDevices(prevDevices => ({
-          video: prevDevices.video.filter(device => device.deviceId !== deviceId),
-          audio: prevDevices.audio
-        }));
-    }
-  };
+  // const handleStopUsingStream = (deviceId, kind) => {
+  //   const device = mergeDevicesArray(devices, storedVideoDevices).find(stream => stream.deviceId === deviceId);
+  //   toast.success(`${device?.label || device?.name || device.deviceId} supprimé(e)`);
+  //   setStoredVideoDevices(prev => prev.filter(stream => stream.deviceId !== deviceId));
+  //   const streamToStop = storedVideoDevices.find(stream => stream.deviceId === deviceId);
+  //   if (streamToStop) {
+  //     streamToStop.stream.getTracks().forEach(track => track.stop());
+  //     if (kind === "screen")
+  //       setDevices(prevDevices => ({
+  //         video: prevDevices.video.filter(device => device.deviceId !== deviceId),
+  //         audio: prevDevices.audio
+  //       }));
+  //   }
+  // };
 
   const handleAddScreenShare = () => {
     navigator.mediaDevices.getDisplayMedia({ video: true })
       .then(stream => {
-        console.log("stream", stream)
         const deviceId = 'screen-' + Date.now(); // Génère un ID unique pour chaque partage d'écran
         handleVideoStream(stream, deviceId, "screen", "Partage d'écran");
 
@@ -312,7 +306,7 @@ function LaunchLive() {
   };
 
   const handleLiveStart = () => {
-    if (!mediaStream) {
+    if (!mediaStream?.active) {
       toast.error("Aucune source sélectionnée");
       return;
     }
@@ -321,36 +315,18 @@ function LaunchLive() {
       toast.error("Veuillez entrer un titre");
       return;
     }
+
     const localRecorder = new MediaRecorder(mediaStream);
     setRecorder(localRecorder);
     setChunks([]);
     localRecorder.start(SEGMENT_TIME);
-
   };
-
-  const sendToBackend = async (blob) => {
-    const formData = new FormData();
-    formData.append("segment", blob);
-    try {
-      await API.post(`/lives/stream/${live.id}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        }
-      });
-      toast.success("Segment envoyé avec succès!");
-      setChunks([]);
-    } catch (err) {
-      console.error("Erreur lors de l'envoi du segment:", err);
-      toast.error("Erreur lors de l'envoi du segment.");
-    }
-  }
 
   const handleStop = () => {
     if (!live.id) return
     API.post(`/lives/${live.id}/stop`)
       .then((response) => {
         console.log("response", response)
-        toast.success("Live arrêté !");
         setLive({
           id: null,
           title: null,
@@ -364,11 +340,11 @@ function LaunchLive() {
         handleError("Erreur lors de l'arrêt du live !")
       });
 
-    if (recorder && recorder.state === "recording") {
-      recorder.stop();
-      toast.success("Live arrêté !");
-      // window.location.reload();  
-    }
+    setHasStarted(false);
+    socket.emit('live.streamer.disconnect');
+
+    toast.success("Live arrêté !");
+
   };
 
   const handeStoreSource = (deviceId, kind) => {
@@ -385,7 +361,6 @@ function LaunchLive() {
 
   function mergeDevicesArray(arr1 = [], arr2 = []) {
     const map = {};
-    console.log(arr1);
 
     [...arr1, ...arr2].forEach(device => {
       const isStored = storedVideoDevices.some(stream => stream.deviceId === device.deviceId);
@@ -434,7 +409,7 @@ function LaunchLive() {
               <div
                 className="self-center 2xl:self-start relative rounded-xl overflow-hidden aspect-video w-full h-fit"
               >
-                <video id="video" autoPlay={true}
+                <video ref={videoRef} autoPlay={true}
                   className="aspect-video w-full bg-black"
                 >
                 </video>
@@ -486,7 +461,7 @@ function LaunchLive() {
             </div>
           </div>
           <div className="flex flex-col gap-5">
-            <div className="flex flex-col bg-slate-800 rounded-xl -mt-4 -mx-4 py-4 px-4 gap-6">
+            <div className="flex flex-col bg-slate-800 rounded-xl 2xl:-mx-4 mt-4 py-4 px-4 gap-6">
               <h3 className="font-semibold text-white">Actions</h3>
               <div
                 className="gap-x-5 flex self-center"
@@ -495,7 +470,7 @@ function LaunchLive() {
                   (<button
                     type="button"
                     onClick={handleLiveStart}
-                    disabled={segmentTimer || !title || !mediaStream}
+                    disabled={(!title || !mediaStream || hasStarted) && live?.id}
                     className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
                   >
                     <FontAwesomeIcon className="text-xs" icon={fasPlay} />
@@ -506,7 +481,7 @@ function LaunchLive() {
                 {!live?.id && (
                   <button type="button"
                     onClick={handleSubmit}
-                    disabled={!title || !mediaStream}
+                    disabled={!title || !mediaStream || hasStarted}
                     className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
                   >
                     <FontAwesomeIcon className="text-xs" icon={fasPlay} />
@@ -548,7 +523,7 @@ function LaunchLive() {
                           if (device.isAddable)
                             handeStoreSource(device.deviceId, 'video')
                           if (device.isStored && !device.isSelected)
-                            switchToStream(device.deviceId)
+                            switchToStream(device.deviceId, 'video')
                         }}
                       >
 

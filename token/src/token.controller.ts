@@ -10,11 +10,11 @@ export class TokenController {
   constructor(private readonly tokenService: TokenService) { }
 
   @MessagePattern('token_create')
-  public async createToken(data: { userId: string, username: string }): Promise<ITokenResponse> {
+  public async createToken({ userId, username }: { userId: string, username: string }): Promise<ITokenResponse> {
     let result: ITokenResponse;
-    if (data && data.userId) {
+    if (userId) {
       try {
-        const createResult = await this.tokenService.createToken(data.userId, data.username);
+        const createResult = await this.tokenService.createToken(userId, username);
         return {
           status: HttpStatus.CREATED,
           message: '✅ Token created successfully',
@@ -37,14 +37,12 @@ export class TokenController {
   }
 
   @MessagePattern('token_destroy')
-  public async destroyToken(data: {
-    userId: string;
-  }): Promise<ITokenDestroyResponse> {
+  public async destroyToken({ userId }: { userId: string; }): Promise<ITokenDestroyResponse> {
     return {
-      status: data && data.userId ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
+      status: userId ? HttpStatus.OK : HttpStatus.BAD_REQUEST,
       message:
-        data && data.userId
-          ? (await this.tokenService.deleteTokenForUserId(data.userId)) &&
+        userId
+          ? (await this.tokenService.deleteTokenForUserId(userId)) &&
           '✅ Token destroyed successfully'
           : '⚠️ Token destroy failed',
       errors: null,
@@ -52,10 +50,8 @@ export class TokenController {
   }
 
   @MessagePattern('token_decode')
-  public async decodeToken(data: {
-    token: string;
-  }): Promise<ITokenDataResponse> {
-    const tokenData = await this.tokenService.decodeToken(data.token);
+  public async decodeToken({ token }: { token: string; }): Promise<ITokenDataResponse> {
+    const tokenData = await this.tokenService.decodeToken(token);
     return {
       status: tokenData ? HttpStatus.OK : HttpStatus.UNAUTHORIZED,
       message: tokenData ?

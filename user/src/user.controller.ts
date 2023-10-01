@@ -123,8 +123,36 @@ export class UserController {
     }
   }
 
+  @MessagePattern('user_get_by_username')
+  public async getUserByUsername(params: { username: string, withMedias?: boolean }): Promise<IUserSearchResponse> {
+
+    if (params.username) {
+      const user = await this.userService.searchUserByUsername(params);
+
+      if (user) {
+        return {
+          status: HttpStatus.OK,
+          message: '✅ User found',
+          user,
+        };
+      } else {
+        return {
+          status: HttpStatus.NOT_FOUND,
+          message: '⚠️ User not found',
+          user: null,
+        };
+      }
+    } else {
+      return {
+        status: HttpStatus.BAD_REQUEST,
+        message: '⚠️ User not found',
+        user: null,
+      };
+    }
+  }
+
   @MessagePattern('user_username_check_availability')
-  public async getUserByUsername(params: { username: string }): Promise<IUserUsernameCheckAvailabilityResponse> {
+  public async getUserByUsernameOnly(params: { username: string }): Promise<IUserUsernameCheckAvailabilityResponse> {
     let result: IUserUsernameCheckAvailabilityResponse;
 
     if (params.username) {

@@ -165,6 +165,151 @@ export class UserService {
     }
   }
 
+  async searchUserByUsername({ username, all, isDeleted, media }: { username: string, all?: boolean, isDeleted?: boolean, media?: boolean }): Promise<IUser> {
+
+    const match = (all ?? false) ?
+      {
+        username,
+      } :
+      {
+        username,
+        isDeleted: isDeleted ?? false,
+      };
+
+    media = media ?? false;
+
+    let pipeline: any[] = [
+      {
+        $match: match,
+      },
+      {
+        $addFields: {
+          id: "$_id"
+        }
+      },
+      //add last live with end_time = null
+      {
+        $lookup: {
+          from: "lives",
+          let: { user_id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$user_id", "$$user_id"] },
+                    { $eq: ["$end_time", null] }
+                  ]
+                }
+              }
+            },
+            {
+              $sort: { start_time: -1 }
+            },
+            {
+              $limit: 1
+            }
+          ],
+          as: "live"
+        }
+      },
+      {
+        $unwind: {
+          path: "$live",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          "live.id": "$live._id",
+          "live.user_id": "$live.user_id",
+          "live.title": "$live.title",
+          "live.start_time": "$live.start_time",
+          "live.end_time": "$live.end_time",
+          "live.created_at": "$live.created_at",
+          "live.updated_at": "$live.updated_at",
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          username: 1,
+          email: 1,
+          is_confirmed: 1,
+          role: 1,
+          live: 1
+        }
+      }
+
+    ];
+
+    if (media) {
+      pipeline.push({
+        $lookup: {
+          from: 'media',
+          localField: '_id',
+          foreignField: 'user_id',
+          as: 'medias',
+        }
+      });
+
+      pipeline.push({
+        $addFields: {
+          medias: {
+            $map: {
+              input: "$medias",
+              as: "media",
+              in: {
+                id: "$$media._id",
+                title: "$$media.title",
+                description: "$$media.description",
+                duration: "$$media.duration",
+                thumbnail: "$$media.urls.thumbnail",
+                type: "$$media.type",
+                isDeleted: "$$media.isDeleted",
+                deletedAt: "$$media.deletedAt",
+                updated_at: "$$media.updated_at",
+                created_at: "$$media.created_at"
+              }
+            }
+          }
+        }
+      });
+    }
+
+    const project = media ?
+      {
+        id: 1,
+        username: 1,
+        email: 1,
+        is_confirmed: 1,
+        role: 1,
+        live: 1,
+        medias: 1
+      } :
+      {
+        id: 1,
+        username: 1,
+        email: 1,
+        is_confirmed: 1,
+        role: 1,
+        live: 1
+      };
+
+    pipeline.push({
+      $project: project
+    });
+
+    let result = await this.userModel.aggregate(pipeline).exec();
+
+    if (result && result.length > 0) {
+      return result[0];
+    } else {
+      return null;
+    }
+  }
+
 
   async updateUserById(
     id: string,
