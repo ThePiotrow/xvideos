@@ -17,7 +17,8 @@ import { ClientProxy } from '@nestjs/microservices';
     },
 })
 export class EventsGateway {
-    private users: { [client_id: string]: string | null } = {};
+    private users: any = {};
+    private socketRoom: any = {};
 
     constructor(
         @Inject('LIVE_SERVICE') private readonly liveServiceClient: ClientProxy,
@@ -52,114 +53,69 @@ export class EventsGateway {
         }
     }
 
-    private sendError(message: string, live: any): any {
-        return {
-            message,
-            data: {
-                live
-            },
-            errors: null
-        };
-    }
-
     @WebSocketServer()
     server: Server;
 
-    @SubscribeMessage('live.streamer.connect')
-    async onStreamerConnect(
+    @SubscribeMessage('join:room')
+    async onJoinRoom(
         @ConnectedSocket() client: Socket,
+        @MessageBody() { room }: { room: string, username: string },
     ): Promise<WsResponse<any>> {
         try {
-            const { username } = await this.validateUser(client);
+            const { id, username } = await this.validateUser(client);
 
-            if (!username)
-                return { event: 'live.streamer.not_authorized', data: { message: 'Not authorized' } };
+            if (this.users[room])
+                this.users[room].push({ id, username });
+            else
+                this.users[room] = [{ id, username }];
 
-            client.join(username);
-            this.server.to(client.id).emit('live.connect', { connected: true });
+            this.socketRoom[id] = room;
 
-            return { event: 'live.streamer.connected', data: { message: 'Connected' } };
+            client.join(room);
+            console.log(`[${this.socketRoom[id]}]: ${id} enter`);
+
+            const roomUsers = this.users[room].map(({ id }) => id);
+
+            return { event: 'users:all', data: { roomUsers } };
         }
         catch (e) {
             console.error(e);
         }
     }
 
-    @SubscribeMessage('live.streamer.disconnect')
-    async onStreamerDisconnect(
+    @SubscribeMessage('offer:make')
+    async onOffer(
         @ConnectedSocket() client: Socket,
-    ): Promise<WsResponse<any>> {
+        @MessageBody() { sdp, offerSendId, offerReceiveId, offerSendUsername }: { sdp: string, offerSendId: string, offerReceiveId: string, offerSendUsername: string },
+    ): Promise<any> {
         try {
-            const { username } = await this.validateUser(client);
-
-            if (!username)
-                return { event: 'live.streamer.disconnect', data: { message: 'Not authorized' } };
-
-            this.server.to(username).emit('live.disconnect');
-
-            return { event: 'live.streamer.disconnect', data: { message: 'Disconnected' } };
+            client.to(offerReceiveId).emit('offer:get', { sdp, offerSendId, offerSendUsername });
         }
         catch (e) {
             console.error(e);
         }
     }
 
-    @SubscribeMessage('live.viewer.connect')
-    async onViewerConnect(
+    @SubscribeMessage('answer:make')
+    async onAnswer(
         @ConnectedSocket() client: Socket,
-        @MessageBody() { streamer }: { streamer: string },
-    ): Promise<WsResponse<any>> {
+        @MessageBody() { sdp, answerSendId, answerReceiveId }: { sdp: string, answerSendId: string, answerReceiveId: string, },
+    ): Promise<any> {
         try {
-            if (!streamer)
-                return { event: 'live.viewer.connect', data: { message: 'Not found' } };
-
-            const { id } = await this.validateUser(client);
-
-            console.log(id, streamer);
-
-            console.log(streamer);
-            client.join(streamer);
-
-            this.server.to(streamer).emit('live.viewer.connect', { id });
-            return { event: 'live.viewer.connect', data: { message: 'Connected' } };
+            client.to(answerReceiveId).emit('answer:get', { sdp, answerSendId });
         }
         catch (e) {
             console.error(e);
         }
     }
 
-    @SubscribeMessage('live.viewer.disconnect')
-    async onViewerDisconnect(
+    @SubscribeMessage('candidate:make')
+    async onCandidate(
         @ConnectedSocket() client: Socket,
-        @MessageBody() { streamer }: { streamer: string },
-    ): Promise<WsResponse<any>> {
+        @MessageBody() { candidate, candidateSendId, candidateReceiveId }: { candidate: string, candidateSendId: string, candidateReceiveId: string },
+    ): Promise<any> {
         try {
-            if (!streamer || !this.server.of('/').adapter.rooms[streamer])
-                return { event: 'live.viewer.disconnect', data: { message: 'Not found' } };
-
-            client.leave(streamer);
-
-            return { event: 'live.disconnect', data: { message: 'Disconnected' } };
-        }
-        catch (e) {
-            console.error(e);
-        }
-    }
-
-    @SubscribeMessage('live.streamer.stream')
-    async onStreamerStream(
-        @ConnectedSocket() client: Socket,
-        @MessageBody() { stream }: { stream: string },
-    ): Promise<WsResponse<any>> {
-        try {
-            const { username } = await this.validateUser(client);
-
-            if (!username)
-                return { event: 'live.streamer.stream', data: { message: 'Not authorized' } };
-
-            this.server.to(username).emit('live.stream', { stream });
-
-            return { event: 'live.streamer.stream', data: { message: 'Streamed' } };
+            client.to(candidateReceiveId).emit('candidate:get', { candidate, candidateSendId });
         }
         catch (e) {
             console.error(e);
@@ -167,8 +123,19 @@ export class EventsGateway {
     }
 
     handleDisconnect(client: Socket) {
-        const { id } = client;
-        delete this.users[id];
+        console.log(`[${this.socketRoom[client.id]}]: ${client.id} disconnect`);
+        const roomId = this.socketRoom[client.id];
+
+        let room = this.users[roomId];
+        if (room) {
+            room = room.filter(({ id }) => id !== client.id);
+            this.users[roomId] = room;
+            if (room.length === 0) {
+                delete this.users[roomId];
+                return;
+            }
+        }
+        client.to(roomId).emit('users:exit', { id: client.id });
     }
 
 }

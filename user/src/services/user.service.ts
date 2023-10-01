@@ -33,8 +33,6 @@ export class UserService {
 
     media = media ?? false;
 
-    console.log(media)
-
     let pipeline: any[] = [
       {
         $match: match,
@@ -230,19 +228,7 @@ export class UserService {
           "live.created_at": "$live.created_at",
           "live.updated_at": "$live.updated_at",
         }
-      },
-      {
-        $project: {
-          _id: 0,
-          id: 1,
-          username: 1,
-          email: 1,
-          is_confirmed: 1,
-          role: 1,
-          live: 1
-        }
       }
-
     ];
 
     if (media) {

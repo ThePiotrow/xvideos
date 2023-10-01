@@ -97,7 +97,6 @@ export class UserController {
 
   @MessagePattern('user_get_by_id')
   public async getUserById(params: { id: string, media?: boolean }): Promise<IUserSearchResponse> {
-    console.log(params)
     if (params.id) {
       const user = await this.userService.searchUserById(params);
 

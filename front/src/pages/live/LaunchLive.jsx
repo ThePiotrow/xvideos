@@ -9,16 +9,14 @@ import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import "../../components/css/pulse.css"
 
 import { io } from "socket.io-client";
+import { useAuth } from "../../contexts/authContext";
 
-const socket = io("http://localhost:3000", {
-  query: {
-    token: localStorage.getItem("token") ?? null
-  }
-});
 
 const SEGMENT_TIME = 1000;
 
 function LaunchLive() {
+  const { user, token } = useAuth();
+
   const [live, setLive] = useState({ elapsedTime: formatDuration(0) });
   const [title, setTitle] = useState("");
   const [mediaStream, setMediaStream] = useState(null);
@@ -34,6 +32,15 @@ function LaunchLive() {
 
   const videoRef = useRef();
   const chunksRef = useRef(chunks);
+
+  const socket = io(
+    "http://localhost:3000",
+    {
+      query: {
+        token: token ?? null
+      }
+    }
+  );
 
   useEffect(() => {
     API.get("/users/me")
