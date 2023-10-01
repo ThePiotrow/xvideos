@@ -13,8 +13,7 @@ function Home() {
   useEffect(() => {
     API.get("/medias")
       .then((response) => {
-        console.log("response", response)
-        setMedias(response.data.medias);
+        setMedias(response.data?.medias ?? []);
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des médias", error);
@@ -38,18 +37,19 @@ function Home() {
             {media.duration && (
               <p className="absolute bottom-3 right-4 text-sm backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-md">
                 {formatDuration(media.duration)}
-              </p>)}
+              </p>
+            )}
           </div>
           <h3 className="mt-2 text-md font-medium text-slate-200 truncate transition-all duration-500 ease-in-out px-3">
             {media.title}
           </h3>
           <div className="text-xs text-slate-500 flex gap-2 px-3 py-2 items-center justify-between">
             <p>
-              {formatCreatedAt(dayjs(dayjs()).diff(media.created_at, "seconds"))}
+              {formatCreatedAt(
+                dayjs(dayjs()).diff(media.created_at, "seconds")
+              )}
             </p>
-            <p>
-              @{media.user.username}
-            </p>
+            <p>@{media.user.username}</p>
           </div>
         </div>
       ))}

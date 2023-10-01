@@ -4,10 +4,22 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import API from "../api";
 import useToken from "../hooks/useToken";
 import { useAuth } from "../contexts/authContext";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faFaceSmile, faFilm, faPowerOff, faVideo, faXmark } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowLeft,
+  faFaceSmile,
+  faFilm,
+  faPowerOff,
+  faVideo,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
-export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDropdown }) {
+export default function Header({
+  isOpen,
+  setIsOpen,
+  isOpenDropdown,
+  setIsOpenDropdown,
+}) {
   const navigate = useNavigate();
   const { user, setUser, token, setToken } = useAuth();
 
@@ -27,20 +39,15 @@ export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDro
       .catch((error) => console.error(error));
   };
 
-
-
   //On navigate, set isOpen and isOpenDropdown to false
   useEffect(() => {
     setIsOpen(false);
     setIsOpenDropdown(false);
-  }, [location])
+  }, [location]);
 
   return (
     <header className="w-full z-[100] pt-3">
-      <nav
-        x-data="{ isOpen: false }"
-        className="relative transparent"
-      >
+      <nav x-data="{ isOpen: false }" className="relative transparent">
         <div className="py-4">
           <div className="lg:flex lg:items-center lg:justify-between">
             <div className="flex items-center justify-between lg:hidden">
@@ -88,11 +95,11 @@ export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDro
             </div>
             <div
               x-cloak="true"
-              className={
-                `${isOpen
+              className={`${
+                isOpen
                   ? "translate-y-0 opacity-100"
-                  : "opacity-0 -translate-y-full"}  absolute overflow-y-auto lg:overflow-visible justify-between flex-grow h-screen lg:h-fit top-0 left-0 right-0 inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-slate-900 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:w-auto lg:opacity-100 lg:translate-y-0 lg:flex lg:items-center`
-              }
+                  : "opacity-0 -translate-y-full"
+              }  absolute overflow-y-auto lg:overflow-visible justify-between flex-grow h-screen lg:h-fit top-0 left-0 right-0 inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-slate-900 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:w-auto lg:opacity-100 lg:translate-y-0 lg:flex lg:items-center`}
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 <button
@@ -103,16 +110,30 @@ export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDro
                   <FontAwesomeIcon icon={faXmark} className="text-2xl" />
                 </button>
                 <Link
-                  onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                  onClick={() => {
+                    setIsOpenDropdown(false);
+                    setIsOpen(false);
+                  }}
                   to="/"
-                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname === '/' ? 'bg-slate-50 text-slate-900 hover:text-slate-900 active' : 'bg-slate-800'}`}
+                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${
+                    location.pathname === "/"
+                      ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
+                      : "bg-slate-800"
+                  }`}
                 >
                   Vidéos
                 </Link>
                 <Link
-                  onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                  onClick={() => {
+                    setIsOpenDropdown(false);
+                    setIsOpen(false);
+                  }}
                   to="/live"
-                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname === '/live' ? 'bg-slate-50 text-slate-900 hover:text-slate-900 active' : 'bg-slate-800'}`}
+                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${
+                    location.pathname === "/live"
+                      ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
+                      : "bg-slate-800"
+                  }`}
                 >
                   Lives
                 </Link>
@@ -142,42 +163,46 @@ export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDro
                 </div>
               </div>
 
-              <div className={`flex lg:justify-center mt-10 lg:flex lg:mt-0 
-              ${isOpen ?
-                  'justify-end' :
-                  ''}`}>
+              <div
+                className={`flex lg:justify-center mt-10 lg:flex lg:mt-0 
+              ${isOpen ? "justify-end" : ""}`}
+              >
                 {user ? (
                   <div className="flex items-center mt-4 lg:mt-0 relative flex-grow justify-end w-full">
                     <button
-                      onClick={() => { setIsOpenDropdown(!isOpenDropdown) }}
+                      onClick={() => {
+                        setIsOpenDropdown(!isOpenDropdown);
+                      }}
                       className={`
                       z-[100] border-none overflow-hidden w-fit max-w-[450px] outline-none 
                       focus:outline-none focus:border-none px-4 py-4 lg:py-2 text-slate-100 
                       transition-colors duration-300 transform rounded-md lg:mt-0 
                       [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100 
                       cursor-pointer font-bold me-5 lg:me-0 
-                      ${isOpenDropdown
+                      ${
+                        isOpenDropdown
                           ? "bg-slate-50 text-slate-900 active"
                           : " bg-slate-800"
-                        } }
+                      } }
                       `}
                     >
                       @{user.username}
                     </button>
 
-                    <div className={`z-[99] absolute -top-4 -right-5 me-5 lg:me-0 flex p-5 flex-col gap-1 lg:w-fit 
+                    <div
+                      className={`z-[99] absolute -top-4 -right-5 me-5 lg:me-0 flex p-5 flex-col gap-1 lg:w-fit 
                     lg:min-w-[350px] lg:max-w-[520px] w-full bg-slate-700/20 backdrop-blur-xl rounded-2xl 
                     text-slate-200 duration-500 shadow-2xl 
-                    ${isOpenDropdown ?
-                        "opacity-100 visible pt-5 pb-5" :
-                        "lg:opacity-0 lg:translate-y-12 lg:invisible lg:pb-10"
-                      }`}>
-
-                      <div className={`z-[100] flex justify-between flex-row-reverse gap-5 duration-500 mb-5 
-                      ${isOpenDropdown
-                          ? ""
-                          : "mb-0"
-                        } `}>
+                    ${
+                      isOpenDropdown
+                        ? "opacity-100 visible pt-5 pb-5"
+                        : "lg:opacity-0 lg:translate-y-12 lg:invisible lg:pb-10"
+                    }`}
+                    >
+                      <div
+                        className={`z-[100] flex justify-between flex-row-reverse gap-5 duration-500 mb-5 
+                      ${isOpenDropdown ? "" : "mb-0"} `}
+                      >
                         <button
                           onClick={() => setIsOpenDropdown(!isOpenDropdown)}
                           className={`opacity-0 duration-500`}
@@ -186,54 +211,69 @@ export default function Header({ isOpen, setIsOpen, isOpenDropdown, setIsOpenDro
                         </button>
                       </div>
 
-
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-5">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-5 z-[100]">
                         <Link
-                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
-                          to="/medias"
-                          className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
-                        >
-                          <FontAwesomeIcon icon={faFilm} className="text-2xl" />
-                          Médias
-                        </Link>
-                        <Link
-                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                          onClick={() => {
+                            setIsOpenDropdown(false);
+                            setIsOpen(false);
+                          }}
                           to="/profile"
                           className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
                         >
-                          <FontAwesomeIcon icon={faFaceSmile} className="text-2xl" />
+                          <FontAwesomeIcon
+                            icon={faFaceSmile}
+                            className="text-2xl"
+                          />
                           Profil
                         </Link>
                         <Link
-                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                          onClick={() => {
+                            setIsOpenDropdown(false);
+                            setIsOpen(false);
+                          }}
                           to="/live/launch"
                           className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
                         >
-                          <FontAwesomeIcon icon={faVideo} className="text-2xl" />
+                          <FontAwesomeIcon
+                            icon={faVideo}
+                            className="text-2xl"
+                          />
                           Lancer un live
                         </Link>
                         <Link
-                          onClick={() => { setIsOpenDropdown(false); setIsOpen(false); handleLogout() }}
+                          onClick={() => {
+                            setIsOpenDropdown(false);
+                            setIsOpen(false);
+                            handleLogout();
+                          }}
                           className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-red-100 hover:text-red-100 hover:bg-red-800 bg-red-500/80 shadow-2xl rounded-lg duration-200"
                         >
-                          <FontAwesomeIcon icon={faPowerOff} className="text-2xl" />
+                          <FontAwesomeIcon
+                            icon={faPowerOff}
+                            className="text-2xl"
+                          />
                           Se déconnecter
                         </Link>
                       </div>
                     </div>
-
                   </div>
                 ) : (
                   <div className="flex gap-3">
                     <Link
-                      onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                      onClick={() => {
+                        setIsOpenDropdown(false);
+                        setIsOpen(false);
+                      }}
                       to="/signup"
                       className="px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 hover:text-slate-100 hover:bg-slate-800 border-2 border-slate-600"
                     >
                       S'inscrire
                     </Link>
                     <Link
-                      onClick={() => { setIsOpenDropdown(false); setIsOpen(false); }}
+                      onClick={() => {
+                        setIsOpenDropdown(false);
+                        setIsOpen(false);
+                      }}
                       to="/login"
                       className="px-4 py-4 lg:py-2 text-slate-900 transition-colors duration-300 transform rounded-md lg:mt-0 hover:text-slate-900 bg-slate-200 hover:bg-slate-50"
                     >

@@ -3,37 +3,27 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import useToken from "../../hooks/useToken";
+import ListMedias from "./ListMedias";
+import { useAuth } from "../../contexts/authContext";
 
 function Profile() {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const { token } = useToken();
-  const hasToken = localStorage.getItem("token")
+  const { token, user } = useAuth();
 
-useEffect(() => {
-  if(hasToken) {
-    API.get('/users', {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }).then((response) => {
-      setUser(response.data.user)
-    }).catch((error) => console.error(error))
-  }
-}, [token]);
-
-    return (
-      <div>
-        {user ? (
+  return (
+    <div>
+      {user ? (
+        <div>
           <h2>Page de profile de {user.username}</h2>
-        ):(
-          <div>
-            <h2>Page de profile</h2>
-          </div>
-          
-        )}
-      </div>
-    );
-  }
-  
-  export default Profile;
+          <ListMedias />
+        </div>
+      ) : (
+        <div>
+          <h2>Page de profile</h2>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default Profile;

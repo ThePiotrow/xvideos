@@ -161,14 +161,21 @@ function ListMedias() {
                                 {media.title}
                               </h2>
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                {media.description ? media.description.split(" ").splice(0, 5).join(" ") + "..." : "N/A"}
+                                {media.description
+                                  ? media.description
+                                      .split(" ")
+                                      .splice(0, 5)
+                                      .join(" ") + "..."
+                                  : "N/A"}
                               </p>
                             </div>
                           </div>
                         </div>
                       </td>
                       <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
-                        {media.duration ? formatDuration(media.duration) : "N/A"}
+                        {media.duration
+                          ? formatDuration(media.duration)
+                          : "N/A"}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}
@@ -187,7 +194,6 @@ function ListMedias() {
                               id: media.id,
                               title: media.title,
                               description: media.description,
-                              path: media.path,
                             });
                           }}
                           className="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100"
@@ -220,13 +226,6 @@ function ListMedias() {
           >
             1
           </a>
-          ...
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-gray-500 rounded-md dark:hover:bg-gray-800 dark:text-gray-300 hover:bg-gray-100"
-          >
-            14
-          </a>
         </div>
 
         <a
@@ -242,7 +241,7 @@ function ListMedias() {
       {modals.upload && (
         <div
           onClick={() => toggleModal("upload")}
-          className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+          className="fixed top-0 left-0 z-[500] w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -260,7 +259,7 @@ function ListMedias() {
       {modals.delete && (
         <div
           onClick={() => toggleModal("delete")}
-          className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+          className="fixed top-0 left-0 z-[500] w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
         >
           <div
             onClick={(e) => e.stopPropagation()}
@@ -279,7 +278,7 @@ function ListMedias() {
       {modals.update && (
         <div
           onClick={() => toggleModal("update")}
-          className="fixed top-0 left-0 z-50 w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
+          className="fixed top-0 left-0 z-[500] w-full h-full bg-black bg-opacity-50 flex items-center justify-center"
         >
           <div
             onClick={(e) => e.stopPropagation()}

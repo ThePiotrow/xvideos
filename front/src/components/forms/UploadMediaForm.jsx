@@ -6,22 +6,24 @@ import "react-toastify/dist/ReactToastify.css";
 function UploadMediaForm({ toggleModal, fetchMedias }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [file, setFile] = useState("");
+  const [media, setMedia] = useState("");
+  const [thumbnail, setThumbnail] = useState("");
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
-    formData.append("file", file);
+    formData.append("media", media);
+    formData.append("thumbnail", thumbnail);
     API.post("/medias", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${localStorage.getItem("token")} `,
       },
     })
       .then((response) => {
-        toast("Votre vidéo a bien été uploadée!");
+        console.log(response);
+        toast("Votre media a bien été uploadée!");
         toggleModal();
         fetchMedias();
       })
@@ -67,18 +69,32 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
         </div>
         <div className="mt-6">
           <div className="flex justify-between mb-2">
-            <label
-              htmlFor="password"
-              className="text-gray-700 dark:text-gray-200"
-            >
+            <label htmlFor="media" className="text-gray-700 dark:text-gray-200">
               Fichier
             </label>
           </div>
           <input
             type="file"
-            name="file"
-            id="file"
-            onChange={(e) => setFile(e.target.files[0])}
+            name="media"
+            id="media"
+            onChange={(e) => setMedia(e.target.files[0])}
+            className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
+          />
+        </div>
+        <div className="mt-6">
+          <div className="flex justify-between mb-2">
+            <label
+              htmlFor="thumbnail"
+              className="text-gray-700 dark:text-gray-200"
+            >
+              Miniature
+            </label>
+          </div>
+          <input
+            type="file"
+            name="thumbnail"
+            id="thumbnail"
+            onChange={(e) => setThumbnail(e.target.files[0])}
             className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40 dark:focus:border-blue-300 focus:outline-none focus:ring"
           />
         </div>
