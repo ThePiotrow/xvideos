@@ -284,7 +284,7 @@ export class UsersController {
   ): Promise<GetUserByTokenResponseDto> {
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: false }),
+      this.userServiceClient.send('user_get_by_id', { id: params.id, media: false }),
     );
 
     return {
@@ -305,7 +305,7 @@ export class UsersController {
   ): Promise<GetUserByTokenResponseDto> {
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_username', { username: params.username, withMedias: false }),
+      this.userServiceClient.send('user_get_by_username', { username: params.username, media: false }),
     );
 
     return {
@@ -326,7 +326,7 @@ export class UsersController {
   ): Promise<GetUserByTokenResponseDto> {
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_by_id', { id: params.id, withMedias: true }),
+      this.userServiceClient.send('user_get_by_id', { id: params.id, media: true }),
     );
 
     return {

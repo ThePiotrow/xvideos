@@ -33,6 +33,8 @@ export class UserService {
 
     media = media ?? false;
 
+    console.log(media)
+
     let pipeline: any[] = [
       {
         $match: match,
@@ -42,7 +44,6 @@ export class UserService {
           id: "$_id"
         }
       },
-      //add last live with end_time = null
       {
         $lookup: {
           from: "lives",

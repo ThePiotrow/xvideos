@@ -11,9 +11,6 @@ import {
   HttpException,
   HttpStatus,
   UseInterceptors,
-  UploadedFile,
-  Res,
-  StreamableFile,
   UploadedFiles,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';

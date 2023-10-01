@@ -8,13 +8,7 @@ import { ILiveDeleteResponse } from './interfaces/live-delete-response.interface
 import { ILiveCreateResponse } from './interfaces/live-create-response.interface';
 import { ILiveUpdateByIdResponse } from './interfaces/live-update-by-id-response.interface';
 import { ILiveSearchByIdResponse } from './interfaces/live-search-by-id-response.interface';
-import { threadId } from 'worker_threads';
-import * as ffmpeg from 'fluent-ffmpeg';
-import * as tmp from 'tmp';
-import * as fs from 'node:fs';
-import * as path from 'node:path';
 import { ILiveUpdateParams } from './interfaces/live-update-params.interface';
-import { RTCPeerConnection, RTCSessionDescription } from 'wrtc';
 
 @Controller()
 export class LiveController {

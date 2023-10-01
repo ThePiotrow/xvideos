@@ -96,8 +96,8 @@ export class UserController {
   }
 
   @MessagePattern('user_get_by_id')
-  public async getUserById(params: { id: string, withMedias?: boolean }): Promise<IUserSearchResponse> {
-
+  public async getUserById(params: { id: string, media?: boolean }): Promise<IUserSearchResponse> {
+    console.log(params)
     if (params.id) {
       const user = await this.userService.searchUserById(params);
 
@@ -124,7 +124,7 @@ export class UserController {
   }
 
   @MessagePattern('user_get_by_username')
-  public async getUserByUsername(params: { username: string, withMedias?: boolean }): Promise<IUserSearchResponse> {
+  public async getUserByUsername(params: { username: string, media?: boolean }): Promise<IUserSearchResponse> {
 
     if (params.username) {
       const user = await this.userService.searchUserByUsername(params);
