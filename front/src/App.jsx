@@ -51,9 +51,8 @@ function App() {
           />
         </Container>
         <div
-          className={`absolute z-[98] top-0 left-0 right-0 bottom-0 ${
-            isOpenDropdown ? "block" : "hidden"
-          }`}
+          className={`absolute z-[98] top-0 left-0 right-0 bottom-0 ${isOpenDropdown ? "block" : "hidden"
+            }`}
           onClick={() => setIsOpenDropdown(false)}
         />
       </BrowserRouter>
