@@ -216,18 +216,10 @@ function Viewer() {
           <div className="flex flex-col 2xl:w-1/2 gap-6">
             <>
               <h3
-                className="font-semibold text-white"
-              >Titre</h3>
-              <input
-                type="text"
-                name="title"
-                id="title"
-                placeholder="Mon live trop cool"
-                value={""}
-                onChange={(e) => setTitle(e.target.value)}
-
                 className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-800 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
-              />
+              >
+                {live.title}
+              </h3>
             </>
             <div
               className="flex gap-5"

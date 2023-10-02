@@ -6,9 +6,10 @@ COPY package*.json ./
 
 RUN npm install npm@latest -g
 RUN npm install
+RUN npm install -g @nestjs/cli
 
 COPY . .
 
-#RUN npm run build
+RUN if [ "${NODE_ENV}" = "prod" ]; then npm run build; fi
 
-CMD [ "npm", "run", "start:dev" ]
+CMD [ "npm", "run", "start:${NODE_ENV}" ]
