@@ -31,9 +31,6 @@ jobs:
           REMOTE_USER: ${{ secrets.EC2_USER }}
           TARGET: "/home/ubuntu"
           EXCLUDE: "/dist/, /node_modules/, /front/"
-          SCRIPT_AFTER: |
-            cd /home/ubuntu
-            sudo docker-compose -f docker-compose-ec2.yml up -d --build --force-recreate --remove-orphans
 
 
 
