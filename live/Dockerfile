@@ -15,4 +15,4 @@ COPY . .
 
 RUN npm run build
 
-CMD [ "sh", "-c", "npm run start:${NODE_ENV}" ]
+CMD [ "npm", "run", "start:prod" ]
