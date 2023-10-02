@@ -96,8 +96,8 @@ export default function Header({
             <div
               x-cloak="true"
               className={`${isOpen
-                  ? "translate-y-0 opacity-100"
-                  : "opacity-0 -translate-y-full"
+                ? "translate-y-0 opacity-100"
+                : "opacity-0 -translate-y-full"
                 }  absolute overflow-y-auto lg:overflow-visible justify-between flex-grow h-screen lg:h-fit top-0 left-0 right-0 inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-slate-900 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:w-auto lg:opacity-100 lg:translate-y-0 lg:flex lg:items-center`}
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
@@ -115,8 +115,8 @@ export default function Header({
                   }}
                   to="/"
                   className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname === "/"
-                      ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
-                      : "bg-slate-800"
+                    ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
+                    : "bg-slate-800"
                     }`}
                 >
                   Vidéos
@@ -128,8 +128,8 @@ export default function Header({
                   }}
                   to="/lives"
                   className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname === "/live"
-                      ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
-                      : "bg-slate-800"
+                    ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
+                    : "bg-slate-800"
                     }`}
                 >
                   Lives
@@ -226,7 +226,7 @@ export default function Header({
                             setIsOpenDropdown(false);
                             setIsOpen(false);
                           }}
-                          to="/live/launch"
+                          to="/live"
                           className="flex flex-col justify-center gap-3 font-bold text-sm h-28 text-center text-slate-100 hover:bg-slate-200 bg-slate-500/60 shadow-2xl hover:text-slate-900 rounded-lg duration-200"
                         >
                           <FontAwesomeIcon

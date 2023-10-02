@@ -11,6 +11,9 @@ async function bootstrap() {
     .setTitle('API docs')
     .addTag('users')
     .addTag('medias')
+    .addTag('live')
+    .addTag('tokens')
+    .addTag('notifications')
     .setVersion('1.0')
     .addBearerAuth()
     .build();

@@ -100,7 +100,7 @@ export class EventsGateway {
     ): Promise<any> {
         try {
             console.log(`[${this.socketRoom[offerSendId]}]: ${offerSendId} offer to ${offerReceiveId}`);
-            this.server.to(offerReceiveId).emit('offer:get', { sdp, offerSendId, offerSendUsername });
+            client.to(offerReceiveId).emit('offer:get', { sdp, offerSendId, offerSendUsername });
         }
         catch (e) {
             console.error(e);

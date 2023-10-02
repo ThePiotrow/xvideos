@@ -136,10 +136,10 @@ function Viewer() {
         offerSendUsername,
       }) => {
         console.log('get offer');
-        if (!streamRef.current) return;
         const pc = createPeerConnection(offerSendId, offerSendUsername);
         if (!(pc && socketRef.current)) return;
         pcsRef.current = { ...pcsRef.current, [offerSendId]: pc };
+        console.log('pc', pc)
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
           console.log('answer set remote description success');
