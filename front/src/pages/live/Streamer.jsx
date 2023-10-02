@@ -26,6 +26,8 @@ function Streamer() {
 
   const [live, setLive] = useState({ elapsedTime: formatDuration(0) });
   const [users, setUsers] = useState([]);
+  const [title, setTitle] = useState("");
+  const [devices, setDevices] = useState({ audio: [], video: [] });
 
 
   const localUser = useRef(null);
@@ -63,6 +65,13 @@ function Streamer() {
     return () => clearInterval(intervalId);
   }, [live]);
 
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const audioDevices = devices.filter((device) => device.kind === "audioinput");
+      const videoDevices = devices.filter((device) => device.kind === "videoinput");
+      setDevices({ audio: audioDevices, video: videoDevices });
+    });
+  }, []);
 
   const getLocalStream = useCallback(async () => {
     try {
@@ -256,7 +265,7 @@ function Streamer() {
                 name="title"
                 id="title"
                 placeholder="Mon live trop cool"
-                value={""}
+                value={live.title}
                 onChange={(e) => setTitle(e.target.value)}
 
                 className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-800 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
