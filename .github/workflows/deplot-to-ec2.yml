@@ -29,14 +29,14 @@ jobs:
           SOURCE: "/"
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USER }}
-          TARGET: "/home/ubuntu"
+          TARGET: "/home/ubuntu/projects"
           EXCLUDE: "/dist/, /node_modules/, /front/"
           SCRIPT_BEFORE: |
-            cd /home/ubuntu 
+            cd /home/ubuntu/projects
             sudo docker-compose -f docker-compose-ec2.yml down
           SCRIPT_AFTER: |
-            cd /home/ubuntu 
-            sudo docker-compose -f docker-compose-ec2.yml up -d --remove-orphans
+            cd /home/ubuntu/projects
+            sudo docker-compose -f docker-compose-ec2.yml up -d --build --force-recreate --remove-orphans
 
 
 
