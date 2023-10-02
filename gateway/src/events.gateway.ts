@@ -20,20 +20,22 @@ export class EventsGateway {
     private verifiedUsers: any = {};
     private users: any = {};
     private socketRoom: any = {};
+    private maxUsersPerRoom = 4;
 
     constructor(
         @Inject('LIVE_SERVICE') private readonly liveServiceClient: ClientProxy,
         @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     ) { }
 
-    private async validateUser(client: Socket, username?: string): Promise<{ _id: string, _username: string | null }> {
+    private async validateUser(client: Socket, username?: string): Promise<{ _id: string, _username: string }> {
         try {
-
             const { id, handshake: { query: { token } } } = client;
 
             if (!token) {
-                this.verifiedUsers[id] = username ?? null;
+                this.verifiedUsers[id] = username || 'Unknown'; // Fallback to 'Unknown' instead of null
             }
+
+            console.log('Verified Users', this.verifiedUsers);
 
             if (!this.verifiedUsers[id]) {
                 const t = await firstValueFrom(
@@ -42,12 +44,12 @@ export class EventsGateway {
                     }),
                 );
                 const { data } = t;
-                this.verifiedUsers[id] = data?.user?.username || null;
+                this.verifiedUsers[id] = data?.user?.username || 'Unknown'; // Fallback to 'Unknown' instead of null
             }
 
             return {
                 _id: id,
-                _username: username ?? this.verifiedUsers[id]
+                _username: username || this.verifiedUsers[id]
             };
         }
         catch (e) {
@@ -67,6 +69,10 @@ export class EventsGateway {
             const { _id, _username } = await this.validateUser(client, username);
 
             if (this.users[room]) {
+                if (this.users[room].length >= this.maxUsersPerRoom) {
+                    client.emit('room:full', { room });
+                    return;
+                }
                 if (!this.users[room].find(({ id }) => id === _id))
                     this.users[room].push({ id: _id, username: _username });
             }
@@ -78,6 +84,7 @@ export class EventsGateway {
 
             const roomUsers = this.users[room];
 
+            console.log(roomUsers);
 
             this.server.sockets.to(room).emit('room:users', { username, roomUsers });
         }
@@ -120,7 +127,7 @@ export class EventsGateway {
         @MessageBody() { candidate, candidateSendId, candidateReceiveId }: { candidate: any, candidateSendId: string, candidateReceiveId: string },
     ): Promise<any> {
         try {
-            console.log(`[${this.socketRoom[candidateSendId]}]: ${candidateSendId} candidate to ${candidateReceiveId}`)
+            console.log(`[${this.socketRoom[candidateSendId]}]: ${this.verifiedUsers[candidateSendId]} candidate to ${this.verifiedUsers[candidateReceiveId]}`)
             client.to(candidateReceiveId).emit('candidate:get', { candidate, candidateSendId });
         }
         catch (e) {
@@ -141,9 +148,7 @@ export class EventsGateway {
                 return;
             }
         }
-        client.to(roomId).emit('room:users', {
-            roomUsers: this.users[room];
-        });
+        client.to(roomId).emit('users:exit', { id: client.id });
     }
 
 }

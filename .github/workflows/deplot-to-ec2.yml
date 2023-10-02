@@ -30,7 +30,7 @@ jobs:
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USER }}
           TARGET: "/home/ubuntu"
-          EXCLUDE: "/dist/, /node_modules/, /front/"
+          EXCLUDE: "/dist/, /node_modules/"
           SCRIPT_BEFORE: |
             cd /home/ubuntu 
             sudo docker-compose -f docker-compose-ec2.yml down

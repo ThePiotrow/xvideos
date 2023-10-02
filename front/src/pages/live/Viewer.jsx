@@ -82,8 +82,8 @@ function Viewer() {
   const createPeerConnection = useCallback(
     (id, username) => {
       const pc = new RTCPeerConnection(pc_config);
+
       pc.onicecandidate = (e) => {
-        console.log('onicecandidate');
         if (!(socketRef.current && e.candidate)) return;
         socketRef.current.emit('candidate:make', {
           candidate: e.candidate,
@@ -97,20 +97,13 @@ function Viewer() {
       };
 
       pc.ontrack = (e) => {
-        console.log('ontrack success');
-        setUsers((oldUsers) =>
-          oldUsers
-            .filter((user) => user.id !== id)
-            .concat({
-              id: id,
-              username,
-              stream: e.streams[0],
-            }),
-        );
-        console.log(users)
+        console.log('ontrack', e);
+        if (!videoRef.current) return;
         videoRef.current.srcObject = e.streams[0];
-      };
-      if (streamRef.current) {
+      }
+
+      if (!streamRef.current) console.log("no stream");
+      else {
         streamRef.current.getTracks().forEach((track) => {
           pc.addTrack(track, streamRef.current);
         });
@@ -132,7 +125,7 @@ function Viewer() {
     getLocalStream();
 
     socketRef.current.on('room:users', ({ roomUsers }) => {
-      setUsers(roomUsers)
+      setUsers(roomUsers);
     });
 
     socketRef.current.on(

@@ -47,7 +47,7 @@ function Live() {
         <div
           className="cursor-pointer relative group w-full bg-slate-800 rounded-xl"
           key={live.id}
-          onClick={() => navigate(`/live/${live.id}`)}
+          onClick={() => navigate(`/live/${live.user.username}`)}
           title={live.title}
         >
 

@@ -83,6 +83,7 @@ function Streamer() {
       const pc = new RTCPeerConnection(pc_config);
 
       pc.onicecandidate = (e) => {
+        if (socketRef.current.id == id) return;
         if (!(socketRef.current && e.candidate)) return;
         console.log('onicecandidate');
         socketRef.current.emit('candidate:make', {
@@ -111,6 +112,7 @@ function Streamer() {
 
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => {
+          console.log('add track');
           pc.addTrack(track, streamRef.current);
         });
       }
@@ -133,7 +135,7 @@ function Streamer() {
     socketRef.current.on('room:users', ({ roomUsers }) => {
       setUsers(roomUsers);
       roomUsers.forEach(async (_user) => {
-        if (!streamRef.current) return;
+        if (!streamRef.current && _user.id === socketRef.current.id) return;
         const pc = createPeerConnection(_user.id, _user.username);
         if (!(pc && socketRef.current)) return;
         pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
