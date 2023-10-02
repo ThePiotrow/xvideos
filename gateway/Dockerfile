@@ -12,4 +12,4 @@ COPY . .
 
 RUN if [ "${NODE_ENV}" = "prod" ]; then npm run build; fi
 
-CMD [ "npm", "run", "start:${NODE_ENV}" ]
+CMD [ "sh", "-c", "npm run start:${NODE_ENV}" ]
