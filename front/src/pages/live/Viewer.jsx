@@ -31,7 +31,7 @@ function Viewer() {
   const localUser = useRef(null);
   const [viewer, setViewer] = useState({ username: "Anonyme-" + Math.random().toString(36).substring(2) });
   const socketRef = useRef();
-  const pcsRef = useRef({});
+  const pcRef = useRef({});
   const videoRef = useRef(null);
   const streamRef = useRef();
 
@@ -45,7 +45,12 @@ function Viewer() {
 
         if (currentLive) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
-          setLive({ ...currentLive, elapsedTime, username: response.data.user.username });
+          setLive(
+            {
+              ...currentLive,
+              elapsedTime,
+              username: response.data.user.username
+            });
         }
       })
       .catch((error) => {
@@ -102,13 +107,6 @@ function Viewer() {
         videoRef.current.srcObject = e.streams[0];
       }
 
-      if (!streamRef.current) console.log("no stream");
-      else {
-        streamRef.current.getTracks().forEach((track) => {
-          pc.addTrack(track, streamRef.current);
-        });
-      }
-
       return pc;
     }, []);
 
@@ -137,9 +135,10 @@ function Viewer() {
       }) => {
         console.log('get offer');
         const pc = createPeerConnection(offerSendId, offerSendUsername);
-        if (!(pc && socketRef.current)) return;
-        pcsRef.current = { ...pcsRef.current, [offerSendId]: pc };
         console.log('pc', pc)
+        if (!(pc && socketRef.current)) return;
+        pcRef.current = { [offerSendId]: pc };
+        console.log('pc', pcRef.current)
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
           console.log('answer set remote description success');
@@ -163,7 +162,7 @@ function Viewer() {
       'answer:get',
       async ({ sdp, answerSendId }) => {
         console.log('get answer');
-        const pc = pcsRef.current[answerSendId];
+        const pc = pcRef.current[answerSendId];
         if (!pc) return;
         pc.setRemoteDescription(new RTCSessionDescription(sdp));
       },
@@ -173,8 +172,8 @@ function Viewer() {
       'candidate:get',
       async ({ candidate, candidateSendId }) => {
         console.log('get candidate');
-        const pc = pcsRef.current[candidateSendId];
-        console.log(candidateSendId, pcsRef.current)
+        const pc = pcRef.current[candidateSendId];
+        console.log(candidateSendId, pcRef.current)
         if (!pc) return;
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
         console.log('candidate add success');
@@ -184,9 +183,9 @@ function Viewer() {
     socketRef.current.on(
       'users:exit',
       ({ id }) => {
-        if (!pcsRef.current[id]) return;
-        pcsRef.current[id].close();
-        delete pcsRef.current[id];
+        if (!pcRef.current[id]) return;
+        pcRef.current[id].close();
+        delete pcRef.current[id];
         setUsers((oldUsers) => oldUsers.filter((user) => user.id !== id));
       });
 
@@ -195,9 +194,9 @@ function Viewer() {
         socketRef.current.disconnect();
       }
       users.forEach((user) => {
-        if (!pcsRef.current[user.id]) return;
-        pcsRef.current[user.id].close();
-        delete pcsRef.current[user.id];
+        if (!pcRef.current[user.id]) return;
+        pcRef.current[user.id].close();
+        delete pcRef.current[user.id];
       });
     };
   }, [createPeerConnection, getLocalStream]);

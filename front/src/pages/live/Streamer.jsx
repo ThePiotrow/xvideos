@@ -137,6 +137,7 @@ function Streamer() {
       setUsers(roomUsers);
       roomUsers.forEach(async (_user) => {
         if (!streamRef.current && _user.id === socketRef.current.id) return;
+        console.log(_user.username)
         const pc = createPeerConnection(_user.id, _user.username);
         if (!(pc && socketRef.current)) return;
         pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
@@ -148,7 +149,6 @@ function Streamer() {
           });
           console.log('create offer success');
           await pc.setLocalDescription(new RTCSessionDescription(localSdp));
-          console.log(_user.id)
           socketRef.current.emit('offer:make', {
             sdp: localSdp,
             offerSendId: socketRef.current.id,
@@ -328,15 +328,6 @@ function Streamer() {
                 </div> */}
 
             </div>
-
-            {users.map((_user) => (
-              <Video
-                key={_user.id}
-                username={_user.username}
-                stream={_user.stream}
-                muted={true}
-              />
-            ))}
           </div>
           <div className="flex flex-col gap-5">
             <div className="flex flex-col bg-slate-800 rounded-xl 2xl:-mx-4 mt-4 py-4 px-4 gap-6">
