@@ -12,9 +12,9 @@ import { TokenSchema } from './schemas/token.schema';
     JwtModule.registerAsync({
       useClass: JwtConfigService,
     }),
-    MongooseModule.forRoot(
-      "mongodb://me:me@cluster.gx5xogt.mongodb.net:27017/project"
-    ),
+    MongooseModule.forRootAsync({
+      useClass: MongoConfigService,
+    }),
     MongooseModule.forFeature([
       {
         name: 'Token',
