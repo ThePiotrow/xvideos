@@ -118,13 +118,11 @@ export class LiveService {
 
       fs.writeFile(filepath, Buffer.from(file.buffer), (err) => {
         if (err) {
-          console.log('err', err)
           reject(err);
           return;
         }
 
         const fileUrl = path.join(this.OUTPUT_BASE, liveId, modifiedName);
-        console.log('fileUrl', fileUrl)
         resolve({
           url: fileUrl,
           name: modifiedName
@@ -157,10 +155,8 @@ export class LiveService {
             .size(`?x${resolution}`)
             .outputOptions(ffmpegOptions)
             .on('start', commandLine => {
-              console.log('Resolution: ' + resolution)
             })
             .on('progress', progress => {
-              console.log('Processing: ' + Math.max(0, Math.round(Number(progress.percent))).toFixed(2) + '%');
             })
             .on('end', resolve)
             .on('error', reject)
@@ -349,7 +345,6 @@ export class LiveService {
       { new: true },
     );
 
-    console.log(live);
 
     return await this.findLiveById({ id });
   }

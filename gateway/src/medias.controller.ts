@@ -71,18 +71,18 @@ export class MediasController {
     type: GetMediasResponseDto,
   })
   public async getMedias(
-    @Body() body: { all?: boolean; isDeleted: boolean; limit?: number; offset?: number, allUser?: boolean, isConfirmed?: boolean },
+    @Param() body: { all?: boolean; limit?: number; offset?: number; },
   ): Promise<GetMediasResponseDto> {
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all', {
-          all: body.all,
-          isDeleted: body.isDeleted,
           limit: body.limit,
           offset: body.offset,
-          allUser: body.allUser,
-          isConfirmed: body.isConfirmed,
+          all: false,
+          isDeleted: false,
+          allUser: false,
+          isConfirmed: true,
         }),
       );
 

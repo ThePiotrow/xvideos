@@ -41,7 +41,10 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
     if (state) {
       controlsTimeoutRef.current = setTimeout(() => {
         setIsControlsVisible(false);
-      }, 500);
+        if (isFullscreen) {
+          videoContainerRef.current.style.cursor = 'none';
+        }
+      }, 2500);
     }
   }, []);
 
@@ -145,7 +148,6 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
   const handleQualityChange = (e, levelIndex) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log(videoRef.current.hls)
     if (!videoRef.current || !videoRef.current.hls) {
       console.error("HLS player not available");
       return;
@@ -242,7 +244,6 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
   const handleProgressClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log(e.nativeEvent.offsetX)
     const offsetX = e.nativeEvent.offsetX;
     const width = e.currentTarget.offsetWidth; // Change e.target to e.currentTarget
     const newTime = (offsetX / width) * videoRef.current.duration;

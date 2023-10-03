@@ -244,10 +244,9 @@ export class MediaService {
     id: string,
     params: IMediaUpdateParams,
   ): Promise<IMedia> {
-    console.log(id, params);
     await this.mediaModel.findOneAndUpdate({ _id: id }, params);
 
-    return await this.getMediaById({ id });
+    return await this.getMediaById({ id, all: true });
   }
 
   public async generateThumbnail(file: { name: string; url: string; mimetype: string; duration: number; }): Promise<{ url: string; name: string }> {
@@ -377,12 +376,15 @@ export class MediaService {
       {
         isDeleted: isDeleted ?? false,
       };
+
     const userMatch = (allUser ?? false) ?
       {
       } :
       {
         "user.is_confirmed": isConfirmed ?? true,
       }
+
+    console.log(match, userMatch)
 
     const result = await this.mediaModel.aggregate([
       {
@@ -400,7 +402,7 @@ export class MediaService {
         $unwind: "$user"
       },
       {
-        $match: userMatch, // Ajouter cette étape pour filtrer en fonction de user.is_confirmed
+        $match: userMatch,
       },
       {
         $addFields: {

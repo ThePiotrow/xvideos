@@ -78,13 +78,13 @@ export class MediaController {
   }): Promise<IMediaUpdateByIdResponse> {
     if (params.id) {
       try {
-        let media = await this.mediaService.getMediaById({ id: params.id });
+        let media = await this.mediaService.getMediaById({ id: params.id, all: true });
         if (media) {
           media.user_id = media.user.id;
           media = { ...media, ...params.media } as IMedia;
 
           delete media.user;
-          console.log(media);
+          console.log("media", media);
           const updatedMedia = await this.mediaService.updateMediaById(
             params.id,
             params.media,

@@ -10,6 +10,7 @@ import {
   HttpException,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -222,6 +223,43 @@ export class AdminController {
     };
   }
 
+  @Get('medias')
+  @Authorization()
+  @Admin()
+  @ApiOkResponse({
+    type: GetMediaResponseDto,
+  })
+  public async getMedias(
+    @Query() params: MediaIdDto,
+  ): Promise<any> {
+    let body = {}
+
+    for (const [key, value] of Object.entries(params)) {
+      if (value) {
+        body = {
+          ...body,
+          [key]: Boolean(value)
+        }
+      }
+    }
+    console.log(body)
+
+    const mediasResponse: any =
+      await firstValueFrom(
+        this.mediaServiceClient.send('media_get_all',
+          body
+        ),
+      );
+
+    return {
+      message: mediasResponse.message,
+      data: {
+        medias: mediasResponse.medias,
+      },
+      errors: null,
+    };
+  }
+
   @Get('medias/:id')
   @Authorization()
   @Admin()
@@ -233,7 +271,7 @@ export class AdminController {
   ): Promise<GetMediaResponseDto> {
     const mediasResponse: IServiceMediaSearchByIdResponse =
       await firstValueFrom(
-        this.mediaServiceClient.send('media_search_by_id',
+        this.mediaServiceClient.send('media_get_all',
           {
             id: params.id,
             all: true
@@ -262,11 +300,12 @@ export class AdminController {
     },
     @Body() body: UpdateMediaDto,
   ): Promise<UpdateMediaResponseDto> {
+    console.log(params.id, body)
     const confirmMediaResponse: IServiceMediaUpdateByIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_update_by_id', {
           id: params.id,
-          ...body,
+          media: body,
         }),
       );
 
@@ -274,7 +313,7 @@ export class AdminController {
       throw new HttpException(
         {
           message: confirmMediaResponse.message,
-          user: null,
+          media: null,
         },
         confirmMediaResponse.status,
       );

@@ -74,7 +74,6 @@
             connected = true;
 
             socket.emit('hostLive', (data) => {
-                console.log('data', data)
                 room = data.room;
             });
 

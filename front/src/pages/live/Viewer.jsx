@@ -98,11 +98,9 @@ function Viewer() {
       };
 
       pc.oniceconnectionstatechange = (e) => {
-        console.log('ice connection state change', e);
       };
 
       pc.ontrack = (e) => {
-        console.log('ontrack', e);
         if (!videoRef.current) return;
         videoRef.current.srcObject = e.streams[0];
       }
@@ -133,15 +131,11 @@ function Viewer() {
         offerSendId,
         offerSendUsername,
       }) => {
-        console.log('get offer');
         const pc = createPeerConnection(offerSendId, offerSendUsername);
-        console.log('pc', pc)
         if (!(pc && socketRef.current)) return;
         pcRef.current = { [offerSendId]: pc };
-        console.log('pc', pcRef.current)
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-          console.log('answer set remote description success');
           const localSdp = await pc.createAnswer({
             offerToReceiveVideo: true,
             offerToReceiveAudio: true,
@@ -161,7 +155,6 @@ function Viewer() {
     socketRef.current.on(
       'answer:get',
       async ({ sdp, answerSendId }) => {
-        console.log('get answer');
         const pc = pcRef.current[answerSendId];
         if (!pc) return;
         pc.setRemoteDescription(new RTCSessionDescription(sdp));
@@ -171,12 +164,10 @@ function Viewer() {
     socketRef.current.on(
       'candidate:get',
       async ({ candidate, candidateSendId }) => {
-        console.log('get candidate');
         const pc = pcRef.current[candidateSendId];
         console.log(candidateSendId, pcRef.current)
         if (!pc) return;
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log('candidate add success');
       },
     );
 

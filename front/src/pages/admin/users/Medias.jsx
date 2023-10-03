@@ -4,25 +4,27 @@ import { useAuth } from "../../../contexts/authContext";
 import MediaIcon from "../../../components/MediaIcon";
 import dayjs from "dayjs";
 import Details from "../../../components/icons/Details";
+import { formatDuration } from "../../../utils/mediaUtils";
 
 //import { toast } from "react-toastify";
 //import "react-toastify/dist/ReactToastify.css";
 
 function Medias() {
   const [medias, setMedias] = useState([]);
-  const { token } = useAuth();
+  const { user } = useAuth();
 
   const getMedias = async () => {
     API.get(
-      "/medias",
-      {},
+      "/admin/medias",
       {
-        allUser: true,
+        params: {
+          all: true,
+          allUser: true,
+        },
       }
     )
       .then((response) => {
-        setMedias(response.data.medias);
-        console.log(medias);
+        setMedias(response.data?.medias ?? []);
       })
       .catch((error) => {
         console.log(error);
@@ -125,9 +127,9 @@ function Medias() {
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                 {media.description
                                   ? media.description
-                                      .split(" ")
-                                      .splice(0, 5)
-                                      .join(" ") + "..."
+                                    .split(" ")
+                                    .splice(0, 5)
+                                    .join(" ") + "..."
                                   : "N/A"}
                               </p>
                             </div>
@@ -150,10 +152,10 @@ function Medias() {
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
                         <button
-                          onClick={() => toggleBlock(user)}
+                          onClick={() => toggleBlock(media)}
                           className="text-slate-500 transition-colors duration-200 hover:text-red-500 focus:outline-none"
                         >
-                          {media.user.is_confirmed ? "Supprimer" : "Récupérer"}
+                          {!media.isDeleted ? "Supprimer" : "Récupérer"}
                         </button>
                       </td>
                     </tr>

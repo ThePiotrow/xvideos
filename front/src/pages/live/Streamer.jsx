@@ -28,6 +28,7 @@ function Streamer() {
   const [users, setUsers] = useState([]);
   const [title, setTitle] = useState("");
   const [devices, setDevices] = useState({ audio: [], video: [] });
+  const [storedDevices, setStoredDevices] = useState([]);
 
 
   const localUser = useRef(null);
@@ -66,12 +67,70 @@ function Streamer() {
   }, [live]);
 
   useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      const audioDevices = devices.filter((device) => device.kind === "audioinput");
-      const videoDevices = devices.filter((device) => device.kind === "videoinput");
-      setDevices({ audio: audioDevices, video: videoDevices });
-    });
+    navigator.mediaDevices.enumerateDevices()
+      .then(deviceList => {
+        const video = deviceList
+          .filter(device => device.kind === 'videoinput')
+          .map(({ deviceId, kind, label, groupId }) => ({
+            deviceId,
+            kind,
+            label,
+            groupId,
+            loading: false
+          }));
+
+        const audio = deviceList
+          .filter(device => device.kind === 'audioinput')
+          .map(({ deviceId, kind, label, groupId }) => ({
+            deviceId,
+            kind,
+            label,
+            groupId,
+            loading: false
+          }));
+
+        setDevices({ video, audio });
+      });
   }, []);
+
+
+  const handleLiveStart = () => {
+    API.post("/lives/start", { title })
+      .then((response) => {
+        const currentLive = response.data?.live;
+        const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
+        setLive({ ...currentLive, elapsedTime });
+      })
+      .catch((error) => {
+        console.error("Erreur lors du lancement du live", error);
+        toast.error("Erreur lors du lancement du live !");
+      });
+  };
+
+
+  const handleStop = () => {
+    API.post("/lives/stop")
+      .then((response) => {
+        setLive({ elapsedTime: formatDuration(0) });
+      })
+      .catch((error) => {
+        console.error("Erreur lors de l'arrêt du live", error);
+        toast.error("Erreur lors de l'arrêt du live !");
+      });
+  };
+
+  const handleSubmit = () => {
+    API.post("/lives/start", { title })
+      .then((response) => {
+        const currentLive = response.data?.live;
+        const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
+        setLive({ ...currentLive, elapsedTime });
+      })
+      .catch((error) => {
+        console.error("Erreur lors du lancement du live", error);
+        toast.error("Erreur lors du lancement du live !");
+      });
+  };
 
   const getLocalStream = useCallback(async () => {
     try {
@@ -95,7 +154,6 @@ function Streamer() {
       pc.onicecandidate = (e) => {
         if (socketRef.current.id == id) return;
         if (!(socketRef.current && e.candidate)) return;
-        console.log('onicecandidate');
         socketRef.current.emit('candidate:make', {
           candidate: e.candidate,
           candidateSendId: socketRef.current.id,
@@ -104,11 +162,9 @@ function Streamer() {
       };
 
       pc.oniceconnectionstatechange = (e) => {
-        console.log('ice connection state change', e);
       };
 
       pc.ontrack = (e) => {
-        console.log('ontrack success');
         setUsers((oldUsers) =>
           oldUsers
             .filter((user) => user.id !== id)
@@ -122,7 +178,6 @@ function Streamer() {
 
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => {
-          console.log('add track');
           pc.addTrack(track, streamRef.current);
         });
       }
@@ -146,17 +201,14 @@ function Streamer() {
       setUsers(roomUsers);
       roomUsers.forEach(async (_user) => {
         if (!streamRef.current && _user.id === socketRef.current.id) return;
-        console.log(_user.username)
         const pc = createPeerConnection(_user.id, _user.username);
         if (!(pc && socketRef.current)) return;
         pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
-        console.log('Updated pcsRef:', pcsRef.current);
         try {
           const localSdp = await pc.createOffer({
             offerToReceiveAudio: true,
             offerToReceiveVideo: true,
           });
-          console.log('create offer success');
           await pc.setLocalDescription(new RTCSessionDescription(localSdp));
           socketRef.current.emit('offer:make', {
             sdp: localSdp,
@@ -177,14 +229,12 @@ function Streamer() {
         offerSendId,
         offerSendUsername,
       }) => {
-        console.log('get offer');
         if (!streamRef.current) return;
         const pc = createPeerConnection(offerSendId, offerSendUsername);
         if (!(pc && socketRef.current)) return;
         pcsRef.current = { ...pcsRef.current, [offerSendId]: pc };
         try {
           await pc.setRemoteDescription(new RTCSessionDescription(sdp));
-          console.log('answer set remote description success');
           const localSdp = await pc.createAnswer({
             offerToReceiveVideo: true,
             offerToReceiveAudio: true,
@@ -204,7 +254,6 @@ function Streamer() {
     socketRef.current.on(
       'answer:get',
       async ({ sdp, answerSendId }) => {
-        console.log('get answer');
         const pc = pcsRef.current[answerSendId];
         if (!pc) return;
         pc.setRemoteDescription(new RTCSessionDescription(sdp));
@@ -214,12 +263,9 @@ function Streamer() {
     socketRef.current.on(
       'candidate:get',
       async ({ candidate, candidateSendId }) => {
-        console.log('get candidate');
         const pc = pcsRef.current[candidateSendId];
-        console.log(candidateSendId, pcsRef.current)
         if (!pc) return;
         await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        console.log('candidate add success');
       },
     );
 
@@ -336,6 +382,7 @@ function Streamer() {
                   </ul>
                 </div> */}
 
+
             </div>
           </div>
           <div className="flex flex-col gap-5">
@@ -344,17 +391,41 @@ function Streamer() {
               <div
                 className="gap-x-5 flex self-center"
               >
+                {live?.id &&
+                  (<button
+                    type="button"
+                    onClick={handleLiveStart}
+                    disabled={segmentTimer || !title || !mediaStream}
+                    className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
+                  >
+                    <FontAwesomeIcon className="text-xs" icon={fasPlay} />
+                    Reprendre
+                  </button>
+                  )
+                }
+                {!live?.id && (
+                  <button type="button"
+                    onClick={handleSubmit}
+                    disabled={!title || !mediaStream}
+                    className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
+                  >
+                    <FontAwesomeIcon className="text-xs" icon={fasPlay} />
+                    Lancer
+                  </button>
+                )}
+
+                <button type="button" onClick={handleStop}
+                  disabled={!live?.id}
+                  className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-red-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-red-700 rounded-lg hover:bg-red-600 focus:bg-red-600"
+                >
+                  <FontAwesomeIcon className="text-xs" icon={fasSquare} />
+                  Arrêter</button>
 
 
               </div>
             </div>
-            <div className="flex flex-col basis-full gap-5">
-              <h3
-                className="font-semibold text-white"
-              >Sources</h3>
-
-            </div>
           </div>
+
 
         </div>
       </div>

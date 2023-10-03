@@ -36,11 +36,10 @@ function ListMedias() {
 
   const fetchMedias = () => {
     if (!user) return;
-    API.get(`/users/${user.id}/medias`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    API.get(`/users/${user.id}/medias`)
       .then((response) => {
-        setMedias(response.data.user.medias);
+        console.log(response.data)
+        setMedias(response.data?.user?.medias);
       })
       .catch((error) => {
         toast.error("Erreur lors de la récupération des médias");
@@ -163,9 +162,9 @@ function ListMedias() {
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                 {media.description
                                   ? media.description
-                                      .split(" ")
-                                      .splice(0, 5)
-                                      .join(" ") + "..."
+                                    .split(" ")
+                                    .splice(0, 5)
+                                    .join(" ") + "..."
                                   : "N/A"}
                               </p>
                             </div>

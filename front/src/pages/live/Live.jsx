@@ -6,8 +6,10 @@ import { formatDuration } from "../../utils/mediaUtils";
 import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "../../contexts/authContext";
 
 function Live() {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const [lives, setLives] = useState([]);
   const [liveData, setLiveData] = useState([]);
@@ -47,7 +49,7 @@ function Live() {
         <div
           className="cursor-pointer relative group w-full bg-slate-800 rounded-xl"
           key={live.id}
-          onClick={() => navigate(`/live/${live.user.username}`)}
+          onClick={() => navigate(`/live${live.user.username === user?.username ? "" : `/${live.user.username}`}`)}
           title={live.title}
         >
 
@@ -70,10 +72,6 @@ function Live() {
           <div className="text-xs text-slate-400 flex px-3 py-2 items-center justify-between">
             <p>
               @{live.user.username}
-            </p>
-            <p className="flex gap-2 items-center bg-slate-700 px-2 py-1 rounded-md">
-              <FontAwesomeIcon icon={faEye} />
-              3
             </p>
           </div>
         </div >

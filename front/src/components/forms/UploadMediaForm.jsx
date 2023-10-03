@@ -22,7 +22,6 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
       },
     })
       .then((response) => {
-        console.log(response);
         toast("Votre media a bien été uploadée!");
         toggleModal();
         fetchMedias();

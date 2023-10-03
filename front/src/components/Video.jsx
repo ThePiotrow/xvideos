@@ -8,7 +8,6 @@ const Video = ({ username, stream, muted }) => {
     useEffect(() => {
         if (ref.current) ref.current.srcObject = stream;
         if (muted) setIsMuted(muted);
-        console.log("stream", stream, "muted", muted)
     }, [stream, muted]);
 
     return (
