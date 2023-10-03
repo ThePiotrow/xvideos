@@ -71,7 +71,7 @@ export class MediasController {
     type: GetMediasResponseDto,
   })
   public async getMedias(
-    @Body() body: { all?: boolean; isDeleted: boolean; limit?: number; offset?: number },
+    @Body() body: { all?: boolean; isDeleted: boolean; limit?: number; offset?: number, allUser?: boolean, isConfirmed?: boolean },
   ): Promise<GetMediasResponseDto> {
 
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
@@ -81,6 +81,8 @@ export class MediasController {
           isDeleted: body.isDeleted,
           limit: body.limit,
           offset: body.offset,
+          allUser: body.allUser,
+          isConfirmed: body.isConfirmed,
         }),
       );
 

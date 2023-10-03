@@ -30,6 +30,9 @@ import { UpdateUserDto } from './interfaces/user/dto/update-user-by-id.dto';
 import { GetMediaResponseDto } from './interfaces/media/dto/get-media-response.dto';
 import { IServiceMediaSearchByIdResponse } from './interfaces/media/service-media-search-by-id-response.interface';
 import { MediaIdDto } from './interfaces/media/dto/media-id.dto';
+import { UpdateMediaDto } from './interfaces/media/dto/update-media.dto';
+import { UpdateMediaResponseDto } from './interfaces/media/dto/update-media-response.dto';
+import { IServiceMediaUpdateByIdResponse } from './interfaces/media/service-media-update-by-id-response.interface';
 
 @Controller('admin')
 @ApiBearerAuth()
@@ -244,6 +247,73 @@ export class AdminController {
         media: mediasResponse.media,
       },
       errors: null,
+    };
+  }
+
+  @Put('/medias/:id')
+  @Authorization()
+  @Admin()
+  @ApiCreatedResponse({
+    type: UpdateMediaResponseDto,
+  })
+  public async updateMedia(
+    @Param() params: {
+      id: string;
+    },
+    @Body() body: UpdateMediaDto,
+  ): Promise<UpdateMediaResponseDto> {
+    const confirmMediaResponse: IServiceMediaUpdateByIdResponse =
+      await firstValueFrom(
+        this.mediaServiceClient.send('media_update_by_id', {
+          id: params.id,
+          ...body,
+        }),
+      );
+
+    if (confirmMediaResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: confirmMediaResponse.message,
+          user: null,
+        },
+        confirmMediaResponse.status,
+      );
+    }
+
+    return {
+      message: confirmMediaResponse.message,
+      errors: null,
+      data: {
+        media: confirmMediaResponse.media,
+      },
+    };
+  }
+
+  @Get('/users')
+  @Authorization()
+  @Admin()
+  public async getUsers(): Promise<any> {
+    const usersResponse: IServiceUserGetByIdResponse =
+      await firstValueFrom(
+        this.userServiceClient.send('user_get_all', {}),
+      );
+
+    if (usersResponse.status !== HttpStatus.OK) {
+      throw new HttpException(
+        {
+          message: usersResponse.message,
+          user: null,
+        },
+        usersResponse.status,
+      );
+    }
+
+    return {
+      message: usersResponse.message,
+      errors: null,
+      data: {
+        users: usersResponse.users,
+      },
     };
   }
 }

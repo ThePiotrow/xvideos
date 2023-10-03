@@ -154,9 +154,9 @@ export class MediaService {
     return res;
   }
 
-  public async getMediaById({ id, all, isDeleted }: { id: string, all?: boolean, isDeleted?: boolean }): Promise<IMedia> {
+  public async getMediaById({ id, all, isDeleted, allUser, isConfirmed }: { id: string, all?: boolean, isDeleted?: boolean, allUser?: boolean, isConfirmed?: boolean }): Promise<IMedia> {
 
-    const match = (all ?? false) ?
+    const initialMatch = (all ?? false) ?
       {
         _id: new mongoose.Types.ObjectId(id),
       } :
@@ -165,9 +165,16 @@ export class MediaService {
         isDeleted: isDeleted ?? false,
       };
 
-    const result = await this.mediaModel.aggregate([
+    const userMatch = (allUser ?? false) ?
       {
-        $match: match
+      } :
+      {
+        "user.is_confirmed": isConfirmed ?? true,
+      }
+
+    const pipeline = [
+      {
+        $match: initialMatch,
       },
       {
         $lookup: {
@@ -179,6 +186,9 @@ export class MediaService {
       },
       {
         $unwind: "$user"
+      },
+      {
+        $match: userMatch, // Ajouter cette étape pour filtrer en fonction de user.is_confirmed
       },
       {
         $addFields: {
@@ -203,11 +213,14 @@ export class MediaService {
             username: 1,
             email: 1,
             role: 1,
-            id: 1
-          }
-        }
-      }
-    ]).exec();
+            id: 1,
+            is_confirmed: 1,
+          },
+        },
+      },
+    ];
+
+    const result = await this.mediaModel.aggregate(pipeline).exec();
 
     if (result && result.length > 0) {
       return result[0];
@@ -231,6 +244,7 @@ export class MediaService {
     id: string,
     params: IMediaUpdateParams,
   ): Promise<IMedia> {
+    console.log(id, params);
     await this.mediaModel.findOneAndUpdate({ _id: id }, params);
 
     return await this.getMediaById({ id });
@@ -355,7 +369,7 @@ export class MediaService {
   }
 
 
-  public async getAllMedias({ all, isDeleted, limit, offset }: { all?: boolean, isDeleted?: boolean, limit: number, offset: number }) {
+  public async getAllMedias({ all, isDeleted, limit, offset, allUser, isConfirmed }: { all?: boolean, isDeleted?: boolean, limit: number, offset: number, allUser?: boolean, isConfirmed?: boolean }) {
 
     const match = (all ?? false) ?
       {
@@ -363,6 +377,12 @@ export class MediaService {
       {
         isDeleted: isDeleted ?? false,
       };
+    const userMatch = (allUser ?? false) ?
+      {
+      } :
+      {
+        "user.is_confirmed": isConfirmed ?? true,
+      }
 
     const result = await this.mediaModel.aggregate([
       {
@@ -378,6 +398,9 @@ export class MediaService {
       },
       {
         $unwind: "$user"
+      },
+      {
+        $match: userMatch, // Ajouter cette étape pour filtrer en fonction de user.is_confirmed
       },
       {
         $addFields: {
@@ -402,7 +425,8 @@ export class MediaService {
             username: 1,
             email: 1,
             role: 1,
-            id: 1
+            id: 1,
+            is_confirmed: 1,
           }
         }
       },

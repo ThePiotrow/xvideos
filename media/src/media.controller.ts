@@ -41,8 +41,9 @@ export class MediaController {
     id: string;
     all?: boolean;
     isDeleted?: boolean;
-  }
-  ): Promise<IMediaSearchByIdResponse> {
+    allUser?: boolean;
+    isConfirmed?: boolean;
+  }): Promise<IMediaSearchByIdResponse> {
     if (params.id) {
       const media = await this.mediaService.getMediaById(params);
 
@@ -77,11 +78,17 @@ export class MediaController {
   }): Promise<IMediaUpdateByIdResponse> {
     if (params.id) {
       try {
-        const media = await this.mediaService.getMediaById({ id: params.id });
+        let media = await this.mediaService.getMediaById({ id: params.id });
         if (media) {
+          media.user_id = media.user.id;
+          media = { ...media, ...params.media } as IMedia;
+
           delete media.user;
-          media.user_id = params.user_id;
-          const updatedMedia = await this.mediaService.updateMediaById(params.id, params.media);
+          console.log(media);
+          const updatedMedia = await this.mediaService.updateMediaById(
+            params.id,
+            params.media,
+          );
           return {
             status: HttpStatus.OK,
             message: '✅ Media updated',
@@ -223,10 +230,12 @@ export class MediaController {
       isDeleted: boolean;
       limit: number;
       offset: number;
+      allUser: boolean;
+      isConfirmed: boolean;
     }
   ): Promise<IMediaSearchByUserResponse> {
     try {
-      const medias = await this.mediaService.getAllMedias({ all: params.all ?? false, isDeleted: params.isDeleted ?? false, limit: params.limit ?? 20, offset: params.offset ?? 0 });
+      const medias = await this.mediaService.getAllMedias({ all: params.all ?? false, isDeleted: params.isDeleted ?? false, limit: params.limit ?? 20, offset: params.offset ?? 0, allUser: params.allUser ?? false, isConfirmed: params.isConfirmed ?? true });
       return {
         status: HttpStatus.OK,
         message: '✅ Medias found',
