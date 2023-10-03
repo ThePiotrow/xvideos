@@ -21,6 +21,11 @@ jobs:
       - name: Create .env
         run: |
           echo "${{ secrets.ENV }}" > .env
+          echo "${{ secrets.ENV }}" > ~/gateway/.env
+          echo "${{ secrets.ENV }}" > ~/live/.env
+          echo "${{ secrets.ENV }}" > ~/media/.env
+          echo "${{ secrets.ENV }}" > ~/token/.env
+          echo "${{ secrets.ENV }}" > ~/user/.env
 
       - name: Deploy to Staging server
         uses: easingthemes/ssh-deploy@main
