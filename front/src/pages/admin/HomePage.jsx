@@ -8,10 +8,6 @@ function HomePage() {
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("users"); // Définir l'onglet actif initial
 
-  useEffect(() => {
-    // ... votre code useEffect existant
-  }, []);
-
   return (
     <div className="container px-6 py-10 mx-auto">
       <div className="flex items-center justify-center">

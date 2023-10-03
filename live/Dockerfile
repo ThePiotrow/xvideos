@@ -2,8 +2,7 @@ FROM node:18-alpine
 
 WORKDIR /var/www/live
 
-RUN apk update && apk upgrade && \
-    apk add --no-cache ffmpeg
+RUN apk update && apk upgrade
 
 COPY package*.json ./
 
@@ -13,6 +12,6 @@ RUN npm install -g @nestjs/cli
 
 COPY . .
 
-RUN npm run build
+#RUN npm run build
 
-CMD [ "npm", "run", "start:prod" ]
+CMD [ "npm", "run", "start:dev" ]

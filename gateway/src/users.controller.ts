@@ -324,7 +324,7 @@ export class UsersController {
   public async getUserByIdWithMedias(
     @Param() params: GetUserByIdDto,
   ): Promise<GetUserByTokenResponseDto> {
-
+    console.log(params);
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
       this.userServiceClient.send('user_get_by_id', { id: params.id, media: true }),
     );

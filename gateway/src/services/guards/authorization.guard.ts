@@ -64,18 +64,7 @@ export class AuthGuard implements CanActivate {
       }),
     );
 
-    if (!userTokenInfo || !userTokenInfo.data) {
-      throw new HttpException(
-        {
-          message: userTokenInfo.message,
-          data: null,
-          errors: null,
-        },
-        userTokenInfo.status,
-      );
-    }
-
-    if (!userTokenInfo.data || !userTokenInfo.data.user) {
+    if (!userTokenInfo || !userTokenInfo.data?.user) {
       throw new HttpException(
         {
           message: userTokenInfo.message,

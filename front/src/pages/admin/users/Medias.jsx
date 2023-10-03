@@ -104,12 +104,6 @@ function Medias() {
                     <tr key={media.id}>
                       <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                         <div className="inline-flex items-center gap-x-3">
-                          <input
-                            type="checkbox"
-                            onChange={(e) => handleCheckboxChange(e, media.id)}
-                            className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
-                          />
-
                           <div className="flex items-center gap-x-2">
                             <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
                               <MediaIcon type={media.type} />

@@ -21,7 +21,7 @@ export class UserService {
   }
 
   async searchUserById({ id, all, isDeleted, media }: { id: string, all?: boolean, isDeleted?: boolean, media?: boolean }): Promise<IUser> {
-
+    console.log('user service searchUserById ok');
     const match = (all ?? false) ?
       {
         _id: new mongoose.Types.ObjectId(id),
@@ -101,9 +101,20 @@ export class UserService {
     if (media) {
       pipeline.push({
         $lookup: {
-          from: 'media',
-          localField: '_id',
-          foreignField: 'user_id',
+          from: 'medias',
+          let: { user_id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$user_id", "$$user_id"] },
+                    { $eq: ["$isDeleted", false] }  // Assurez-vous que les médias ne sont pas supprimés
+                  ]
+                }
+              }
+            },
+          ],
           as: 'medias',
         }
       });
@@ -156,6 +167,7 @@ export class UserService {
     });
 
     let result = await this.userModel.aggregate(pipeline).exec();
+    console.log("this is the result : ", result)
 
     if (result && result.length > 0) {
       return result[0];
