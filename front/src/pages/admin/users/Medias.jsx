@@ -14,14 +14,16 @@ function Medias() {
   const { user } = useAuth();
 
   const getMedias = async () => {
-    API.get("/admin/medias", {
+    API.get("/medias", {
       params: {
         all: true,
         allUser: true,
       },
     })
       .then((response) => {
-        setMedias(response.data?.medias ?? []);
+        console.log(response);
+        setMedias(response.data.medias);
+        console.log("this is medias", medias);
       })
       .catch((error) => {
         console.log(error);

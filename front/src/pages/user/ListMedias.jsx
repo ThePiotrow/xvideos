@@ -36,9 +36,10 @@ function ListMedias() {
 
   const fetchMedias = () => {
     if (!user) return;
+    console.log(user.id);
     API.get(`/users/${user.id}/medias`)
       .then((response) => {
-        console.log(response.data)
+        console.log(response.data.user.medias);
         setMedias(response.data?.user?.medias);
       })
       .catch((error) => {
@@ -162,9 +163,9 @@ function ListMedias() {
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                 {media.description
                                   ? media.description
-                                    .split(" ")
-                                    .splice(0, 5)
-                                    .join(" ") + "..."
+                                      .split(" ")
+                                      .splice(0, 5)
+                                      .join(" ") + "..."
                                   : "N/A"}
                               </p>
                             </div>
