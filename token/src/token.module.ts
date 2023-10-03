@@ -13,7 +13,7 @@ import { TokenSchema } from './schemas/token.schema';
       useClass: JwtConfigService,
     }),
     MongooseModule.forRoot(
-      'mongodb+srv://me:me@cluster.gx5xogt.mongodb.net/?retryWrites=true&w=majority&authSource=admin'
+      "mongodb://me:me@cluster.gx5xogt.mongodb.net:27017/project"
     ),
     MongooseModule.forFeature([
       {
