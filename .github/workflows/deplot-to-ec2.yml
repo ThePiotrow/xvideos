@@ -33,7 +33,7 @@ jobs:
           EXCLUDE: "/dist/, /node_modules/, /front/"
           SCRIPT_BEFORE: |
             cd /home/ubuntu
-            make pm2-stop
+            pm2 stop all
           SCRIPT_AFTER: |
             cd /home/ubuntu
             mkdir -p ~/gateway/secrets/
@@ -41,7 +41,7 @@ jobs:
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem
             chmod 666 ~/gateway/secrets/private-key.pem
-            make pm2-start
+            pm2 start all
           
 
 
