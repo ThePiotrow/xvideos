@@ -14,9 +14,14 @@ import { OwnerGuard } from './services/guards/owner.guard';
 import { EventsGateway } from './events.gateway';
 
 import { ConfigService } from './services/config/config.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    })
+  ],
   controllers: [UsersController, MediasController, LivesController, AdminController],
   providers: [
     ConfigService,

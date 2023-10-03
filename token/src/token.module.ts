@@ -6,9 +6,13 @@ import { TokenService } from './services/token.service';
 import { JwtConfigService } from './services/config/jwt-config.service';
 import { MongoConfigService } from './services/config/mongo-config.service';
 import { TokenSchema } from './schemas/token.schema';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
     JwtModule.registerAsync({
       useClass: JwtConfigService,
     }),

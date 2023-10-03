@@ -6,9 +6,13 @@ import { MediaController } from './media.controller';
 import { MediaService } from './services/media.service';
 import { MediaSchema } from './schemas/media.schema';
 import { BullModule } from '@nestjs/bull';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
     MongooseModule.forRootAsync({
       useClass: MongoConfigService,
     }),
