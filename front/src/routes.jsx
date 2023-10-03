@@ -3,6 +3,7 @@ import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
 import HomePage from "./pages/admin/HomePage";
 import AuthGuard from "./guards/AuthGuard";
+import AdminGuard from "./guards/AdminGuard";
 import Users from "./pages/admin/users/Users";
 import useToken from "./hooks/useToken";
 import SignUp from "./pages/auth/SignUp";
@@ -70,7 +71,9 @@ function AppRoutes() {
           path="/admin"
           element={
             <AuthGuard>
-              <HomePage />
+              <AdminGuard>
+                <HomePage />
+              </AdminGuard>
             </AuthGuard>
           }
         />
@@ -78,7 +81,9 @@ function AppRoutes() {
           path="/admin/users"
           element={
             <AuthGuard>
-              <Users />
+              <AdminGuard>
+                <Users />
+              </AdminGuard>
             </AuthGuard>
           }
         />
