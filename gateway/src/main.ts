@@ -6,12 +6,12 @@ import * as compression from 'compression';
 import * as fs from 'fs';
 
 async function bootstrap() {
-  const httpsOptions = {
-    key: fs.readFileSync('./secrets/private-key.pem'),
-    cert: fs.readFileSync('./secrets/public-certificate.pem'),
-  };
+  // const httpsOptions = {
+  //   key: fs.readFileSync('./secrets/private-key.pem'),
+  //   cert: fs.readFileSync('./secrets/public-certificate.pem'),
+  // };
   const app = await NestFactory.create(AppModule, {
-    httpsOptions,
+    // httpsOptions,
   });
   app.enableCors();
   const options = new DocumentBuilder()
