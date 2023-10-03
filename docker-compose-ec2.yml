@@ -16,7 +16,6 @@ services:
             - media
             - live
             - token
-            - mailer
             - user
 
     media:
@@ -52,18 +51,6 @@ services:
             - .env
         ports:
             - ${TOKEN_SERVICE_PORT}:${TOKEN_SERVICE_PORT}
-        networks:
-            - backend
-
-    mailer:
-        build: ./mailer
-        restart: always
-        volumes:
-          - ./mailer:/var/www/mailer
-        env_file:
-            - .env
-        ports:
-            - ${MAILER_SERVICE_PORT}:${MAILER_SERVICE_PORT}
         networks:
             - backend
 
@@ -105,4 +92,3 @@ volumes:
     media:
     live:
     token:
-    mailer:

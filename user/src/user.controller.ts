@@ -14,7 +14,6 @@ import { IUserGetAllResponse } from './interfaces/user-get-all-response.interfac
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    @Inject('MAILER_SERVICE') private readonly mailerServiceClient: ClientProxy,
   ) { }
 
   @MessagePattern('user_get_all')
@@ -252,7 +251,7 @@ export class UserController {
         };
       } else {
         try {
-          params.is_confirmed = false;
+          params.is_confirmed = true;
 
           const createdUser = await this.userService.createUser(params);
           const userLink = await this.userService.createUserLink(
@@ -260,23 +259,6 @@ export class UserController {
           );
 
           delete createdUser.password;
-
-          await firstValueFrom(this.mailerServiceClient
-            .send('mail_send', {
-              to: createdUser.email,
-              subject: 'Email confirmation',
-              html: `<center>
-            <b>Hello, ${createdUser.username}!</b>
-            <br>
-            Please confirm your email.
-            <br>
-            Use the following link for this.<br>
-            <a href="${this.userService.getConfirmationLink(
-                userLink.link,
-              )}"><b>Confirm The Email</b></a>
-            </center>`,
-            })
-          );
 
           return {
             status: HttpStatus.CREATED,
@@ -381,7 +363,7 @@ export class UserController {
         };
       } else {
         try {
-          params.is_confirmed = false;
+          params.is_confirmed = true;
           params.role = 'ROLE_ADMIN'
 
           const createdUser = await this.userService.createUser(params);
@@ -390,23 +372,6 @@ export class UserController {
           );
 
           delete createdUser.password;
-
-          await firstValueFrom(this.mailerServiceClient
-            .send('mail_send', {
-              to: createdUser.email,
-              subject: 'Email confirmation',
-              html: `<center>
-            <b>Hello, ${createdUser.username}!</b>
-            <br>
-            Please confirm your email.
-            <br>
-            Use the following link for this.<br>
-            <a href="${this.userService.getConfirmationLink(
-                userLink.link,
-              )}"><b>Confirm The Email</b></a>
-            </center>`,
-            })
-          );
 
           return {
             status: HttpStatus.CREATED,

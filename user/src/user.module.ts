@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ClientProxyFactory } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserController } from './user.controller';
 import { UserService } from './services/user.service';
@@ -30,14 +29,6 @@ import { UserLinkSchema } from './schemas/user-link.schema';
   providers: [
     UserService,
     ConfigService,
-    {
-      provide: 'MAILER_SERVICE',
-      useFactory: (configService: ConfigService) => {
-        const mailerServiceOptions = configService.get('mailerService');
-        return ClientProxyFactory.create(mailerServiceOptions);
-      },
-      inject: [ConfigService],
-    },
   ],
 })
 export class UserModule { }
