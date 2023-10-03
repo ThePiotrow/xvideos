@@ -22,11 +22,6 @@ jobs:
         run: |
           cd /home/ubuntu
           echo "${{ secrets.ENV }}" > .env
-          echo "${{ secrets.ENV }}" > ./gateway/.env
-          echo "${{ secrets.ENV }}" > ./live/.env
-          echo "${{ secrets.ENV }}" > ./media/.env
-          echo "${{ secrets.ENV }}" > ./token/.env
-          echo "${{ secrets.ENV }}" > ./user/.env
 
       - name: Deploy to Staging server
         uses: easingthemes/ssh-deploy@main
@@ -44,6 +39,11 @@ jobs:
           SCRIPT_AFTER: |
             cd /home/ubuntu
             mkdir -p ~/gateway/secrets/
+            echo "${{ secrets.ENV }}" > ~/gateway/.env
+            echo "${{ secrets.ENV }}" > ~/live/.env
+            echo "${{ secrets.ENV }}" > ~/media/.env
+            echo "${{ secrets.ENV }}" > ~/token/.env
+            echo "${{ secrets.ENV }}" > ~/user/.env
             echo "${{ secrets.PUBLIC_CERTIFICATE }}" > ~/gateway/secrets/public-certificate.pem
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem
