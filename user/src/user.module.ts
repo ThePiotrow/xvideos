@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ClientProxyFactory } from '@nestjs/microservices';
 import { MongooseModule } from '@nestjs/mongoose';
 import { UserController } from './user.controller';
 import { UserService } from './services/user.service';
@@ -9,9 +10,9 @@ import { UserLinkSchema } from './schemas/user-link.schema';
 
 @Module({
   imports: [
-    MongooseModule.forRootAsync({
-      useClass: MongoConfigService,
-    }),
+    MongooseModule.forRoot(
+      'mongodb+srv://me:me@cluster.gx5xogt.mongodb.net/?retryWrites=true&w=majority&authSource=admin'
+    ),
     MongooseModule.forFeature([
       {
         name: 'User',

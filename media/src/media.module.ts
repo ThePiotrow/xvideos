@@ -9,9 +9,9 @@ import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
-    MongooseModule.forRootAsync({
-      useClass: MongoConfigService,
-    }),
+    MongooseModule.forRoot(
+      'mongodb+srv://me:me@cluster.gx5xogt.mongodb.net/?retryWrites=true&w=majority&authSource=admin'
+    ),
     MongooseModule.forFeature([
       {
         name: 'Media',
