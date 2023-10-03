@@ -9,4 +9,5 @@ export class MongoConfigService implements MongooseOptionsFactory {
       uri: process.env.MONGO_DSN,
     };
   }
+
 }
