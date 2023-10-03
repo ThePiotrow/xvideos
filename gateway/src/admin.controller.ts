@@ -293,7 +293,7 @@ export class AdminController {
   @Authorization()
   @Admin()
   public async getUsers(): Promise<any> {
-    const usersResponse: IServiceUserGetByIdResponse =
+    const usersResponse: any =
       await firstValueFrom(
         this.userServiceClient.send('user_get_all', {}),
       );
