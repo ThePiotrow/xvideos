@@ -14,15 +14,12 @@ function Medias() {
   const { user } = useAuth();
 
   const getMedias = async () => {
-    API.get(
-      "/admin/medias",
-      {
-        params: {
-          all: true,
-          allUser: true,
-        },
-      }
-    )
+    API.get("/admin/medias", {
+      params: {
+        all: true,
+        allUser: true,
+      },
+    })
       .then((response) => {
         setMedias(response.data?.medias ?? []);
       })
@@ -63,10 +60,6 @@ function Medias() {
                       className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
-                        <input
-                          type="checkbox"
-                          className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
-                        />
                         <span>Nom du fichier</span>
                       </div>
                     </th>
@@ -127,9 +120,9 @@ function Medias() {
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                 {media.description
                                   ? media.description
-                                    .split(" ")
-                                    .splice(0, 5)
-                                    .join(" ") + "..."
+                                      .split(" ")
+                                      .splice(0, 5)
+                                      .join(" ") + "..."
                                   : "N/A"}
                               </p>
                             </div>

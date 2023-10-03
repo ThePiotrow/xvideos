@@ -55,26 +55,21 @@ function Users() {
   return (
     <section className="container px-4 mx-auto">
       <div className="relative flex items-center gap-x-3">
-        <h2 className="text-lg font-medium text-slate-800">Utilisateurs</h2>
-
-        <span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">
+        <span className="mt-5 px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full">
           {users.length} utilisateurs
         </span>
-        <button className="absolute right-0 static px-5 py-1 font-medium tracking-wide text-white capitalize transition-colors duration-300 transform bg-green-600 rounded-lg hover:bg-green-500 focus:outlin-none focus:ring focus:ring-green-300 focus:ring-opacity-80">
-          + Ajouter
-        </button>
       </div>
 
       <div className="flex flex-col mt-6">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-slate-200">
-              <table className="min-w-full divide-y divide-slate-200">
-                <thead className="bg-slate-50">
+            <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                <thead className="bg-gray-50 dark:bg-gray-800">
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-slate-500"
+                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right  text-gray-500 dark:text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
                         <span>Name</span>
@@ -85,7 +80,7 @@ function Users() {
                       scope="col"
                       className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
                     >
-                      <button className="flex items-center gap-x-2">
+                      <div className="flex items-center gap-x-2">
                         <span>Status</span>
 
                         <svg
@@ -113,14 +108,14 @@ function Users() {
                             strokeWidth="0.3"
                           />
                         </svg>
-                      </button>
+                      </div>
                     </th>
 
                     <th
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
                     >
-                      <button className="flex items-center gap-x-2">
+                      <div className="flex items-center gap-x-2">
                         <span>Role</span>
 
                         <svg
@@ -137,7 +132,7 @@ function Users() {
                             d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
                           />
                         </svg>
-                      </button>
+                      </div>
                     </th>
 
                     <th
@@ -154,16 +149,19 @@ function Users() {
                       Teams
                     </th>
 
-                    <th scope="col" className="relative py-3.5 px-4">
-                      <span className="sr-only">Edit</span>
+                    <th
+                      scope="col"
+                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
+                    >
+                      Edit
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-slate-200">
+                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
                   {users.map((user) => {
                     return (
                       <tr key={user.id}>
-                        <td className="px-4 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
+                        <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                           <div className="inline-flex items-center gap-x-3">
                             <div className="flex items-center gap-x-2">
                               <img
@@ -172,19 +170,37 @@ function Users() {
                                 alt=""
                               ></img>
                               <div>
-                                <h2 className="font-medium text-slate-800">
+                                <h2 className="font-normal text-gray-800 dark:text-white">
                                   @{user.username}
                                 </h2>
                               </div>
                             </div>
                           </div>
                         </td>
-                        <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
-                          <div className="inline-flex items-center px-3 py-1 rounded-full gap-x-2 bg-emerald-100/60">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
 
-                            <h2 className="text-sm font-normal text-emerald-500">
-                              Active
+                        <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
+                          <div
+                            className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                              user.is_confirmed
+                                ? "bg-emerald-600/60"
+                                : "bg-red-400/40"
+                            }`}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                user.is_confirmed
+                                  ? "bg-emerald-500"
+                                  : "bg-red-500"
+                              }`}
+                            ></span>
+                            <h2
+                              className={`text-sm font-normal ${
+                                user.is_confirmed
+                                  ? "text-emerald-500"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {user.is_confirmed ? "Actif" : "Inactif"}
                             </h2>
                           </div>
                         </td>
