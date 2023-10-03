@@ -33,7 +33,7 @@ jobs:
           EXCLUDE: "/dist/, /node_modules/, /front/"
           SCRIPT_BEFORE: |
             cd /home/ubuntu
-            ~/.nvm/versions/node/v18.18.0/bin/pm2 stop all
+            /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 stop all
           SCRIPT_AFTER: |
             cd /home/ubuntu
             mkdir -p ~/gateway/secrets/
@@ -41,4 +41,4 @@ jobs:
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem
             chmod 666 ~/gateway/secrets/private-key.pem
-            ~/.nvm/versions/node/v18.18.0/bin/pm2 start all
+            /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 start all
