@@ -37,13 +37,7 @@ dev:
 # PM2 commands
 
 pm2-start:
-	@for dir in $(DIRS); do \
-		echo "Starting $$dir"; \
-		cd $$dir && npm run pm2:start && cd ..; \
-	done
+	pm2 start all
 
 pm2-stop:
-	@for dir in $(DIRS); do \
-		echo "Stopping $$dir"; \
-		cd $$dir && npm run pm2:stop && cd ..; \
-	done
+	pm2 stop all
