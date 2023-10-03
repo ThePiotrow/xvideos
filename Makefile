@@ -25,3 +25,9 @@ build:
 		echo "Building $$dir"; \
 		cd $$dir && npm run build && cd ..; \
 	done
+
+dev:
+	@for dir in $(DIRS); do\
+			echo "Starting Dev $$dir; \
+			cd $$dir && npm run start:dev && cd ..;\
+	done

@@ -85,3 +85,9 @@ networks:
     frontend:
         external: true
         name: infrastructure
+
+volumes:
+    gateway: 
+    media:
+    live:
+    token:
