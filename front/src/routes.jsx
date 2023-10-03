@@ -9,7 +9,6 @@ import SignUp from "./pages/auth/SignUp";
 import Live from "./pages/live/Live";
 import Profile from "./pages/user/Profile";
 import ListMedias from "./pages/user/ListMedias";
-import CreateMedias from "./pages/medias/CreateMedias";
 import MediaViewer from "./pages/medias/MediaViewer";
 import Viewer from "./pages/live/Viewer";
 import Streamer from "./pages/live/Streamer";
@@ -42,14 +41,6 @@ function AppRoutes() {
           element={
             <AuthGuard>
               <ListMedias />
-            </AuthGuard>
-          }
-        />
-        <Route
-          path="/medias/create"
-          element={
-            <AuthGuard>
-              <CreateMedias />
             </AuthGuard>
           }
         />
