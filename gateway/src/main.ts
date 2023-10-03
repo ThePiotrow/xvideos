@@ -3,9 +3,16 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { ConfigService } from './services/config/config.service';
 import * as compression from 'compression';
+import * as fs from 'fs';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const httpsOptions = {
+    key: fs.readFileSync('./secrets/private-key.pem'),
+    cert: fs.readFileSync('./secrets/public-certificate.pem'),
+  };
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
   app.enableCors();
   const options = new DocumentBuilder()
     .setTitle('API docs')

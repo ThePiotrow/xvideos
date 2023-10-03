@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Setup SSH key
+      - name: Setup SSH key and certificate
         run: |
           mkdir -p ~/.ssh/
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/github-actions.pem
@@ -30,7 +30,19 @@ jobs:
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USER }}
           TARGET: "/home/ubuntu"
-          EXCLUDE: "/dist/, /node_modules/"
+          EXCLUDE: "/dist/, /node_modules/, /front/"
+          SCRIPT_BEFORE: |
+            cd /home/ubuntu
+            make pm2-stop
+          SCRIPT_AFTER: |
+            cd /home/ubuntu
+            mkdir -p ~/gateway/secrets/
+            echo "${{ secrets.PUBLIC_CERTIFICATE }}" > ~/gateway/secrets/public-certificate.pem
+            echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
+            chmod 666 ~/gateway/secrets/public-certificate.pem
+            chmod 666 ~/gateway/secrets/private-key.pem
+            make pm2-start
+          
 
 
 
