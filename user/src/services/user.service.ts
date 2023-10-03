@@ -98,10 +98,11 @@ export class UserService {
 
     ];
 
+    console.log("there is some media ? ", media)
     if (media) {
       pipeline.push({
         $lookup: {
-          from: 'medias',
+          from: 'media',
           let: { user_id: '$_id' },
           pipeline: [
             {
@@ -115,15 +116,15 @@ export class UserService {
               }
             },
           ],
-          as: 'medias',
+          as: 'media',
         }
       });
-
+      console.log(pipeline)
       pipeline.push({
         $addFields: {
           medias: {
             $map: {
-              input: "$medias",
+              input: "$media",
               as: "media",
               in: {
                 id: "$$media._id",
@@ -151,7 +152,7 @@ export class UserService {
         is_confirmed: 1,
         role: 1,
         live: 1,
-        medias: 1
+        media: 1
       } :
       {
         id: 1,
