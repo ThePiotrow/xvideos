@@ -1,22 +1,26 @@
-import PropTypes from 'prop-types';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import PropTypes from "prop-types";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const isAuthenticated = () => {
-  const authToken = localStorage.getItem('token');
+const getAuthenticationStatus = () => {
+  const authToken = localStorage.getItem("token");
   return !!authToken;
 };
 
 function AuthGuard({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    getAuthenticationStatus
+  );
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!isAuthenticated()) {
-      navigate('/login');
+    setIsAuthenticated(getAuthenticationStatus());
+    if (!isAuthenticated) {
+      navigate("/login");
     }
-  }, [navigate]);
+  }, [navigate, isAuthenticated]);
 
-  if (!isAuthenticated()) {
+  if (!isAuthenticated) {
     return null;
   }
 

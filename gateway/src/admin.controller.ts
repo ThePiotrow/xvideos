@@ -230,24 +230,18 @@ export class AdminController {
     type: GetMediaResponseDto,
   })
   public async getMedias(
-    @Query() params: MediaIdDto,
+    @Query() { limit, page }: any,
   ): Promise<any> {
-    let body = {}
-
-    for (const [key, value] of Object.entries(params)) {
-      if (value) {
-        body = {
-          ...body,
-          [key]: Boolean(value)
-        }
-      }
-    }
-    console.log(body)
+    const offset = limit * (page - 1);
 
     const mediasResponse: any =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all',
-          body
+          {
+            limit: limit,
+            offset: offset,
+            all: true
+          }
         ),
       );
 

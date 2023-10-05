@@ -1,46 +1,48 @@
-import { useState, useEffect } from "react";
+//import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import API from "../../../api";
-import { useAuth } from "../../../contexts/authContext";
-import MediaIcon from "../../../components/MediaIcon";
-import dayjs from "dayjs";
-import Details from "../../../components/icons/Details";
 import { formatDuration } from "../../../utils/mediaUtils";
+import dayjs from "dayjs";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { useAuth } from "../../../contexts/authContext";
 
-//import { toast } from "react-toastify";
-//import "react-toastify/dist/ReactToastify.css";
-
-function Medias() {
-  const [medias, setMedias] = useState([]);
+function Lives() {
   const { user } = useAuth();
-
-  const getMedias = async () => {
-    API.get("/admin/medias")
-      .then((response) => {
-        console.log(response);
-        setMedias(response.data.medias);
-        console.log("this is medias", medias);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const toggleBlock = async (media) => {
-    try {
-      const response = await API.put(`/admin/medias/${media.id}`, {
-        isDeleted: !media.isDeleted,
-      });
-      setMedias([
-        ...medias.filter((m) => m.id !== media.id),
-        response.data.media,
-      ]);
-    } catch (error) {
-      console.log("Il y a un problème avec la récupération des médias" + error);
-    }
-  };
+  const navigate = useNavigate();
+  const [lives, setLives] = useState([]);
+  const [liveData, setLiveData] = useState([]);
 
   useEffect(() => {
-    getMedias();
+    const intervalId = setInterval(() => {
+      setLiveData((prevLives) =>
+        prevLives.map((live) => ({
+          ...live,
+          elapsedTime: formatDuration(
+            dayjs(dayjs()).diff(live.start_time, "seconds")
+          ),
+        }))
+      );
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  useEffect(() => {
+    API.get("/lives")
+      .then((response) => {
+        const livesWithTime = response.data.lives.map((live) => ({
+          ...live,
+          elapsedTime: formatDuration(
+            dayjs(dayjs()).diff(live.start_time, "seconds")
+          ),
+        }));
+        setLiveData(livesWithTime);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la récupération des lives", error);
+      });
   }, []);
 
   return (
@@ -57,7 +59,7 @@ function Medias() {
                       className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
-                        <span>Nom du fichier</span>
+                        <span>Titre du live</span>
                       </div>
                     </th>
 
@@ -72,21 +74,21 @@ function Medias() {
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Date d'ajout
+                      Commencé à
                     </th>
 
                     <th
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Dernière modification
+                      Arrêté à
                     </th>
 
                     <th
                       scope="col"
                       className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
-                      Ajouter par
+                      Streamer
                     </th>
 
                     <th scope="col" className="relative py-3.5 px-4">
@@ -95,22 +97,22 @@ function Medias() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                  {medias.map((media) => (
-                    <tr key={media.id}>
+                  {lives.map((live) => (
+                    <tr key={live.id}>
                       <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                         <div className="inline-flex items-center gap-x-3">
                           <div className="flex items-center gap-x-2">
                             <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
-                              <MediaIcon type={media.type} />
+                              <MediaIcon type={live.type} />
                             </div>
 
                             <div>
                               <h2 className="font-normal text-gray-800 dark:text-white ">
-                                {media.title}
+                                {live.title}
                               </h2>
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                {media.description
-                                  ? media.description
+                                {live.description
+                                  ? live.description
                                       .split(" ")
                                       .splice(0, 5)
                                       .join(" ") + "..."
@@ -121,30 +123,23 @@ function Medias() {
                         </div>
                       </td>
                       <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
-                        {media.duration
-                          ? formatDuration(media.duration)
-                          : "N/A"}
+                        {live.duration ? formatDuration(live.duration) : "N/A"}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}
+                        {dayjs(live.created_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {dayjs(media.updated_at).format("DD/MM/YYYY HH:mm:ss")}
+                        {dayjs(live.updated_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {media.user.username}
+                        {live.user.username}
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
                         <button
                           onClick={() => toggleBlock(media)}
-                          className={`text-slate-500 transition-colors duration-200 ${
-                            media.isDeleted
-                              ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
-                              : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
-                          }
-                            focus:outline-none`}
+                          className="text-slate-500 transition-colors duration-200 hover:text-red-500 focus:outline-none"
                         >
-                          {!media.isDeleted ? "Supprimer" : "Récupérer"}
+                          {!live.isDeleted ? "Supprimer" : "Récupérer"}
                         </button>
                       </td>
                     </tr>
@@ -159,4 +154,4 @@ function Medias() {
   );
 }
 
-export default Medias;
+export default Lives;

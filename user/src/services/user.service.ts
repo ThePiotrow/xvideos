@@ -21,7 +21,6 @@ export class UserService {
   }
 
   async searchUserById({ id, all, isDeleted, media }: { id: string, all?: boolean, isDeleted?: boolean, media?: boolean }): Promise<IUser> {
-    console.log('user service searchUserById ok');
     const match = (all ?? false) ?
       {
         _id: new mongoose.Types.ObjectId(id),
@@ -98,54 +97,9 @@ export class UserService {
 
     ];
 
-    console.log("there is some media ? ", media)
-    if (media) {
-      pipeline.push({
-        $lookup: {
-          from: 'media',
-          let: { user_id: '$_id' },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$user_id", "$$user_id"] },
-                    { $eq: ["$isDeleted", false] }  // Assurez-vous que les médias ne sont pas supprimés
-                  ]
-                }
-              }
-            },
-          ],
-          as: 'media',
-        }
-      });
-      console.log(pipeline)
-      pipeline.push({
-        $addFields: {
-          medias: {
-            $map: {
-              input: "$media",
-              as: "media",
-              in: {
-                id: "$$media._id",
-                title: "$$media.title",
-                description: "$$media.description",
-                duration: "$$media.duration",
-                thumbnail: "$$media.urls.thumbnail",
-                type: "$$media.type",
-                isDeleted: "$$media.isDeleted",
-                deletedAt: "$$media.deletedAt",
-                updated_at: "$$media.updated_at",
-                created_at: "$$media.created_at"
-              }
-            }
-          }
-        }
-      });
-    }
-
     const project = media ?
       {
+        _id: 0,
         id: 1,
         username: 1,
         email: 1,
@@ -167,8 +121,11 @@ export class UserService {
       $project: project
     });
 
+
+    // console.log('Pipeline:', JSON.stringify(pipeline, null, 1));
     let result = await this.userModel.aggregate(pipeline).exec();
-    console.log("this is the result : ", result)
+    // console.log('Result:', JSON.stringify(result, null, 2));
+    // console.log(result)
 
     if (result && result.length > 0) {
       return result[0];

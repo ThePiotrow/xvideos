@@ -2,8 +2,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IUser } from '../user.interface';
 
 export class GetUserByTokenResponseDto {
-  @ApiProperty({ example: 'user_get_by_id_success' })
+  @ApiProperty({
+    example: 'user_get_by_id_success'
+  })
+
   message: string;
+
   @ApiProperty({
     example: {
       user: {
@@ -15,9 +19,12 @@ export class GetUserByTokenResponseDto {
     },
     nullable: true,
   })
+
   data: {
     user: IUser;
   };
+
   @ApiProperty({ example: null, nullable: true })
+
   errors: { [key: string]: any };
 }

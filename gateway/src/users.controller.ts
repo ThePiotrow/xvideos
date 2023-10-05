@@ -9,6 +9,7 @@ import {
   HttpStatus,
   HttpException,
   Param,
+  Query,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -38,6 +39,7 @@ import { GetUserByIdDto } from './interfaces/user/dto/get-user-by-id.dto';
 import { GetAllUsersResponseDto } from './interfaces/user/dto/get-all-users-response.dto';
 import { IUserGetAllResponse } from './interfaces/user/user-get-all-response.interface';
 import { GetUserByUsernameDto } from './interfaces/user/dto/get-user-by-username.dto';
+import { request } from 'http';
 
 @Controller('users')
 @ApiBearerAuth()
@@ -46,6 +48,7 @@ export class UsersController {
   constructor(
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
+    @Inject('MEDIA_SERVICE') private readonly mediaServiceClient: ClientProxy,
   ) { }
 
   @Get('/me')
@@ -317,22 +320,73 @@ export class UsersController {
     };
   }
 
+  @Get('/me/medias')
+  @Authorization()
+  @ApiOkResponse({
+    type: GetUserByTokenResponseDto,
+  })
+  public async getMeWithMedias(
+    @Req() request: IAuthorizedRequest,
+    @Query() { limit, page }: any
+  ): Promise<GetUserByTokenResponseDto> {
+    const offset = limit * (page - 1);
+    const { user } = request;
+
+    const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
+      this.userServiceClient.send('user_get_by_id', { id: user.id, media: true }),
+    );
+    const mediaResponse: any = await firstValueFrom(
+      this.mediaServiceClient.send('media_get_all',
+        {
+          limit: limit,
+          offset: offset,
+          userId: user.id,
+          all: true,
+        }),
+    )
+
+    return {
+      message: userResponse.message,
+      data: {
+        user: {
+          ...userResponse.user,
+          medias: mediaResponse.medias
+        }
+      },
+      errors: null,
+    };
+  }
+
+
   @Get('/:id/medias')
   @ApiOkResponse({
     type: GetUserByTokenResponseDto,
   })
   public async getUserByIdWithMedias(
     @Param() params: GetUserByIdDto,
+    @Query() { limit, page }: any
   ): Promise<GetUserByTokenResponseDto> {
-    console.log(params);
+    const offset = limit * (page - 1);
+
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
       this.userServiceClient.send('user_get_by_id', { id: params.id, media: true }),
     );
+    const mediaResponse: any = await firstValueFrom(
+      this.mediaServiceClient.send('media_get_all',
+        {
+          limit: limit,
+          offset: offset,
+          userId: params.id,
+        }),
+    )
 
     return {
       message: userResponse.message,
       data: {
-        user: userResponse.user,
+        user: {
+          ...userResponse.user,
+          medias: mediaResponse.medias
+        }
       },
       errors: null,
     };

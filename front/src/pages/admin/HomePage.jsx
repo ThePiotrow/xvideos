@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import API from "../../api";
 import Users from "./users/Users";
 import Medias from "./users/Medias";
+import Lives from "./users/Lives";
 // ... autres imports
 
 function HomePage() {
@@ -51,7 +52,9 @@ function HomePage() {
           </div>
         )}
         {activeTab === "lives" && (
-          <div className="lives-tab">{/* Contenu de l'onglet Lives */}</div>
+          <div className="lives-tab">
+            <Lives />
+          </div>
         )}
       </div>
     </div>

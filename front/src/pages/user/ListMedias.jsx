@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../../api";
 import { useAuth } from "../../contexts/authContext";
 import { toast } from "react-toastify";
+import { formatDuration, formatCreatedAt } from "../../utils/mediaUtils";
 import dayjs from "dayjs";
 import MediaIcon from "../../components/MediaIcon";
 import Uploads from "../../components/icons/Uploads";
@@ -36,10 +37,9 @@ function ListMedias() {
 
   const fetchMedias = () => {
     if (!user) return;
-    console.log(user.id);
-    API.get(`/users/${user.id}/medias`)
+    API.get(`/users/me/medias`)
       .then((response) => {
-        console.log(response.data.user.medias);
+        console.log(response);
         setMedias(response.data?.user?.medias);
       })
       .catch((error) => {
@@ -109,6 +109,19 @@ function ListMedias() {
 
                     <th
                       scope="col"
+                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                    >
+                      <div className="flex items-center gap-x-3">
+                        <input
+                          type="checkbox"
+                          className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
+                        />
+                        <span>Status</span>
+                      </div>
+                    </th>
+
+                    <th
+                      scope="col"
                       className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       Durée
@@ -170,6 +183,31 @@ function ListMedias() {
                               </p>
                             </div>
                           </div>
+                        </div>
+                      </td>
+
+                      <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
+                        <div
+                          className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                            !media.isDeleted
+                              ? "bg-emerald-600/60"
+                              : "bg-red-400/40"
+                          }`}
+                        >
+                          <span
+                            className={`h-1.5 w-1.5 rounded-full ${
+                              !media.isDeleted ? "bg-emerald-500" : "bg-red-500"
+                            }`}
+                          ></span>
+                          <h2
+                            className={`text-sm font-normal ${
+                              !media.isDeleted
+                                ? "text-emerald-500"
+                                : "text-red-500"
+                            }`}
+                          >
+                            {!media.isDeleted ? "En ligne" : "Indisponible"}
+                          </h2>
                         </div>
                       </td>
                       <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">

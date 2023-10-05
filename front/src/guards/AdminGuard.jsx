@@ -4,21 +4,23 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/authContext";
 
 function AdminGuard({ children }) {
-  const { user } = useAuth(); // Destructure user from the auth context
+  const { user, isLoading } = useAuth(); // Destructurer isLoading depuis le contexte d'authentification
   const navigate = useNavigate();
 
-  // Définissez la fonction isAdmin à l'intérieur du composant AdminGuard
+  // Définir la fonction isAdmin à l'intérieur du composant AdminGuard
   const isAdmin = () => {
-    return user && user.role === "ROLE_ADMIN"; // Adjust the role string to match your system
+    return user && user.role === "ROLE_ADMIN"; // Ajustez la chaîne de rôle pour correspondre à votre système
   };
 
   useEffect(() => {
-    if (!isAdmin()) {
+    if (!isLoading && !isAdmin()) {
+      // Vérifier que le chargement est terminé avant de rediriger
       navigate("/");
     }
-  }, [navigate, isAdmin]); // Add isAdmin to the dependency array
+  }, [navigate, isLoading, user]); // Ajouter isLoading et user à l'array des dépendances
 
-  if (!isAdmin()) {
+  // N'afficher rien si les données sont en cours de chargement ou si l'utilisateur n'est pas un administrateur
+  if (isLoading || !isAdmin()) {
     return null;
   }
 

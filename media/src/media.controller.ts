@@ -84,7 +84,7 @@ export class MediaController {
           media = { ...media, ...params.media } as IMedia;
 
           delete media.user;
-          console.log("media", media);
+          // console.log("media", media);
           const updatedMedia = await this.mediaService.updateMediaById(
             params.id,
             params.media,
@@ -232,10 +232,19 @@ export class MediaController {
       offset: number;
       allUser: boolean;
       isConfirmed: boolean;
+      userId: string;
     }
   ): Promise<IMediaSearchByUserResponse> {
     try {
-      const medias = await this.mediaService.getAllMedias({ all: params.all ?? false, isDeleted: params.isDeleted ?? false, limit: params.limit ?? 20, offset: params.offset ?? 0, allUser: params.allUser ?? false, isConfirmed: params.isConfirmed ?? true });
+      const medias = await this.mediaService.getAllMedias({
+        all: params.all ?? false,
+        isDeleted: params.isDeleted ?? false,
+        limit: params.limit ?? 20,
+        offset: params.offset ?? 0,
+        allUser: params.allUser ?? false,
+        isConfirmed: params.isConfirmed ?? true,
+        userId: params.userId ?? null,
+      });
       return {
         status: HttpStatus.OK,
         message: '✅ Medias found',
