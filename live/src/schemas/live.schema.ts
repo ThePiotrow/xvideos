@@ -23,6 +23,10 @@ export const LiveSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    is_ended: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: {

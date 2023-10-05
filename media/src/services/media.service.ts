@@ -154,7 +154,7 @@ export class MediaService {
     return res;
   }
 
-  public async getMediaById({ id, all, isDeleted, allUser, isConfirmed }: { id: string, all?: boolean, isDeleted?: boolean, allUser?: boolean, isConfirmed?: boolean }): Promise<IMedia> {
+  public async getMediaById({ id, all, is_deleted, allUser, isConfirmed }: { id: string, all?: boolean, is_deleted?: boolean, allUser?: boolean, isConfirmed?: boolean }): Promise<IMedia> {
 
     const initialMatch = (all ?? false) ?
       {
@@ -162,7 +162,7 @@ export class MediaService {
       } :
       {
         _id: new mongoose.Types.ObjectId(id),
-        isDeleted: isDeleted ?? false,
+        is_deleted: is_deleted ?? false,
       };
 
     const userMatch = (allUser ?? false) ?
@@ -207,8 +207,8 @@ export class MediaService {
           type: 1,
           created_at: 1,
           updated_at: 1,
-          isDeleted: 1,
-          deletedAt: 1,
+          is_deleted: 1,
+          deleted_at: 1,
           user: {
             username: 1,
             email: 1,
@@ -231,8 +231,8 @@ export class MediaService {
 
   public async removeMediaById(id: string) {
     const params = {
-      isDeleted: true,
-      deletedAt: Date.now()
+      is_deleted: true,
+      deleted_at: Date.now()
     };
 
     await this.mediaModel.findOneAndUpdate({ _id: id }, params);
@@ -368,13 +368,13 @@ export class MediaService {
   }
 
 
-  public async getAllMedias({ all, isDeleted, limit, offset, allUser, isConfirmed, userId }: { all?: boolean, isDeleted?: boolean, limit: number, offset: number, allUser?: boolean, isConfirmed?: boolean, userId?: string }) {
+  public async getAllMedias({ all, is_deleted, limit, offset, allUser, isConfirmed, userId }: { all?: boolean, is_deleted?: boolean, limit: number, offset: number, allUser?: boolean, isConfirmed?: boolean, userId?: string }) {
 
-    let match: { isDeleted?: boolean, user_id?: mongoose.Types.ObjectId } = (all ?? false) ?
+    let match: { is_deleted?: boolean, user_id?: mongoose.Types.ObjectId } = (all ?? false) ?
       {
       } :
       {
-        isDeleted: isDeleted ?? false,
+        is_deleted: is_deleted ?? false,
       };
 
     if (userId) {
@@ -428,8 +428,8 @@ export class MediaService {
           type: 1,
           created_at: 1,
           updated_at: 1,
-          isDeleted: 1,
-          deletedAt: 1,
+          is_deleted: 1,
+          deleted_at: 1,
           user: {
             username: 1,
             email: 1,

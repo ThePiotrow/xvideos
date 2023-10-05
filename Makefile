@@ -30,7 +30,7 @@ build:
 
 dev:
 	@for dir in $(DIRS); do\
-		echo "Starting Dev $$dir; \
+		echo "Starting Dev $$dir"; \
 		cd $$dir && npm run start:dev && cd ..;\
 	done
 

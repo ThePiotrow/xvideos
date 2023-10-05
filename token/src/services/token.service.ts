@@ -72,6 +72,11 @@ export class TokenService {
         }
       },
       {
+        $match: {
+          "user.is_confirmed": true,
+        }
+      },
+      {
         $project: {
           _id: 0,
           token: 1,

@@ -82,11 +82,11 @@ export class EventsGateway {
             this.socketRoom[_id] = room;
             client.join(room);
 
-            const roomUsers = this.users[room];
+            const users = this.users[room];
 
-            console.log(roomUsers);
+            console.log(users);
 
-            this.server.sockets.to(room).emit('room:users', { username, roomUsers });
+            this.server.sockets.to(room).emit('room:users', { username, users, _user: { id: _id, username: _username } });
         }
         catch (e) {
             console.error(e);
@@ -148,7 +148,7 @@ export class EventsGateway {
                 return;
             }
         }
-        client.to(roomId).emit('users:exit', { id: client.id });
+        client.to(roomId).emit('users:exit', { users: room, room: roomId, client: client.id });
     }
 
 }

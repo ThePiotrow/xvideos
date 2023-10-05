@@ -176,9 +176,9 @@ function ListMedias() {
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                 {media.description
                                   ? media.description
-                                      .split(" ")
-                                      .splice(0, 5)
-                                      .join(" ") + "..."
+                                    .split(" ")
+                                    .splice(0, 5)
+                                    .join(" ") + "..."
                                   : "N/A"}
                               </p>
                             </div>
@@ -188,25 +188,22 @@ function ListMedias() {
 
                       <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                         <div
-                          className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
-                            !media.isDeleted
+                          className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${!media.is_deleted
                               ? "bg-emerald-600/60"
                               : "bg-red-400/40"
-                          }`}
+                            }`}
                         >
                           <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              !media.isDeleted ? "bg-emerald-500" : "bg-red-500"
-                            }`}
+                            className={`h-1.5 w-1.5 rounded-full ${!media.is_deleted ? "bg-emerald-500" : "bg-red-500"
+                              }`}
                           ></span>
                           <h2
-                            className={`text-sm font-normal ${
-                              !media.isDeleted
+                            className={`text-sm font-normal ${!media.is_deleted
                                 ? "text-emerald-500"
                                 : "text-red-500"
-                            }`}
+                              }`}
                           >
-                            {!media.isDeleted ? "En ligne" : "Indisponible"}
+                            {!media.is_deleted ? "En ligne" : "Indisponible"}
                           </h2>
                         </div>
                       </td>

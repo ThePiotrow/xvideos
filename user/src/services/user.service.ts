@@ -20,14 +20,14 @@ export class UserService {
     return this.userModel.find(data).exec();
   }
 
-  async searchUserById({ id, all, isDeleted, media }: { id: string, all?: boolean, isDeleted?: boolean, media?: boolean }): Promise<IUser> {
+  async searchUserById({ id, all, is_deleted, media }: { id: string, all?: boolean, is_deleted?: boolean, media?: boolean }): Promise<IUser> {
     const match = (all ?? false) ?
       {
         _id: new mongoose.Types.ObjectId(id),
       } :
       {
         _id: new mongoose.Types.ObjectId(id),
-        isDeleted: isDeleted ?? false,
+        is_deleted: is_deleted ?? false,
       };
 
     media = media ?? false;
@@ -134,7 +134,7 @@ export class UserService {
     }
   }
 
-  async searchUserByUsername({ username, all, isDeleted, media }: { username: string, all?: boolean, isDeleted?: boolean, media?: boolean }): Promise<IUser> {
+  async searchUserByUsername({ username, all, is_deleted, media }: { username: string, all?: boolean, is_deleted?: boolean, media?: boolean }): Promise<IUser> {
 
     const match = (all ?? false) ?
       {
@@ -142,7 +142,7 @@ export class UserService {
       } :
       {
         username,
-        isDeleted: isDeleted ?? false,
+        is_deleted: is_deleted ?? false,
       };
 
     media = media ?? false;
@@ -224,8 +224,8 @@ export class UserService {
                 duration: "$$media.duration",
                 thumbnail: "$$media.urls.thumbnail",
                 type: "$$media.type",
-                isDeleted: "$$media.isDeleted",
-                deletedAt: "$$media.deletedAt",
+                is_deleted: "$$media.is_deleted",
+                deleted_at: "$$media.deleted_at",
                 updated_at: "$$media.updated_at",
                 created_at: "$$media.created_at"
               }
@@ -282,8 +282,8 @@ export class UserService {
 
   public async removeUserById(id: string) {
     const params = {
-      isDeleted: true,
-      deletedAt: Date.now()
+      is_deleted: true,
+      deleted_at: Date.now()
     };
 
     await this.userModel.findOneAndUpdate({ _id: id }, params);

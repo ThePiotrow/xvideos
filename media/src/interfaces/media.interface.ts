@@ -21,6 +21,6 @@ export interface IMedia extends Document {
   thumbnail?: Express.Multer.File;
   created_at?: number;
   updated_at?: number;
-  isDeleted?: boolean;
-  deletedAt?: number | null;
+  is_deleted?: boolean;
+  deleted_at?: number | null;
 }

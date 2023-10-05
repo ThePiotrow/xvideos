@@ -1,9 +1,8 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_BASE_URI}:${
-    import.meta.env.VITE_API_GATEWAY_PORT
-  }`, // l'URL de base de vos requêtes API
+  baseURL: `${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT
+    }`, // l'URL de base de vos requêtes API
   timeout: 10000, // spécifie le nombre de millisecondes avant que la requête n'expire
   headers: {
     "Content-Type": "application/json",

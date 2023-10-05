@@ -216,6 +216,8 @@ export class LiveService {
         end_time: (onAir ?? false) ? null : { $ne: null },
       };
 
+    console.log(match)
+
     const result = await this.liveModel.aggregate([
       {
         $match: match,
@@ -244,6 +246,7 @@ export class LiveService {
           title: 1,
           start_time: 1,
           end_time: 1,
+          is_ended: 1,
           created_at: 1,
           user: {
             id: 1,
@@ -263,6 +266,8 @@ export class LiveService {
         $limit: limit,
       },
     ]).exec();
+
+    console.log(result)
 
     return result;
   }
@@ -314,6 +319,7 @@ export class LiveService {
           start_time: 1,
           end_time: 1,
           created_at: 1,
+          is_ended: 1,
           user: {
             id: 1,
             username: 1,

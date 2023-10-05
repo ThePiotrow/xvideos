@@ -38,10 +38,16 @@ function Streamer() {
   const streamRef = useRef();
 
   useEffect(() => {
+    console.log(users)
+  }, [users])
+
+  useEffect(() => {
     API.get("/users/me")
       .then((response) => {
         const currentLive = response.data?.user?.live;
         localUser.current = response.data?.user
+
+        console.log(response.data.user)
 
         if (currentLive) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
@@ -95,7 +101,7 @@ function Streamer() {
 
 
   const handleLiveStart = () => {
-    API.post("/lives/start", { title })
+    API.post("/lives", { title })
       .then((response) => {
         const currentLive = response.data?.live;
         const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
@@ -109,26 +115,14 @@ function Streamer() {
 
 
   const handleStop = () => {
-    API.post("/lives/stop")
+    if (!live.id) return
+    API.post(`/lives/${live.id}/stop`)
       .then((response) => {
         setLive({ elapsedTime: formatDuration(0) });
       })
       .catch((error) => {
         console.error("Erreur lors de l'arrêt du live", error);
         toast.error("Erreur lors de l'arrêt du live !");
-      });
-  };
-
-  const handleSubmit = () => {
-    API.post("/lives/start", { title })
-      .then((response) => {
-        const currentLive = response.data?.live;
-        const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
-        setLive({ ...currentLive, elapsedTime });
-      })
-      .catch((error) => {
-        console.error("Erreur lors du lancement du live", error);
-        toast.error("Erreur lors du lancement du live !");
       });
   };
 
@@ -197,29 +191,27 @@ function Streamer() {
 
     getLocalStream();
 
-    socketRef.current.on('room:users', ({ roomUsers }) => {
-      setUsers(roomUsers);
-      roomUsers.forEach(async (_user) => {
-        if (!streamRef.current && _user.id === socketRef.current.id) return;
-        const pc = createPeerConnection(_user.id, _user.username);
-        if (!(pc && socketRef.current)) return;
-        pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
-        try {
-          const localSdp = await pc.createOffer({
-            offerToReceiveAudio: true,
-            offerToReceiveVideo: true,
-          });
-          await pc.setLocalDescription(new RTCSessionDescription(localSdp));
-          socketRef.current.emit('offer:make', {
-            sdp: localSdp,
-            offerSendId: socketRef.current.id,
-            offerSendUsername: localUser.current.username,
-            offerReceiveId: _user.id,
-          });
-        } catch (e) {
-          console.error(e);
-        }
-      });
+    socketRef.current.on('room:users', async ({ users, _user }) => {
+      setUsers(users);
+      if (!streamRef.current && _user.id === socketRef.current.id) return;
+      const pc = createPeerConnection(_user.id, _user.username);
+      if (!(pc && socketRef.current)) return;
+      pcsRef.current = { ...pcsRef.current, [_user.id]: pc };
+      try {
+        const localSdp = await pc.createOffer({
+          offerToReceiveAudio: true,
+          offerToReceiveVideo: true,
+        });
+        await pc.setLocalDescription(new RTCSessionDescription(localSdp));
+        socketRef.current.emit('offer:make', {
+          sdp: localSdp,
+          offerSendId: socketRef.current.id,
+          offerSendUsername: localUser.current.username,
+          offerReceiveId: _user.id,
+        });
+      } catch (e) {
+        console.error(e);
+      }
     });
 
     socketRef.current.on(
@@ -271,11 +263,11 @@ function Streamer() {
 
     socketRef.current.on(
       'users:exit',
-      ({ id }) => {
-        if (!pcsRef.current[id]) return;
-        pcsRef.current[id].close();
-        delete pcsRef.current[id];
-        setUsers((oldUsers) => oldUsers.filter((user) => user.id !== id));
+      ({ client, users }) => {
+        setUsers(users);
+        if (!pcsRef.current[client]) return;
+        pcsRef.current[client].close();
+        delete pcsRef.current[client];
       });
 
     return () => {
@@ -391,22 +383,10 @@ function Streamer() {
               <div
                 className="gap-x-5 flex self-center"
               >
-                {live?.id &&
-                  (<button
-                    type="button"
-                    onClick={handleLiveStart}
-                    disabled={segmentTimer || !title || !mediaStream}
-                    className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
-                  >
-                    <FontAwesomeIcon className="text-xs" icon={fasPlay} />
-                    Reprendre
-                  </button>
-                  )
-                }
                 {!live?.id && (
                   <button type="button"
-                    onClick={handleSubmit}
-                    disabled={!title || !mediaStream}
+                    onClick={handleLiveStart}
+                    disabled={!title}
                     className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
                   >
                     <FontAwesomeIcon className="text-xs" icon={fasPlay} />
@@ -420,16 +400,11 @@ function Streamer() {
                 >
                   <FontAwesomeIcon className="text-xs" icon={fasSquare} />
                   Arrêter</button>
-
-
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
-
     </div >
   );
 }

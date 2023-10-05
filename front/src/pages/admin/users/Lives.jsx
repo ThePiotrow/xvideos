@@ -5,22 +5,23 @@ import API from "../../../api";
 import { formatDuration } from "../../../utils/mediaUtils";
 import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEye } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faHand, faStop } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../../../contexts/authContext";
+import MediaIcon from "../../../components/MediaIcon";
+import { faStopCircle } from "@fortawesome/free-regular-svg-icons";
 
 function Lives() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [lives, setLives] = useState([]);
-  const [liveData, setLiveData] = useState([]);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
-      setLiveData((prevLives) =>
+      setLives((prevLives) =>
         prevLives.map((live) => ({
           ...live,
           elapsedTime: formatDuration(
-            dayjs(dayjs()).diff(live.start_time, "seconds")
+            dayjs(live.end_time ?? dayjs()).diff(live.start_time, "seconds")
           ),
         }))
       );
@@ -30,20 +31,36 @@ function Lives() {
   }, []);
 
   useEffect(() => {
-    API.get("/lives")
+    API.get("/admin/lives")
       .then((response) => {
+        console.log(response.data.lives)
         const livesWithTime = response.data.lives.map((live) => ({
           ...live,
           elapsedTime: formatDuration(
             dayjs(dayjs()).diff(live.start_time, "seconds")
           ),
         }));
-        setLiveData(livesWithTime);
+        setLives(livesWithTime);
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des lives", error);
       });
   }, []);
+
+  const toggleBlock = (live) => {
+    API.put(`/admin/lives/${live.id}`, {
+      is_deleted: !live.is_deleted,
+    })
+      .then((response) => {
+        const updatedLives = lives.map((live) =>
+          live.id === response.data.live.id ? response.data.live : live
+        );
+        setLives(updatedLives);
+      })
+      .catch((error) => {
+        console.error("Erreur lors de la mise à jour du live", error);
+      });
+  }
 
   return (
     <section className="container px-4 mx-auto">
@@ -102,28 +119,26 @@ function Lives() {
                       <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                         <div className="inline-flex items-center gap-x-3">
                           <div className="flex items-center gap-x-2">
-                            <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
-                              <MediaIcon type={live.type} />
-                            </div>
-
                             <div>
                               <h2 className="font-normal text-gray-800 dark:text-white ">
                                 {live.title}
                               </h2>
-                              <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                {live.description
-                                  ? live.description
-                                      .split(" ")
-                                      .splice(0, 5)
-                                      .join(" ") + "..."
-                                  : "N/A"}
-                              </p>
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
-                        {live.duration ? formatDuration(live.duration) : "N/A"}
+                      <td className="px-12 py-4 text-sm font-normal text-white whitespace-nowrap">
+                        <p
+                          className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center w-fit"
+                        >
+                          <span
+                            className={`absolute h-2 w-2 rounded-full ${!live?.end_time ? "bg-red-500 animate-ping" : ''}`}
+                          ></span>
+                          <span
+                            className={`relative h-2 w-2 rounded-full ${!live?.end_time ? "bg-red-500" : 'bg-slate-500'}`}
+                          ></span>
+                          {live.elapsedTime}
+                        </p>
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         {dayjs(live.created_at).format("DD/MM/YYYY HH:mm:ss")}
@@ -132,15 +147,27 @@ function Lives() {
                         {dayjs(live.updated_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {live.user.username}
+                        @{live.user.username}
                       </td>
-                      <td className="px-4 py-4 text-sm whitespace-nowrap">
-                        <button
-                          onClick={() => toggleBlock(media)}
-                          className="text-slate-500 transition-colors duration-200 hover:text-red-500 focus:outline-none"
-                        >
-                          {!live.isDeleted ? "Supprimer" : "Récupérer"}
-                        </button>
+                      <td className="px-4 py-4 text-sm whitespace-nowrap flex gap-2 items-center">
+
+                        {!live.is_ended && (
+                          <>
+                            <a
+                              href={`/live/${live.user.username}`}
+                              className="text-slate-500 transition-colors duration-200 py-2 px-4 hover:text-slate-600 focus:outline-none bg-slate-400 hover:bg-slate-500 rounded-lg"
+                            >
+                              <FontAwesomeIcon icon={faEye} />
+                            </a>
+                            <button
+                              onClick={() => toggleBlock(live)}
+                              className="text-slate-500 transition-colors duration-200 py-2 px-4 hover:text-red-500 focus:outline-none flex items-center gap-2"
+                            >
+                              <FontAwesomeIcon className="" icon={faHand} />
+                              Arrêter
+                            </button>
+                          </>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -155,3 +182,4 @@ function Lives() {
 }
 
 export default Lives;
+

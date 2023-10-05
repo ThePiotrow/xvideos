@@ -1,5 +1,5 @@
 export interface IMediaUpdateParams {
   title?: string;
   description?: string;
-  isDeleted?: boolean;
+  is_deleted?: boolean;
 }

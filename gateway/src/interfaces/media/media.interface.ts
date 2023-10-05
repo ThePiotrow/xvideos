@@ -20,6 +20,6 @@ export interface IMedia {
   duration?: number;
   created_at?: number;
   updated_at?: number;
-  isDeleted?: boolean;
-  deletedAt?: number;
+  is_deleted?: boolean;
+  deleted_at?: number;
 }

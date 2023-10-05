@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { formatDuration } from "../../utils/mediaUtils";
 import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleNotch, faEye, faPlus, faSync, faSyncAlt, faCheck as fasCheck, faCircle as fasCircle, faDesktop as fasDesktop, faMicrophone as fasMicrophone, faPlay as fasPlay, faQuestion as fasQuestion, faShare as fasShare, faSquare as fasSquare, faTrash as fasTrash, faVideo as fasVideo } from "@fortawesome/free-solid-svg-icons";
+import { faCircleNotch, faEye, faPaperPlane, faPlus, faSync, faSyncAlt, faCheck as fasCheck, faCircle as fasCircle, faDesktop as fasDesktop, faMicrophone as fasMicrophone, faPlay as fasPlay, faQuestion as fasQuestion, faShare as fasShare, faSquare as fasSquare, faTrash as fasTrash, faVideo as fasVideo } from "@fortawesome/free-solid-svg-icons";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import "../../components/css/pulse.css"
 
@@ -27,6 +27,8 @@ function Viewer() {
 
   const [live, setLive] = useState({ elapsedTime: formatDuration(0) });
   const [users, setUsers] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
 
   const localUser = useRef(null);
   const [viewer, setViewer] = useState({ username: "Anonyme-" + Math.random().toString(36).substring(2) });
@@ -120,8 +122,8 @@ function Viewer() {
 
     getLocalStream();
 
-    socketRef.current.on('room:users', ({ roomUsers }) => {
-      setUsers(roomUsers);
+    socketRef.current.on('room:users', ({ users }) => {
+      setUsers(users);
     });
 
     socketRef.current.on(
@@ -173,11 +175,11 @@ function Viewer() {
 
     socketRef.current.on(
       'users:exit',
-      ({ id }) => {
-        if (!pcRef.current[id]) return;
-        pcRef.current[id].close();
-        delete pcRef.current[id];
-        setUsers((oldUsers) => oldUsers.filter((user) => user.id !== id));
+      ({ users, room }) => {
+        setUsers(users);
+        if (!pcRef.current[room]) return;
+        pcRef.current[room].close();
+        delete pcRef.current[room];
       });
 
     return () => {
@@ -192,7 +194,15 @@ function Viewer() {
     };
   }, [createPeerConnection, getLocalStream]);
 
-
+  const handleMessageSend = () => {
+    if (!user) return;
+    if (!(messageRef.current && messageRef.current.value)) return;
+    socketRef.current.emit('message:send', {
+      message: messageRef.current.value,
+      username: viewer.username,
+    });
+    messageRef.current.value = "";
+  }
 
 
   return (
@@ -201,9 +211,9 @@ function Viewer() {
         className="mt-6"
       >
         <div
-          className="2xl:flex-row flex-col flex gap-12"
+          className="2xl:flex-row flex-col flex gap-6"
         >
-          <div className="flex flex-col 2xl:w-1/2 gap-6">
+          <div className="flex flex-col w-full gap-6">
             <>
               <h3
                 className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-800 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
@@ -278,24 +288,37 @@ function Viewer() {
 
             </div>
           </div>
-          <div className="flex flex-col gap-5">
-            <div className="flex flex-col bg-slate-800 rounded-xl 2xl:-mx-4 mt-4 py-4 px-4 gap-6">
-              <h3 className="font-semibold text-white">Actions</h3>
-              <div
-                className="gap-x-5 flex self-center"
-              >
-
-
-              </div>
+          <div className="min-w-[400px] bg-slate-800 rounded-xl flex flex-col">
+            <div className="flex basis-14 rounded-t-xl items-center px-4">
+              <h2 className="font-semibold">Chat</h2>
             </div>
-            <div className="flex flex-col basis-full gap-5">
-              <h3
-                className="font-semibold text-white"
-              >Sources</h3>
-
+            <div className="flex basis-full bg-red-200"></div>
+            <div className="flex basis-20 rounded-b-xl w-full">
+              <textarea onKeyDownCapture={
+                (e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!(e.key === 'Enter' && !e.shiftKey)) return; {
+                    handleMessageSend();
+                  }
+                }
+              }
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                }}
+                value={message}
+                placeholder="Envoyer un message"
+                type="text" cols={3} className="w-full rounded-none rounded-bl-xl text-sm outline-none py-2 px-3 resize-none" />
+              <button
+                className="rounded-none rounded-br-xl aspect-square"
+                onClick={() => {
+                  handleMessageSend();
+                }}
+              >
+                <FontAwesomeIcon icon={faPaperPlane} />
+              </button>
             </div>
           </div>
-
         </div>
       </div>
 

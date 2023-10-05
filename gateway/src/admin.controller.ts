@@ -43,6 +43,7 @@ export class AdminController {
     @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     @Inject('USER_SERVICE') private readonly userServiceClient: ClientProxy,
     @Inject('MEDIA_SERVICE') private readonly mediaServiceClient: ClientProxy,
+    @Inject('LIVE_SERVICE') private readonly liveServiceClient: ClientProxy,
   ) { }
 
   @Get()
@@ -347,6 +348,34 @@ export class AdminController {
       data: {
         users: usersResponse.users,
       },
+    };
+  }
+
+  @Get('/lives')
+  @Authorization()
+  @Admin()
+  public async getAdminLives(
+    @Query() { limit, page }: any,
+  ): Promise<any> {
+    const offset = limit * (page - 1);
+
+    const livesResponse: any =
+      await firstValueFrom(
+        this.liveServiceClient.send('get_all_lives',
+          {
+            limit: limit,
+            offset: offset,
+            all: true
+          }
+        ),
+      );
+
+    return {
+      message: livesResponse.message,
+      data: {
+        lives: livesResponse.lives,
+      },
+      errors: null,
     };
   }
 }

@@ -6,7 +6,7 @@ export class MediaIdDto {
   @ApiProperty()
   all?: boolean;
   @ApiProperty()
-  isDeleted?: boolean;
+  is_deleted?: boolean;
   @ApiProperty()
   allUser?: boolean;
   @ApiProperty()

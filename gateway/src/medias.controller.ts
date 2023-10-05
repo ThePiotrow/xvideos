@@ -80,7 +80,7 @@ export class MediasController {
           limit: body.limit,
           offset: body.offset,
           all: false,
-          isDeleted: false,
+          is_deleted: false,
           allUser: false,
           isConfirmed: true,
         }),

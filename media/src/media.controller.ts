@@ -40,7 +40,7 @@ export class MediaController {
   public async mediaSearchById(params: {
     id: string;
     all?: boolean;
-    isDeleted?: boolean;
+    is_deleted?: boolean;
     allUser?: boolean;
     isConfirmed?: boolean;
   }): Promise<IMediaSearchByIdResponse> {
@@ -227,7 +227,7 @@ export class MediaController {
   public async mediaGetAll(
     params: {
       all: boolean;
-      isDeleted: boolean;
+      is_deleted: boolean;
       limit: number;
       offset: number;
       allUser: boolean;
@@ -238,7 +238,7 @@ export class MediaController {
     try {
       const medias = await this.mediaService.getAllMedias({
         all: params.all ?? false,
-        isDeleted: params.isDeleted ?? false,
+        is_deleted: params.is_deleted ?? false,
         limit: params.limit ?? 20,
         offset: params.offset ?? 0,
         allUser: params.allUser ?? false,
@@ -268,7 +268,7 @@ export class MediaController {
     if (params && params.id && params.media) {
       try {
 
-        if (params.media.isDeleted) {
+        if (params.media.is_deleted) {
           return {
             status: HttpStatus.OK,
             message: '⚠️ Media already deleted',

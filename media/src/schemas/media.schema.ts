@@ -40,11 +40,11 @@ export const MediaSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: [true, 'User can not be empty'],
     },
-    isDeleted: {
+    is_deleted: {
       type: Boolean,
       default: false
     },
-    deletedAt: {
+    deleted_at: {
       type: Date,
       default: null
     }
@@ -74,7 +74,7 @@ MediaSchema.pre('validate', function (next) {
     this.invalidate('user_id', 'The field value can not be updated');
   }
 
-  if (!this.isModified('deletedAt'))
+  if (!this.isModified('deleted_at'))
     self.updated_at = Date.now();
 
   next();

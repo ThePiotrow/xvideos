@@ -38,11 +38,11 @@ export const UserSchema = new mongoose.Schema(
       required: [true, 'Role can not be empty'],
       enum: ['ROLE_ADMIN', 'ROLE_USER'],
     },
-    isDeleted: {
+    is_deleted: {
       type: Boolean,
       default: false,
     },
-    deletedAt: {
+    deletet_at: {
       type: Date,
       default: null,
     },
@@ -79,7 +79,7 @@ UserSchema.pre('validate', async function (next) {
 
   const self = this as IUser;
 
-  if (!this.isModified('deletedAt'))
+  if (!this.isModified('deleted_at'))
     self.updated_at = Date.now();
 
 });

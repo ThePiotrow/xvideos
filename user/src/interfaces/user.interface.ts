@@ -9,8 +9,8 @@ export interface IUser extends Document {
   role: string;
   created_at: number;
   updated_at: number;
-  isDeleted?: boolean;
-  deletedAt?: number;
+  is_deleted?: boolean;
+  deleted_at?: number;
   compareEncryptedPassword: (password: string) => boolean;
   getEncryptedPassword: (password: string) => string;
 }
