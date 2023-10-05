@@ -154,90 +154,111 @@ function ListMedias() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                  {medias.map((media) => (
-                    <tr key={media.id}>
-                      <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
-                        <div className="inline-flex items-center gap-x-3">
-                          <input
-                            type="checkbox"
-                            onChange={(e) => handleCheckboxChange(e, media.id)}
-                            className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
-                          />
+                  {medias ? (
+                    medias.length > 0 ? (
+                      medias.map((media) => (
+                        <tr key={media.id}>
+                          <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
+                            <div className="inline-flex items-center gap-x-3">
+                              <input
+                                type="checkbox"
+                                onChange={(e) =>
+                                  handleCheckboxChange(e, media.id)
+                                }
+                                className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
+                              />
 
-                          <div className="flex items-center gap-x-2">
-                            <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
-                              <MediaIcon type={media.type} />
+                              <div className="flex items-center gap-x-2">
+                                <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
+                                  <MediaIcon type={media.type} />
+                                </div>
+
+                                <div>
+                                  <h2 className="font-normal text-gray-800 dark:text-white ">
+                                    {media.title}
+                                  </h2>
+                                  <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                                    {media.description
+                                      ? media.description
+                                          .split(" ")
+                                          .splice(0, 5)
+                                          .join(" ") + "..."
+                                      : "N/A"}
+                                  </p>
+                                </div>
+                              </div>
                             </div>
+                          </td>
 
-                            <div>
-                              <h2 className="font-normal text-gray-800 dark:text-white ">
-                                {media.title}
+                          <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
+                            <div
+                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                                !media.is_deleted
+                                  ? "bg-emerald-600/60"
+                                  : "bg-red-400/40"
+                              }`}
+                            >
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  !media.is_deleted
+                                    ? "bg-emerald-500"
+                                    : "bg-red-500"
+                                }`}
+                              ></span>
+                              <h2
+                                className={`text-sm font-normal ${
+                                  !media.is_deleted
+                                    ? "text-emerald-500"
+                                    : "text-red-500"
+                                }`}
+                              >
+                                {!media.is_deleted
+                                  ? "En ligne"
+                                  : "Indisponible"}
                               </h2>
-                              <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
-                                {media.description
-                                  ? media.description
-                                    .split(" ")
-                                    .splice(0, 5)
-                                    .join(" ") + "..."
-                                  : "N/A"}
-                              </p>
                             </div>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
-                        <div
-                          className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${!media.is_deleted
-                              ? "bg-emerald-600/60"
-                              : "bg-red-400/40"
-                            }`}
-                        >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${!media.is_deleted ? "bg-emerald-500" : "bg-red-500"
-                              }`}
-                          ></span>
-                          <h2
-                            className={`text-sm font-normal ${!media.is_deleted
-                                ? "text-emerald-500"
-                                : "text-red-500"
-                              }`}
-                          >
-                            {!media.is_deleted ? "En ligne" : "Indisponible"}
-                          </h2>
-                        </div>
-                      </td>
-                      <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
-                        {media.duration
-                          ? formatDuration(media.duration)
-                          : "N/A"}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {dayjs(media.updated_at).format("DD/MM/YYYY HH:mm:ss")}
-                      </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {user.username}
-                      </td>
-                      <td className="px-4 py-4 text-sm whitespace-nowrap">
-                        <button
-                          onClick={() => {
-                            toggleModal("update");
-                            setUpdateMediaData({
-                              id: media.id,
-                              title: media.title,
-                              description: media.description,
-                            });
-                          }}
-                          className="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100"
-                        >
-                          <Details />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                          </td>
+                          <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
+                            {media.duration
+                              ? formatDuration(media.duration)
+                              : "N/A"}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                            {dayjs(media.created_at).format(
+                              "DD/MM/YYYY HH:mm:ss"
+                            )}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                            {dayjs(media.updated_at).format(
+                              "DD/MM/YYYY HH:mm:ss"
+                            )}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                            {user.username}
+                          </td>
+                          <td className="px-4 py-4 text-sm whitespace-nowrap">
+                            <button
+                              onClick={() => {
+                                toggleModal("update");
+                                setUpdateMediaData({
+                                  id: media.id,
+                                  title: media.title,
+                                  description: media.description,
+                                });
+                              }}
+                              className="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100"
+                            >
+                              <Details />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <p>Pas de médias disponibles</p>
+                    )
+                  ) : (
+                    <p>Chargement des médias...</p>
+                  )}
                 </tbody>
               </table>
             </div>
