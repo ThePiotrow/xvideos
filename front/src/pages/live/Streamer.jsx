@@ -414,9 +414,9 @@ function Streamer() {
             <div className="flex basis-14 rounded-t-xl items-center px-4 border-b border-slate-600">
               <h2 className="font-semibold">Chat</h2>
             </div>
-            <div ref={chat} className="flex flex-col basis-full max-h-[500px] overflow-y-scroll gap-4 p-2">
+            <div ref={chat} className="flex flex-col basis-full max-h-[500px] overflow-y-scroll gap-4 p-3">
               {messages.map((message, index) => (
-                <div key={index} className="flex flex-col w-full px-4 py-2 bg-slate-300/20 gap-2 rounded-lg">
+                <div key={index} className="flex flex-col w-full px-4 pt-2 pb-3 bg-slate-300/20 gap-2 rounded-lg shadow-xl">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">@{message.username}</p>
                     <p className="text-xs text-gray-400">{dayjs(message.timestamp).format("HH:mm")}</p>
