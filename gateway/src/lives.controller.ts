@@ -12,6 +12,7 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFiles,
+  Patch,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -67,53 +68,6 @@ export class LivesController {
     };
   }
 
-  @Post('stream/:id')
-  @Authorization()
-  @Owner('live')
-  @UseInterceptors(FileFieldsInterceptor(
-    [
-      { name: 'segment', maxCount: 1 },
-    ],
-  ))
-  @ApiConsumes('multipart/form-data')
-  @ApiCreatedResponse({
-    type: CreateLiveResponseDto,
-  })
-  public async createStream(
-    @Req() request: IAuthorizedRequest,
-    @Param() params: LiveIdDto,
-    @UploadedFiles() files: { segment?: Express.Multer.File[] },
-  ) {
-    const { user, resource } = request;
-    const stream = files.segment[0];
-    const createLiveResponse: IServiceLiveCreateResponse =
-      await firstValueFrom(
-        this.liveServiceClient.send(
-          'live_stream',
-          Object.assign({ id: params.id, stream, live: resource }),
-        ),
-      );
-
-    if (createLiveResponse.status !== HttpStatus.CREATED) {
-      throw new HttpException(
-        {
-          message: createLiveResponse.message,
-          data: null,
-          errors: createLiveResponse.errors,
-        },
-        createLiveResponse.status,
-      );
-    }
-
-    return {
-      message: createLiveResponse.message,
-      data: {
-        live: createLiveResponse.live,
-      },
-      errors: null,
-    };
-  }
-
   @Post()
   @Authorization()
   @ApiCreatedResponse({
@@ -152,44 +106,6 @@ export class LivesController {
     };
   }
 
-  @Post(':id/stop')
-  @Authorization()
-  @Owner('live')
-  @ApiCreatedResponse({
-    type: CreateLiveResponseDto,
-  })
-  public async stopLive(
-    @Req() request: IAuthorizedRequest,
-    @Param() params: LiveIdDto,
-  ): Promise<any> {
-    const { resource } = request;
-    const createLiveResponse: IServiceLiveCreateResponse =
-      await firstValueFrom(
-        this.liveServiceClient.send(
-          'live_stop',
-          Object.assign({ live: resource, id: params.id }),
-        ),
-      );
-
-    if (createLiveResponse.status !== HttpStatus.OK) {
-      throw new HttpException(
-        {
-          message: createLiveResponse.message,
-          data: null,
-          errors: createLiveResponse.errors,
-        },
-        createLiveResponse.status,
-      );
-    }
-
-    return {
-      message: createLiveResponse.message,
-      data: {
-        live: createLiveResponse.live,
-      },
-      errors: null,
-    };
-  }
 
   @Delete(':id')
   @Authorization()
@@ -229,7 +145,7 @@ export class LivesController {
     };
   }
 
-  @Put(':id')
+  @Patch(':id')
   @Authorization()
   @Owner('live')
   @ApiOkResponse({
@@ -238,15 +154,16 @@ export class LivesController {
   public async updateLive(
     @Req() request: IAuthorizedRequest,
     @Param() params: LiveIdDto,
-    @Body() body: UpdateLiveDto,
+    @Body() live: UpdateLiveDto,
   ): Promise<UpdateLiveResponseDto> {
     const { user } = request;
+
     const updateLiveResponse: IServiceLiveUpdateByIdResponse =
       await firstValueFrom(
         this.liveServiceClient.send('live_update_by_id', {
           id: params.id,
-          userId: user.id,
-          live: body,
+          live,
+          all: true
         }),
       );
 

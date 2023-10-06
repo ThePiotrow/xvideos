@@ -247,6 +247,7 @@ export class LiveService {
           start_time: 1,
           end_time: 1,
           is_ended: 1,
+          updated_at: 1,
           created_at: 1,
           user: {
             id: 1,
@@ -267,8 +268,6 @@ export class LiveService {
       },
     ]).exec();
 
-    console.log(result)
-
     return result;
   }
 
@@ -279,15 +278,14 @@ export class LiveService {
     return res;
   }
 
-  public async findLiveById({ id, onAir }: { id: string, onAir?: boolean }) {
-    const match = (onAir ?? true) ?
+  public async findLiveById({ id, all, onAir }: { id: string; all?: boolean; onAir?: boolean }) {
+    const match = (all ?? true) ?
       {
         _id: new mongoose.Types.ObjectId(id),
-        end_time: { $eq: null, },
       } :
       {
         _id: new mongoose.Types.ObjectId(id),
-        end_time: { $ne: null },
+        is_ended: !(onAir ?? false),
       };
 
     const result = await this.liveModel.aggregate([
@@ -319,6 +317,7 @@ export class LiveService {
           start_time: 1,
           end_time: 1,
           created_at: 1,
+          updated_at: 1,
           is_ended: 1,
           user: {
             id: 1,
@@ -344,6 +343,7 @@ export class LiveService {
   public async updateLiveById(
     id: string,
     params: ILiveUpdateParams,
+    all: boolean,
   ): Promise<ILive> {
     const live = await this.liveModel.findOneAndUpdate(
       { _id: id },
@@ -351,7 +351,6 @@ export class LiveService {
       { new: true },
     );
 
-
-    return await this.findLiveById({ id });
+    return await this.findLiveById({ id: live.id, all });
   }
 }

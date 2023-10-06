@@ -84,7 +84,6 @@ export class MediaController {
           media = { ...media, ...params.media } as IMedia;
 
           delete media.user;
-          // console.log("media", media);
           const updatedMedia = await this.mediaService.updateMediaById(
             params.id,
             params.media,

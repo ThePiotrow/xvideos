@@ -13,4 +13,6 @@ export interface ILive extends Document {
   start_time: number;
   end_time?: number;
   created_at: number;
+  updated_at: number;
+  is_ended: boolean;
 }

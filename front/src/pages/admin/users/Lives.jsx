@@ -48,8 +48,8 @@ function Lives() {
   }, []);
 
   const toggleBlock = (live) => {
-    API.put(`/admin/lives/${live.id}`, {
-      is_deleted: !live.is_deleted,
+    API.patch(`/lives/${live.id}`, {
+      is_ended: !live.is_ended,
     })
       .then((response) => {
         const updatedLives = lives.map((live) =>
@@ -144,7 +144,7 @@ function Lives() {
                         {dayjs(live.created_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {dayjs(live.updated_at).format("DD/MM/YYYY HH:mm:ss")}
+                        {live.end_time ? dayjs(live.end_time).format("DD/MM/YYYY HH:mm:ss") : "En cours"}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         @{live.user.username}

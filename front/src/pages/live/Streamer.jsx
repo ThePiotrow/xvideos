@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { formatDuration } from "../../utils/mediaUtils";
 import dayjs from "dayjs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleNotch, faEye, faPlus, faSync, faSyncAlt, faCheck as fasCheck, faCircle as fasCircle, faDesktop as fasDesktop, faMicrophone as fasMicrophone, faPlay as fasPlay, faQuestion as fasQuestion, faShare as fasShare, faSquare as fasSquare, faTrash as fasTrash, faVideo as fasVideo } from "@fortawesome/free-solid-svg-icons";
+import { faCircleNotch, faEye, faPaperPlane, faPlus, faSync, faSyncAlt, faCheck as fasCheck, faCircle as fasCircle, faDesktop as fasDesktop, faMicrophone as fasMicrophone, faPlay as fasPlay, faQuestion as fasQuestion, faShare as fasShare, faSquare as fasSquare, faTrash as fasTrash, faVideo as fasVideo } from "@fortawesome/free-solid-svg-icons";
 import { faCircle } from "@fortawesome/free-regular-svg-icons";
 import "../../components/css/pulse.css"
 
@@ -29,6 +29,9 @@ function Streamer() {
   const [title, setTitle] = useState("");
   const [devices, setDevices] = useState({ audio: [], video: [] });
   const [storedDevices, setStoredDevices] = useState([]);
+  const [messages, setMessages] = useState([]);
+  const [message, setMessage] = useState("");
+
 
 
   const localUser = useRef(null);
@@ -36,6 +39,7 @@ function Streamer() {
   const pcsRef = useRef({});
   const videoRef = useRef(null);
   const streamRef = useRef();
+  const chat = useRef(null);
 
   useEffect(() => {
     console.log(users)
@@ -49,9 +53,10 @@ function Streamer() {
 
         console.log(response.data.user)
 
-        if (currentLive) {
+        if (currentLive?.start_time) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
           setLive({ ...currentLive, elapsedTime, username: response.data.user.username });
+          getLocalStream();
         }
       })
       .catch((error) => {
@@ -116,14 +121,10 @@ function Streamer() {
 
   const handleStop = () => {
     if (!live.id) return
-    API.post(`/lives/${live.id}/stop`)
-      .then((response) => {
-        setLive({ elapsedTime: formatDuration(0) });
-      })
-      .catch((error) => {
-        console.error("Erreur lors de l'arrêt du live", error);
-        toast.error("Erreur lors de l'arrêt du live !");
-      });
+    socketRef.current.emit('live:stop', {
+      room: localUser.current.username,
+      live_id: live.id
+    });
   };
 
   const getLocalStream = useCallback(async () => {
@@ -188,8 +189,6 @@ function Streamer() {
         }
       }
     );
-
-    getLocalStream();
 
     socketRef.current.on('room:users', async ({ users, _user }) => {
       setUsers(users);
@@ -270,6 +269,24 @@ function Streamer() {
         delete pcsRef.current[client];
       });
 
+    socketRef.current.on(
+      'message:receive',
+      ({ message, username, timestamp }) => {
+        setMessages(prevMessages => [...prevMessages, { message, username, timestamp }]);
+      });
+
+    socketRef.current.on(
+      'live:stop',
+      ({ live, room }) => {
+        setLive({ ...live, elapsedTime: formatDuration(0) });
+        socketRef.current.disconnect();
+        if (!pcsRef.current) return;
+        Object.keys(pcsRef.current).forEach((key) => {
+          pcsRef.current[key].close();
+          delete pcsRef.current[key];
+        });
+      });
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -282,6 +299,20 @@ function Streamer() {
     };
   }, [createPeerConnection, getLocalStream]);
 
+  const handleMessageSend = () => {
+    if (!user) return;
+    if (!(message && message.length)) return;
+
+    socketRef.current.emit('message:send', {
+      room: live.username,
+      message,
+    });
+    setMessage("");
+  }
+
+  useEffect(() => {
+    chat.current.scrollTop = chat.current.scrollHeight;
+  }, [messages]);
 
 
 
@@ -376,7 +407,57 @@ function Streamer() {
 
 
             </div>
+
           </div>
+
+          <div className="min-w-[400px] bg-slate-800 rounded-xl flex flex-col">
+            <div className="flex basis-14 rounded-t-xl items-center px-4 border-b border-slate-600">
+              <h2 className="font-semibold">Chat</h2>
+            </div>
+            <div ref={chat} className="flex flex-col basis-full max-h-[500px] overflow-y-scroll gap-4 p-2">
+              {messages.map((message, index) => (
+                <div key={index} className="flex flex-col w-full px-4 py-2 bg-slate-300/20 gap-2 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold">@{message.username}</p>
+                    <p className="text-xs text-gray-400">{dayjs(message.timestamp).format("HH:mm")}</p>
+                  </div>
+                  <p className="text-sm pl-2">{message.message}</p>
+                </div>
+              ))}
+            </div>
+            <div className="relative flex basis-20 rounded-b-xl w-full border-t border-slate-600">
+              <textarea
+                onKeyUpCapture={
+                  (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.key === 'Enter' && !e.shiftKey)
+                      handleMessageSend();
+                  }
+                }
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                }}
+                placeholder="Envoyer un message"
+                type="text" cols={3} className="w-full rounded-none rounded-bl-xl text-sm outline-none py-2 px-3 resize-none bg-transparent" />
+              <button
+                className="rounded-none border-none rounded-br-xl aspect-square bg-slate-600 disabled:bg-slate-200/50 transition-colors duration-150 no-scrollbar"
+                onClick={() => {
+                  handleMessageSend();
+                }}
+                disabled={!message.length}
+              >
+                <FontAwesomeIcon className={`${message.length ? 'animate-pulse' : ''}`} icon={faPaperPlane} />
+              </button>
+              {!user && (
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-slate-800/40 backdrop-blur-xl rounded-b-xl">
+                  <p className="text-white text-center text-sm">Connectez-vous pour pouvoir envoyer des messages</p>
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="flex flex-col gap-5">
             <div className="flex flex-col bg-slate-800 rounded-xl 2xl:-mx-4 mt-4 py-4 px-4 gap-6">
               <h3 className="font-semibold text-white">Actions</h3>
@@ -389,8 +470,10 @@ function Streamer() {
                     disabled={!title}
                     className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
                   >
-                    <FontAwesomeIcon className="text-xs" icon={fasPlay} />
-                    Lancer
+                    <FontAwesomeIcon className="text-sm pt-[2px]" icon={fasPlay} />
+                    <span>
+                      Lancer
+                    </span>
                   </button>
                 )}
 
@@ -398,7 +481,7 @@ function Streamer() {
                   disabled={!live?.id}
                   className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-red-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-red-700 rounded-lg hover:bg-red-600 focus:bg-red-600"
                 >
-                  <FontAwesomeIcon className="text-xs" icon={fasSquare} />
+                  <FontAwesomeIcon className="text-sm pt-[2px]" icon={fasSquare} />
                   Arrêter</button>
               </div>
             </div>

@@ -121,11 +121,7 @@ export class UserService {
       $project: project
     });
 
-
-    // console.log('Pipeline:', JSON.stringify(pipeline, null, 1));
     let result = await this.userModel.aggregate(pipeline).exec();
-    // console.log('Result:', JSON.stringify(result, null, 2));
-    // console.log(result)
 
     if (result && result.length > 0) {
       return result[0];

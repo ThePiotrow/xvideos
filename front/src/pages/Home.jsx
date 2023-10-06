@@ -53,6 +53,16 @@ function Home() {
           </div>
         </div>
       ))}
+      {!medias.length && (
+        <div className="flex flex-col items-center justify-center col-span-full mt-12">
+          <p className="text-slate-200 text-lg font-medium mb-2">
+            Aucun média trouvé
+          </p>
+          <p className="text-slate-400 text-sm">
+            Revenez plus tard !
+          </p>
+        </div>
+      )}
     </div>
   );
 }

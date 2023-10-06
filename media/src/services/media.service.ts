@@ -263,10 +263,10 @@ export class MediaService {
           .outputOptions('-vf', 'scale=-1:500')
           .output(outputPath)
           .on('progress', progress => {
-            // console.log('Processing: ' + progress.percent + '% done');
+            console.log('Processing: ' + progress.percent + '% done');
           })
           .on('end', () => {
-            // console.log('Screenshots taken');
+            console.log('Screenshots taken');
             resolve(true);
           })
           .on('error', (err) => {
@@ -324,10 +324,10 @@ export class MediaService {
             .size(`?x${resolution}`)
             .outputOptions(ffmpegOptions)
             .on('start', commandLine => {
-              // console.log('Resolution: ' + resolution)
+              console.log('Resolution: ' + resolution)
             })
             .on('progress', progress => {
-              // console.log('Processing: ' + Math.max(0, Math.round(Number(progress.percent))).toFixed(2) + '%');
+              console.log('Processing: ' + Math.max(0, Math.round(Number(progress.percent))).toFixed(2) + '%');
             })
             .on('end', resolve)
             .on('error', reject)
@@ -390,8 +390,6 @@ export class MediaService {
       {
         "user.is_confirmed": isConfirmed ?? true,
       }
-
-    // console.log(match, userMatch)
 
     const result = await this.mediaModel.aggregate([
       {

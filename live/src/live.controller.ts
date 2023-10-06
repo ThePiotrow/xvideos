@@ -14,8 +14,6 @@ import { ILiveUpdateParams } from './interfaces/live-update-params.interface';
 export class LiveController {
   constructor(private readonly liveService: LiveService) { }
 
-  private senderStream;
-
   @MessagePattern('get_all_lives')
   public async liveGetAll(
     body: {
@@ -54,12 +52,17 @@ export class LiveController {
   public async liveSearchById(body: {
     id: string,
     on_air?: boolean,
+    all?: boolean,
   }
   ): Promise<ILiveSearchByIdResponse> {
     let result: ILiveSearchByIdResponse;
 
     if (body.id) {
-      const live = await this.liveService.findLiveById({ id: body.id, onAir: body.on_air });
+      const live = await this.liveService.findLiveById({
+        id: body.id,
+        onAir: body.on_air,
+        all: body.all,
+      });
 
       if (live)
         return {
@@ -80,38 +83,25 @@ export class LiveController {
   public async liveUpdateById(body: {
     live: ILiveUpdateParams;
     id: string;
-    user_id: string;
+    all: boolean;
   }): Promise<ILiveUpdateByIdResponse> {
-    let result: ILiveUpdateByIdResponse;
     if (body.id) {
+
+      if (body.live.is_ended)
+        body.live.end_time = +new Date();
+
       try {
-        const live = await this.liveService.findLiveById({ id: body.id });
-        if (live) {
-          if (live.user_id.toString() === body.user_id.toString()) {
-            const updatedLive = Object.assign(live, body.live);
-            await updatedLive.save();
-            return {
-              status: HttpStatus.OK,
-              message: '✅ Live updated',
-              live: updatedLive,
-              errors: null,
-            };
-          } else {
-            return {
-              status: HttpStatus.FORBIDDEN,
-              message: '⛔ Forbidden',
-              live: null,
-              errors: null,
-            };
-          }
-        } else {
-          return {
-            status: HttpStatus.NOT_FOUND,
-            message: '⚠️ Live not found',
-            live: null,
-            errors: null,
-          };
-        }
+        const live = await this.liveService.updateLiveById(
+          body.id,
+          body.live,
+          body.all,
+        );
+        return {
+          status: HttpStatus.OK,
+          message: '✅ Live updated',
+          live: live,
+          errors: null,
+        };
       } catch (e) {
         return {
           status: HttpStatus.PRECONDITION_FAILED,
@@ -128,11 +118,6 @@ export class LiveController {
       errors: null,
     };
   }
-
-  private handleTrackEvent(e, peer) {
-    this.senderStream = e.streams[0];
-  };
-
 
   @MessagePattern('live_create')
   public async liveCreate(body: ILive): Promise<ILiveCreateResponse> {
@@ -172,58 +157,6 @@ export class LiveController {
     return {
       status: HttpStatus.BAD_REQUEST,
       message: '⚠️ Live create failed',
-      live: null,
-      errors: null,
-    };
-  }
-
-  @MessagePattern('live_stop')
-  public async liveStop(body: {
-    id: string;
-    live: ILive;
-  }): Promise<ILiveUpdateByIdResponse> {
-    let result: ILiveUpdateByIdResponse;
-    const { live } = body;
-    if (body.id) {
-      try {
-        if (live) {
-          const liveCheck = await this.liveService.findLiveById({ id: body.id });
-          if (liveCheck?.end_time) {
-            return {
-              status: HttpStatus.BAD_REQUEST,
-              message: '⚠️ Live already stopped',
-              live: null,
-              errors: null,
-            };
-          }
-          const l = await this.liveService.updateLiveById(live.id, { end_time: +new Date() });
-          return {
-            status: HttpStatus.OK,
-            message: '✅ Live stopped',
-            live: l,
-            errors: null,
-          };
-        } else {
-          return {
-            status: HttpStatus.NOT_FOUND,
-            message: '⚠️ Live not found',
-            live: null,
-            errors: null,
-          };
-        }
-      } catch (e) {
-        console.log(e);
-        return {
-          status: HttpStatus.PRECONDITION_FAILED,
-          message: '⚠️ Live stop failed',
-          live: null,
-          errors: e.errors,
-        };
-      }
-    }
-    return {
-      status: HttpStatus.BAD_REQUEST,
-      message: '⚠️ Live stop failed',
       live: null,
       errors: null,
     };
