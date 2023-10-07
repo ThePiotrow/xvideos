@@ -49,6 +49,14 @@ export const LiveSchema = new mongoose.Schema(
 LiveSchema.pre('validate', function (next) {
   const self = this as ILive;
 
+  //if is_ended is changed to true, set end_time to current time
+  if (this.isModified('is_ended') && self.is_ended) {
+    self.end_time = +new Date();
+  }
+  else {
+    self.updated_at = +new Date();
+  }
+
   if (this.isModified('user_id') && self.created_at) {
     this.invalidate('user_id', 'The field value can not be updated');
   }

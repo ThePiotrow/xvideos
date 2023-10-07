@@ -64,9 +64,10 @@ export class OwnerGuard implements CanActivate {
         case 'live':
           const liveResponse: IServiceLiveSearchByIdResponse =
             await firstValueFrom(
-              this.liveServiceClient.send('live_search_by_id', { id }),
+              this.liveServiceClient.send('live_search_by_id', { id, all: true }),
             );
 
+          console.log('liveResponse', liveResponse)
           resourceResponse = liveResponse;
           resource = resourceResponse.live;
           break;
@@ -81,6 +82,8 @@ export class OwnerGuard implements CanActivate {
             HttpStatus.PRECONDITION_FAILED,
           );
       }
+
+      console.log('resourceResponse', resourceResponse);
 
       if (resourceResponse.status !== HttpStatus.OK) {
         throw new HttpException(

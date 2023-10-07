@@ -36,6 +36,7 @@ function Viewer() {
   const pcRef = useRef({});
   const videoRef = useRef(null);
   const streamRef = useRef();
+  const chat = useRef(null);
 
   useEffect(() => {
     API.get(`/users/live/${username}`)
@@ -45,7 +46,7 @@ function Viewer() {
         if (user)
           setViewer({ username: user.username })
 
-        if (currentLive) {
+        if (currentLive?.start_time) {
           const elapsedTime = formatDuration(dayjs(dayjs()).diff(currentLive.start_time, "seconds"));
           setLive(
             {
@@ -54,6 +55,7 @@ function Viewer() {
               username: response.data.user.username
             });
         }
+
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération du live", error);
@@ -69,7 +71,6 @@ function Viewer() {
         elapsedTime: formatDuration(dayjs(dayjs()).diff(prevLive.start_time, "milliseconds") / 1000)
       }));
     }, 800);
-
     return () => clearInterval(intervalId);
   }, [live]);
 
@@ -85,6 +86,7 @@ function Viewer() {
       console.error(`getUserMedia error: ${e}`);
     }
   }, []);
+
 
   const createPeerConnection = useCallback(
     (id, username) => {
@@ -122,8 +124,9 @@ function Viewer() {
 
     getLocalStream();
 
-    socketRef.current.on('room:users', ({ users }) => {
+    socketRef.current.on('room:users', ({ users, messages }) => {
       setUsers(users);
+      setMessages(messages);
     });
 
     socketRef.current.on(
@@ -182,6 +185,22 @@ function Viewer() {
         delete pcRef.current[room];
       });
 
+    socketRef.current.on(
+      'message:receive',
+      ({ message, username, timestamp }) => {
+        setMessages(prevMessages => [...prevMessages, { message, username, timestamp }]);
+      });
+
+    socketRef.current.on(
+      'live:stop',
+      ({ live, room }) => {
+        setLive({ ...live, elapsedTime: formatDuration(0) });
+        socketRef.current.disconnect();
+        if (!pcRef.current) return;
+        pcRef.current[room].close();
+        delete pcRef.current[room];
+      });
+
     return () => {
       if (socketRef.current) {
         socketRef.current.disconnect();
@@ -196,13 +215,18 @@ function Viewer() {
 
   const handleMessageSend = () => {
     if (!user) return;
-    if (!(messageRef.current && messageRef.current.value)) return;
+    if (!(message && message.length)) return;
+
     socketRef.current.emit('message:send', {
-      message: messageRef.current.value,
-      username: viewer.username,
+      room: live.username,
+      message,
     });
-    messageRef.current.value = "";
+    setMessage("");
   }
+
+  useEffect(() => {
+    chat.current.scrollTop = chat.current.scrollHeight;
+  }, [messages]);
 
 
   return (
@@ -214,13 +238,6 @@ function Viewer() {
           className="2xl:flex-row flex-col flex gap-6"
         >
           <div className="flex flex-col w-full gap-6">
-            <>
-              <h3
-                className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-800 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
-              >
-                {live.title}
-              </h3>
-            </>
             <div
               className="flex gap-5"
             >
@@ -233,6 +250,18 @@ function Viewer() {
                   autoPlay={true}
                   className="aspect-video w-full bg-black"
                 ></video>
+                <div className="absolute top-3 left-4 right-4 flex gap-2 items-center justify-between">
+                  <h3
+                    className="block text-lg font-semibold px-4 py-2 rounded-lg bg-slate-800/50 backdrop-blur-xl text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+                  >
+                    {live.title}
+                  </h3>
+                  <h3
+                    className="block  font-semibold text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+                  >
+                    @{live.username}
+                  </h3>
+                </div>
                 <div className="absolute bottom-3 right-4 text-sm flex gap-2 items-center">
                   <p
                     className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center"
@@ -287,36 +316,53 @@ function Viewer() {
                 </div> */}
 
             </div>
+
           </div>
           <div className="min-w-[400px] bg-slate-800 rounded-xl flex flex-col">
-            <div className="flex basis-14 rounded-t-xl items-center px-4">
+            <div className="flex basis-14 rounded-t-xl items-center px-4 border-b border-slate-600">
               <h2 className="font-semibold">Chat</h2>
             </div>
-            <div className="flex basis-full bg-red-200"></div>
-            <div className="flex basis-20 rounded-b-xl w-full">
-              <textarea onKeyDownCapture={
-                (e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (!(e.key === 'Enter' && !e.shiftKey)) return; {
-                    handleMessageSend();
+            <div ref={chat} className="flex flex-col basis-full max-h-[500px] overflow-y-scroll gap-4 p-3">
+              {messages.map((message, index) => (
+                <div key={index} className="flex flex-col w-full px-4 pt-2 pb-3 bg-slate-300/20 gap-2 rounded-lg shadow-xl">
+                  <div className="flex items-center justify-between">
+                    <p className="font-semibold">@{message.username}</p>
+                    <p className="text-xs text-gray-400">{dayjs(message.timestamp).format("HH:mm")}</p>
+                  </div>
+                  <p className="text-sm pl-2">{message.message}</p>
+                </div>
+              ))}
+            </div>
+            <div className="relative flex basis-20 rounded-b-xl w-full border-t border-slate-600">
+              <textarea
+                onKeyUpCapture={
+                  (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    if (e.key === 'Enter' && !e.shiftKey)
+                      handleMessageSend();
                   }
                 }
-              }
+                value={message}
                 onChange={(e) => {
                   setMessage(e.target.value);
                 }}
-                value={message}
                 placeholder="Envoyer un message"
-                type="text" cols={3} className="w-full rounded-none rounded-bl-xl text-sm outline-none py-2 px-3 resize-none" />
+                type="text" cols={3} className="w-full rounded-none rounded-bl-xl text-sm outline-none py-2 px-3 resize-none bg-transparent" />
               <button
-                className="rounded-none rounded-br-xl aspect-square"
+                className="rounded-none border-none rounded-br-xl aspect-square bg-slate-600 disabled:bg-slate-200/50 transition-colors duration-150 no-scrollbar"
                 onClick={() => {
                   handleMessageSend();
                 }}
+                disabled={!message.length}
               >
-                <FontAwesomeIcon icon={faPaperPlane} />
+                <FontAwesomeIcon className={`${message.length ? 'animate-pulse' : ''}`} icon={faPaperPlane} />
               </button>
+              {!user && (
+                <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center bg-slate-800/40 backdrop-blur-xl rounded-b-xl">
+                  <p className="text-white text-center text-sm">Connectez-vous pour pouvoir envoyer des messages</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

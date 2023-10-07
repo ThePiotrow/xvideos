@@ -20,6 +20,7 @@ export class EventsGateway {
     private verifiedUsers: any = {};
     private users: any = {};
     private socketRoom: any = {};
+    private messages: any = {};
     private maxUsersPerRoom = 4;
 
     constructor(
@@ -27,30 +28,79 @@ export class EventsGateway {
         @Inject('TOKEN_SERVICE') private readonly tokenServiceClient: ClientProxy,
     ) { }
 
-    private async validateUser(client: Socket, username?: string): Promise<{ _id: string, _username: string }> {
+    private async validateUser(client: Socket, username?: string): Promise<{ _id: string; _username: string; _connected: boolean }> {
         try {
             const { id, handshake: { query: { token } } } = client;
 
             if (!token) {
-                this.verifiedUsers[id] = username || 'Unknown'; // Fallback to 'Unknown' instead of null
+                this.verifiedUsers[id] = {
+                    username: username || 'Unknown',
+                    connected: false,
+                };
             }
 
             console.log('Verified Users', this.verifiedUsers);
 
-            if (!this.verifiedUsers[id]) {
+            if (!this.verifiedUsers[id] || !this.verifiedUsers[id].connected) {
                 const t = await firstValueFrom(
                     this.tokenServiceClient.send('token_decode', {
                         token,
                     }),
                 );
                 const { data } = t;
-                this.verifiedUsers[id] = data?.user?.username || 'Unknown'; // Fallback to 'Unknown' instead of null
+                this.verifiedUsers[id] = {
+                    username: data?.user?.username || 'Unknown',
+                    connected: !!data?.user?.username,
+                };
             }
 
             return {
                 _id: id,
-                _username: username || this.verifiedUsers[id]
+                _username: username || this.verifiedUsers[id].username,
+                _connected: this.verifiedUsers[id].connected || false,
             };
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+
+    private async isAdmin(client: Socket): Promise<boolean> {
+        try {
+            const { handshake: { query: { token } } } = client;
+
+            if (!token) {
+                return false;
+            }
+
+            const t = await firstValueFrom(
+                this.tokenServiceClient.send('token_decode', {
+                    token,
+                }),
+            );
+            const { data } = t;
+            return data?.user?.role === 'admin';
+        }
+        catch (e) {
+            console.error(e);
+        }
+    }
+
+    private async canManageLive(client: Socket, room: string): Promise<boolean> {
+        try {
+            const { id, handshake: { query: { token } } } = client;
+
+            if (!token) {
+                return false;
+            }
+
+            const t = await firstValueFrom(
+                this.tokenServiceClient.send('token_decode', {
+                    token,
+                }),
+            );
+            const { data } = t;
+            return data?.user?.role === 'admin' || data?.user?.username === room;
         }
         catch (e) {
             console.error(e);
@@ -79,6 +129,9 @@ export class EventsGateway {
             else
                 this.users[room] = [{ id: _id, username: _username }];
 
+            if (!this.messages[room])
+                this.messages[room] = [];
+
             this.socketRoom[_id] = room;
             client.join(room);
 
@@ -86,7 +139,7 @@ export class EventsGateway {
 
             console.log(users);
 
-            this.server.sockets.to(room).emit('room:users', { username, users, _user: { id: _id, username: _username } });
+            this.server.sockets.to(room).emit('room:users', { username, users, _user: { id: _id, username: _username }, messages: this.messages[room].slice(-100) || [] });
         }
         catch (e) {
             console.error(e);
@@ -151,4 +204,39 @@ export class EventsGateway {
         client.to(roomId).emit('users:exit', { users: room, room: roomId, client: client.id });
     }
 
+    @SubscribeMessage('message:send')
+    async handleLiveMessage(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() { message, room }: { message: string, room: string },
+    ) {
+        const { _id, _username, _connected } = await this.validateUser(client);
+        if (!_connected) return;
+        console.log('Live Message', `
+            [${room}] ${_username}: ${message}
+        `);
+        this.messages[room].push({ username: _username, message, timestamp: +new Date() });
+        this.server.sockets.to(room).emit('message:receive', { room, message, username: _username, timestamp: +new Date() });
+    }
+
+    @SubscribeMessage('live:stop')
+    async handleLiveStop(
+        @ConnectedSocket() client: Socket,
+        @MessageBody() { live_id, room }: { live_id: string, room: string },
+    ) {
+        if (!this.canManageLive(client, room)) return;
+
+        const live = await firstValueFrom(
+            this.liveServiceClient.send('live_update_by_id', {
+                live: { is_ended: true },
+                id: live_id,
+                all: true,
+            })
+        )
+        console.log('Live Stop', room);
+        this.server.sockets.to(room).emit('live:stop', { room, live });
+
+
+        delete this.messages[room]
+        delete this.users[room];
+    }
 }

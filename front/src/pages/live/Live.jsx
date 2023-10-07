@@ -42,10 +42,8 @@ function Live() {
   }, []);
 
   return (
-    <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 ">
+    <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {liveData.map((live) => (
-
-        // on hover card, show full title in a tooltip
         <div
           className="cursor-pointer relative group w-full bg-slate-800 rounded-xl"
           key={live.id}
@@ -77,6 +75,17 @@ function Live() {
         </div >
       ))
       }
+
+      {!liveData.length && (
+        <div className="flex flex-col items-center justify-center col-span-full mt-12">
+          <p className="text-slate-200 text-lg font-medium mb-2">
+            Aucun live en cours
+          </p>
+          <p className="text-slate-400 text-sm">
+            Revenez plus tard !
+          </p>
+        </div>
+      )}
 
     </div >
   );

@@ -7,13 +7,12 @@ import { useAuth } from "../../../contexts/authContext";
 
 function Users() {
   const [users, setUsers] = useState([]);
-  const { token } = useAuth();
+  const { user, token } = useAuth();
 
   const getUSers = async () => {
-    API.get("/users", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    API.get("/users")
       .then((response) => {
+        console.log(response.data.users)
         setUsers(response.data.users);
       })
       .catch((error) => {
@@ -21,12 +20,12 @@ function Users() {
       });
   };
 
-  const toggleBlock = async (user) => {
+  const toggleBlock = async (_user) => {
     try {
-      const response = await API.put(`/admin/users/${user.id}`, {
-        is_confirmed: !user.is_confirmed,
+      const response = await API.put(`/admin/users/${_user.id}`, {
+        is_confirmed: !_user.is_confirmed,
       });
-      setUsers([...users.filter((u) => u.id !== user.id), response.data.user]);
+      setUsers([...users.filter((u) => u.id !== _user.id), response.data.user]);
     } catch (error) {
       console.log(
         "Il y a un problème avec la récupération des utilisateurs" + error
@@ -158,9 +157,9 @@ function Users() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                  {users.map((user) => {
+                  {users.map((_user) => {
                     return (
-                      <tr key={user.id}>
+                      <tr key={_user.id}>
                         <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                           <div className="inline-flex items-center gap-x-3">
                             <div className="flex items-center gap-x-2">
@@ -171,7 +170,7 @@ function Users() {
                               ></img>
                               <div>
                                 <h2 className="font-normal text-gray-800 dark:text-white">
-                                  @{user.username}
+                                  @{_user.username}
                                 </h2>
                               </div>
                             </div>
@@ -180,47 +179,46 @@ function Users() {
 
                         <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                           <div
-                            className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
-                              user.is_confirmed
-                                ? "bg-emerald-600/60"
-                                : "bg-red-400/40"
-                            }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${_user.is_confirmed
+                              ? "bg-emerald-600/60"
+                              : "bg-red-400/40"
+                              }`}
                           >
                             <span
-                              className={`h-1.5 w-1.5 rounded-full ${
-                                user.is_confirmed
-                                  ? "bg-emerald-500"
-                                  : "bg-red-500"
-                              }`}
+                              className={`h-1.5 w-1.5 rounded-full ${_user.is_confirmed
+                                ? "bg-emerald-500"
+                                : "bg-red-500"
+                                }`}
                             ></span>
                             <h2
-                              className={`text-sm font-normal ${
-                                user.is_confirmed
-                                  ? "text-emerald-500"
-                                  : "text-red-500"
-                              }`}
+                              className={`text-sm font-normal ${_user.is_confirmed
+                                ? "text-emerald-500"
+                                : "text-red-500"
+                                }`}
                             >
-                              {user.is_confirmed ? "Actif" : "Inactif"}
+                              {_user.is_confirmed ? "Actif" : "Inactif"}
                             </h2>
                           </div>
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-500">
-                          {user.role}
+                          {_user.role}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-500">
-                          {user.email}
+                          {_user.email}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-500">
-                          {user.is_confirmed ? "Oui" : "Non"}
+                          {_user.is_confirmed ? "Oui" : "Non"}
                         </td>
                         <td className="px-4 py-4 text-sm whitespace-nowrap">
                           <div className="flex items-center gap-x-6">
-                            <button
-                              onClick={() => toggleBlock(user)}
-                              className="text-slate-500 transition-colors duration-200 hover:text-red-500 focus:outline-none"
-                            >
-                              {user.is_confirmed ? "Bloquer" : "Debloquer"}
-                            </button>
+                            {_user.id !== user.id && (
+                              <button
+                                onClick={() => toggleBlock(_user)}
+                                className="text-slate-500 transition-colors duration-200 hover:text-red-500 focus:outline-none"
+                              >
+                                {_user.is_confirmed ? "Bloquer" : "Debloquer"}
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
