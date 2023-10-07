@@ -154,7 +154,7 @@ function ListMedias() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
-                  {medias ? (
+                  {medias !== null ? (
                     medias.length > 0 ? (
                       medias.map((media) => (
                         <tr key={media.id}>
@@ -254,10 +254,18 @@ function ListMedias() {
                         </tr>
                       ))
                     ) : (
-                      <p>Pas de médias disponibles</p>
+                      <tr>
+                        <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
+                          <p>Ajoutez votre première image ou vidéo</p>
+                        </td>
+                      </tr>
                     )
                   ) : (
-                    <p>Chargement des médias...</p>
+                    <tr>
+                      <td className="px-12 py-4 text-sm font-normal text-gray-700 whitespace-nowrap">
+                        <p>Ajoutez votre première image ou vidéo</p>
+                      </td>
+                    </tr>
                   )}
                 </tbody>
               </table>

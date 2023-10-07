@@ -22,12 +22,13 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
       },
     })
       .then((response) => {
+        console.log("Response from server:", response);
         toast("Votre media a bien été uploadée!");
         toggleModal();
         fetchMedias();
       })
       .catch((error) => {
-        console.log(error);
+        console.log("Error from server:", error);
         toast.error("Un problème est survenu !");
       });
   };
