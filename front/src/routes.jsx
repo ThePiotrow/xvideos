@@ -13,6 +13,7 @@ import ListMedias from "./pages/user/ListMedias";
 import MediaViewer from "./pages/medias/MediaViewer";
 import Viewer from "./pages/live/Viewer";
 import Streamer from "./pages/live/Streamer";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function AppRoutes() {
   const token = localStorage.getItem("token");
@@ -27,24 +28,6 @@ function AppRoutes() {
         <Route path="/media/:id" element={<MediaViewer />} />
 
         {/* IS AUTHENTICATED */}
-
-        {/* MEDIAS */}
-        <Route
-          path="/medias"
-          element={
-            <AuthGuard>
-              <ListMedias />
-            </AuthGuard>
-          }
-        />
-        <Route
-          path="/medias/edit"
-          element={
-            <AuthGuard>
-              <ListMedias />
-            </AuthGuard>
-          }
-        />
 
         {/* LIVES */}
         <Route
@@ -88,6 +71,8 @@ function AppRoutes() {
           }
         />
         <Route path="/live/:username" element={<Viewer />} />
+
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </div>
   );

@@ -40,7 +40,14 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <ToastContainer />
+        <ToastContainer
+          position="top-center"
+          autoClose={1000}
+          closeOnClick
+          draggable
+          pauseOnFocusLoss={false}
+          theme="dark"
+        />
         <Container isOpen={isOpen}>
           <AppRoutes />
           <Header
@@ -51,8 +58,9 @@ function App() {
           />
         </Container>
         <div
-          className={`absolute z-[98] top-0 left-0 right-0 bottom-0 ${isOpenDropdown ? "block" : "hidden"
-            }`}
+          className={`absolute z-[98] top-0 left-0 right-0 bottom-0 ${
+            isOpenDropdown ? "block" : "hidden"
+          }`}
           onClick={() => setIsOpenDropdown(false)}
         />
       </BrowserRouter>

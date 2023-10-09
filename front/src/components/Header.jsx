@@ -22,22 +22,28 @@ export default function Header({
   setIsOpenDropdown,
 }) {
   const navigate = useNavigate();
-  const { user, setUser, token, setToken } = useAuth();
+  const { user, token, handleRemoveToken } = useAuth();
 
   const location = useLocation();
 
-  const handleLogout = () => {
-    API.put("/users/logout", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    })
-      .then(() => {
-        setToken(null);
-        setUser(null);
-        navigate("/login");
-      })
-      .catch((error) => console.error(error));
+  const handleLogout = async () => {
+    try {
+      // On attend que la requete API soit complète
+      API.put("/users/logout", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      //mettre à jour l'état
+      handleRemoveToken();
+
+      //Rédiriger l'utilisateur
+      navigate("/login");
+    } catch (error) {
+      // Gérer les erreurs
+      console.error(error);
+    }
   };
 
   //On navigate, set isOpen and isOpenDropdown to false
@@ -96,10 +102,11 @@ export default function Header({
             </div>
             <div
               x-cloak="true"
-              className={`${isOpen
-                ? "translate-y-0 opacity-100"
-                : "opacity-0 -translate-y-full"
-                }  absolute overflow-y-auto lg:overflow-visible justify-between flex-grow h-screen lg:h-fit top-0 left-0 right-0 inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-slate-900 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:w-auto lg:opacity-100 lg:translate-y-0 lg:flex lg:items-center`}
+              className={`${
+                isOpen
+                  ? "translate-y-0 opacity-100"
+                  : "opacity-0 -translate-y-full"
+              }  absolute overflow-y-auto lg:overflow-visible justify-between flex-grow h-screen lg:h-fit top-0 left-0 right-0 inset-x-0 z-20 w-full py-4 transition-all duration-300 ease-in-out bg-slate-900 lg:mt-0 lg:p-0 lg:top-0 lg:relative lg:w-auto lg:opacity-100 lg:translate-y-0 lg:flex lg:items-center`}
             >
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 <button
@@ -115,9 +122,12 @@ export default function Header({
                     setIsOpen(false);
                   }}
                   to="/"
-                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname.includes("/media") || location.pathname === "/" ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
-                    : "bg-slate-800"
-                    }`}
+                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${
+                    location.pathname.includes("/media") ||
+                    location.pathname === "/"
+                      ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
+                      : "bg-slate-800"
+                  }`}
                 >
                   xVidéos
                 </Link>
@@ -127,9 +137,11 @@ export default function Header({
                     setIsOpen(false);
                   }}
                   to="/lives"
-                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${location.pathname.includes("/live") ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
-                    : "bg-slate-800"
-                    }`}
+                  className={`px-4 py-4 lg:py-2 text-slate-100 transition-colors duration-300 transform rounded-md lg:mt-0 [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100  ${
+                    location.pathname.includes("/live")
+                      ? "bg-slate-50 text-slate-900 hover:text-slate-900 active"
+                      : "bg-slate-800"
+                  }`}
                 >
                   xLives
                 </Link>
@@ -151,10 +163,11 @@ export default function Header({
                       transition-colors duration-300 transform rounded-md lg:mt-0 
                       [&:not(.active)]:hover:bg-slate-700 [&:not(.active)]:hover:text-slate-100 
                       cursor-pointer font-bold me-5 lg:me-0 
-                      ${isOpenDropdown
+                      ${
+                        isOpenDropdown
                           ? "bg-slate-50 text-slate-900 active"
                           : " bg-slate-800"
-                        } }
+                      } }
                       `}
                     >
                       @{user.username}
@@ -164,10 +177,11 @@ export default function Header({
                       className={`z-[99] absolute -top-4 -right-5 me-5 lg:me-0 flex p-5 flex-col gap-1 lg:w-fit 
                     lg:min-w-[350px] lg:max-w-[520px] w-full bg-slate-700/20 backdrop-blur-xl rounded-2xl 
                     text-slate-200 duration-500 shadow-2xl 
-                    ${isOpenDropdown
-                          ? "opacity-100 visible pt-5 pb-5"
-                          : "lg:opacity-0 lg:translate-y-12 lg:invisible lg:pb-10"
-                        }`}
+                    ${
+                      isOpenDropdown
+                        ? "opacity-100 visible pt-5 pb-5"
+                        : "lg:opacity-0 lg:translate-y-12 lg:invisible lg:pb-10"
+                    }`}
                     >
                       <div
                         className={`z-[100] flex justify-between flex-row-reverse gap-5 duration-500 mb-5 
