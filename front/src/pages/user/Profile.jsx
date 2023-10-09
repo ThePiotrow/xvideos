@@ -10,11 +10,16 @@ function Profile() {
   const navigate = useNavigate();
   const { token, user } = useAuth();
 
+  useEffect(() => {
+    if (!token) {
+      navigate("/login");
+    }
+  }, [token, navigate]);
+
   return (
     <div>
       {user ? (
         <div>
-          <h2>Page de profile de {user.username}</h2>
           <ListMedias />
         </div>
       ) : (

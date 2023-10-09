@@ -22,7 +22,7 @@ function Login() {
         const token = response.data.token;
         localStorage.setItem("token", token);
         setContextToken(token);
-        toast("Vous êtes connecté!");
+        toast.success("Vous êtes connecté!");
         navigate("/");
       })
       .catch((error) => {
@@ -38,12 +38,12 @@ function Login() {
           Bienvenue sur <span className="font-black text-white">xVidéos</span>
         </h2>
 
-        <form onSubmit={handleSubmit} className="flex flex-col items-start gap-6">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col items-start gap-6"
+        >
           <div className="flex flex-col gap-3 w-full">
-            <label
-              htmlFor="username"
-              className="text-slate-200"
-            >
+            <label htmlFor="username" className="text-slate-200">
               Nom d'utilisateur
             </label>
             <input
@@ -61,10 +61,7 @@ function Login() {
 
           <div className="flex flex-col gap-3 w-full">
             <div className="flex justify-between">
-              <label
-                htmlFor="password"
-                className="text-slate-200"
-              >
+              <label htmlFor="password" className="text-slate-200">
                 Mot de passe
               </label>
             </div>
@@ -86,10 +83,7 @@ function Login() {
                 Se connecter
               </button>
             </div>
-            <a
-              href="/signup"
-              className="text-slate-200"
-            >
+            <a href="/signup" className="text-slate-200">
               Pas encore de compte ? Inscrivez-vous !
             </a>
           </div>

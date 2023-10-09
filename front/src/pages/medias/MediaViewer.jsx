@@ -27,8 +27,8 @@ function MediaViewer() {
       const internalPlayer = player.getInternalPlayer();
 
       if (internalPlayer && internalPlayer.on) {
-        internalPlayer.on('waiting', () => console.log('player is waiting'));
-        internalPlayer.on('dispose', () => console.log('player will dispose'));
+        internalPlayer.on("waiting", () => console.log("player is waiting"));
+        internalPlayer.on("dispose", () => console.log("player will dispose"));
       }
     }
   };
@@ -39,9 +39,13 @@ function MediaViewer() {
     <div>
       {media ? (
         <>
-          {media.type === 'video' ? (
-            <VideoJS hls={media.urls.hls} thumbnail={media.urls.thumbnail} duration={media.duration} />
-          ) : media.type === 'image' ? (
+          {media.type === "video" ? (
+            <VideoJS
+              hls={media.urls.hls}
+              thumbnail={media.urls.thumbnail}
+              duration={media.duration}
+            />
+          ) : media.type === "image" ? (
             <img
               className="w-full rounded-lg"
               src={media.urls.original}
@@ -54,15 +58,16 @@ function MediaViewer() {
             {media.title}
           </h2>
           {media.user && (
-            <p className="mt-4 text-gray-600">Publié par : {media.user.username}</p>
+            <p className="mt-4 text-gray-600">
+              Publié par : {media.user.username}
+            </p>
           )}
           <p className="mt-2 text-gray-500">{media.description}</p>
         </>
       ) : (
-        <p>Chargement...</p>
-      )
-      }
-    </div >
+        <p>Ce Média n'est pas disponible...</p>
+      )}
+    </div>
   );
 }
 
