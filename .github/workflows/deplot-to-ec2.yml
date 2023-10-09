@@ -45,6 +45,6 @@ jobs:
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem
             chmod 666 ~/gateway/secrets/private-key.pem
-            make build
-            source ~/.nvm/nvm.sh
-            /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 start all
+            # make build
+            # source ~/.nvm/nvm.sh
+            # /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 start all
