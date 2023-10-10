@@ -1,6 +1,8 @@
 import axios from "axios";
 import https from 'https';
 
+const agent = new https.Agent({ rejectUnauthorized: false });
+
 const API = axios.create({
   baseURL: `${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT
     }`, // l'URL de base de vos requêtes API
@@ -8,9 +10,7 @@ const API = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  httpsAgent: new https.Agent({
-    rejectUnauthorized: false,
-  }),
+  httpsAgent: agent,
 });
 
 API.interceptors.request.use(
