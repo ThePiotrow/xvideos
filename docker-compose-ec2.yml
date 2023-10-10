@@ -100,3 +100,5 @@ services:
 networks:
     backend:
         driver: bridge
+    frontend:
+        driver: bridge
