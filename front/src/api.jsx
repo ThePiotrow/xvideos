@@ -9,8 +9,8 @@ const API = axios.create({
     "Content-Type": "application/json",
   },
   httpsAgent: new https.Agent({
-    rejectUnauthorized: false
-  })
+    rejectUnauthorized: false,
+  }),
 });
 
 API.interceptors.request.use(
