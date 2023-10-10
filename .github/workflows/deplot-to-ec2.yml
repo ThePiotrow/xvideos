@@ -35,8 +35,8 @@ jobs:
           EXCLUDE: "/dist/, /node_modules/, /db/"
           SCRIPT_BEFORE: |
             cd /home/ubuntu
-            source ~/.nvm/nvm.sh
-            /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 stop all
+            # source ~/.nvm/nvm.sh
+            # /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 stop all
           SCRIPT_AFTER: |
             cd /home/ubuntu
             mkdir -p ~/gateway/secrets/
