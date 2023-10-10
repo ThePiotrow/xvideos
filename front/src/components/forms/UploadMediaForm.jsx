@@ -2,12 +2,15 @@ import { useState } from "react";
 import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { faCircle, faCircleNotch } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 function UploadMediaForm({ toggleModal, fetchMedias }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [media, setMedia] = useState("");
   const [thumbnail, setThumbnail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -16,20 +19,26 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
     formData.append("description", description);
     formData.append("media", media);
     formData.append("thumbnail", thumbnail);
+
+    setLoading(true);
     API.post("/medias", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
+      timeout: 3600000,
     })
       .then((response) => {
         console.log("Response from server:", response);
         toast("Votre media a bien été uploadée!");
         toggleModal();
         fetchMedias();
+        setLoading(false);
+        toggleModal("upload");
       })
       .catch((error) => {
         console.log("Error from server:", error);
         toast.error("Un problème est survenu !");
+        setLoading(false);
       });
   };
 
@@ -101,9 +110,16 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
         <div className="mt-6">
           <button
             onClick={handleSubmit}
-            className="mr-5 px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
+            disabled={loading}
+            className="mr-5 px-8 py-2.5 disabled:opacity-30 disabled:border-none disabled:hover:bg-gray-700 disabled:cursor-not-allowed leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
           >
-            Ajouter
+            {!loading && "Ajouter"}
+            {loading && (
+              <span>
+                <FontAwesomeIcon className="z-30 text-lg self-start mr-2 animate-spin" icon={faCircleNotch} />
+                Ajout en cours
+              </span>
+            )}
           </button>
           <button onClick={() => toggleModal("upload")} className="right-0">
             Fermer
