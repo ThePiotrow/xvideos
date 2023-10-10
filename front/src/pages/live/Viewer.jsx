@@ -114,7 +114,7 @@ function Viewer() {
 
   useEffect(() => {
     socketRef.current = io.connect(
-      "ws://localhost:3000",
+      "wss://13.38.18.223:3000",
       {
         query: {
           token: token ?? null

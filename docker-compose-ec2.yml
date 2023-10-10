@@ -20,8 +20,7 @@ services:
             - live
             - token
             - user
-            - redis
-
+ 
     media:
         build:
             dockerfile: Dockerfile
@@ -98,16 +97,8 @@ services:
         networks:
             - frontend
 
-    redis:
-        image: redis:alpine
-        restart: always
-        volumes:
-            - redis:/data
-        ports:
-            - ${REDIS_PORT}:${REDIS_PORT}
-        networks:
-            - backend
-
 networks:
     backend:
+        driver: bridge
+    frontend:
         driver: bridge

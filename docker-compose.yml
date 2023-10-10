@@ -21,7 +21,6 @@ services:
             - live
             - token
             - user
-            - redis
 
     media:
         build:
@@ -92,6 +91,7 @@ services:
             dockerfile: Dockerfile
             context: ./front
             target: development
+        user: "1000"
         restart: always
         volumes:
             - ./front:/var/www/front
@@ -103,16 +103,6 @@ services:
             - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
         networks:
             - frontend
-
-    redis:
-        image: redis:alpine
-        restart: always
-        volumes:
-            - redis:/data
-        ports:
-            - ${REDIS_PORT}:${REDIS_PORT}
-        networks:
-            - backend
 
 networks:
     backend:

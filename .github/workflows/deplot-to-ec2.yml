@@ -23,6 +23,7 @@ jobs:
         run: |
           pwd
           echo "${{ secrets.ENV }}" > .env
+          echo "${{ secrets.ENV_FRONT }}" > ./front/.env
 
       - name: Deploy to Staging server
         uses: easingthemes/ssh-deploy@main
@@ -35,12 +36,13 @@ jobs:
           EXCLUDE: "/dist/, /node_modules/, /db/"
           SCRIPT_BEFORE: |
             cd /home/ubuntu
-            source ~/.nvm/nvm.sh
-            /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 stop all
+            # source ~/.nvm/nvm.sh
+            # /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 stop all
           SCRIPT_AFTER: |
             cd /home/ubuntu
-            mkdir -p ~/gateway/secrets/
             echo "${{ secrets.ENV }}" > .env
+            echo "${{ secrets.ENV_FRONT }}" > ./front/.env
+            mkdir -p ~/gateway/secrets/
             echo "${{ secrets.PUBLIC_CERTIFICATE }}" > ~/gateway/secrets/public-certificate.pem
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem

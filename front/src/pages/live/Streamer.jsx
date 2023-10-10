@@ -181,7 +181,7 @@ function Streamer() {
       });
     };
 
-    pc.oniceconnectionstatechange = (e) => {};
+    pc.oniceconnectionstatechange = (e) => { };
 
     pc.ontrack = (e) => {
       setUsers((oldUsers) =>
@@ -205,7 +205,7 @@ function Streamer() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io.connect("ws://localhost:3000", {
+    socketRef.current = io.connect("wss://13.38.18.223:3000", {
       query: {
         token: token ?? null,
       },
@@ -360,14 +360,12 @@ function Streamer() {
                   </p>
                   <p className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center">
                     <span
-                      className={`absolute h-2 w-2 rounded-full ${
-                        live?.id ? "bg-red-500 animate-ping" : ""
-                      }`}
+                      className={`absolute h-2 w-2 rounded-full ${live?.id ? "bg-red-500 animate-ping" : ""
+                        }`}
                     ></span>
                     <span
-                      className={`relative h-2 w-2 rounded-full ${
-                        live?.id ? "bg-red-500" : "bg-slate-500"
-                      }`}
+                      className={`relative h-2 w-2 rounded-full ${live?.id ? "bg-red-500" : "bg-slate-500"
+                        }`}
                     ></span>
                     {live.elapsedTime}
                   </p>
