@@ -6,7 +6,10 @@ import mkcert from 'vite-plugin-mkcert'
 export default defineConfig({
   plugins: [react(), mkcert()],
   server: {
-    https: true,
+    https: {
+      key: './secrets/private-key.pem',
+      cert: './secrets/public-certificate.pem'
+    },
     host: true,
     port: 3006,
     watch: {
