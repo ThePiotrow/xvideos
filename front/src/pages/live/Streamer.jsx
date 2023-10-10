@@ -211,7 +211,7 @@ function Streamer() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io.connect("ws://13.38.18.223:3000", {
+    socketRef.current = io.connect("wss://13.38.18.223:3000", {
       query: {
         token: token ?? null,
       },
