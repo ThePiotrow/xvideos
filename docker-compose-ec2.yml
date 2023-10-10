@@ -20,7 +20,7 @@ services:
             - live
             - token
             - user
-
+ 
     media:
         build:
             dockerfile: Dockerfile
