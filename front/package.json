@@ -51,6 +51,7 @@
     "postcss": "^8.4.24",
     "react-error-overlay": "^6.0.9",
     "tailwindcss": "^3.3.2",
-    "vite": "^4.3.9"
+    "vite": "^4.3.9",
+    "vite-plugin-mkcert": "^1.16.0"
   }
 }
