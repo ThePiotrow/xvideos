@@ -39,6 +39,6 @@ COPY . .
 
 COPY --from=build /var/www/front/dist ./dist
 
-EXPOSE 3000
+EXPOSE 3006
 
 CMD [ "npm", "run", "preview" ]
