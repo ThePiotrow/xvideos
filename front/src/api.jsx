@@ -1,4 +1,5 @@
 import axios from "axios";
+import https from 'https';
 
 const API = axios.create({
   baseURL: `${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT
