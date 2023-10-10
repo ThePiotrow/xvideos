@@ -16,9 +16,7 @@ function Medias() {
   const getMedias = async () => {
     API.get("/admin/medias")
       .then((response) => {
-        console.log(response);
         setMedias(response.data.medias);
-        console.log("this is medias", medias);
       })
       .catch((error) => {
         console.log(error);
@@ -111,9 +109,9 @@ function Medias() {
                               <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                 {media.description
                                   ? media.description
-                                    .split(" ")
-                                    .splice(0, 5)
-                                    .join(" ") + "..."
+                                      .split(" ")
+                                      .splice(0, 5)
+                                      .join(" ") + "..."
                                   : "N/A"}
                               </p>
                             </div>
@@ -137,10 +135,11 @@ function Medias() {
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
                         <button
                           onClick={() => toggleBlock(media)}
-                          className={`text-slate-500 transition-colors duration-200 ${media.is_deleted
+                          className={`text-slate-500 transition-colors duration-200 ${
+                            media.is_deleted
                               ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
                               : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
-                            }
+                          }
                             focus:outline-none`}
                         >
                           {!media.is_deleted ? "Supprimer" : "Récupérer"}

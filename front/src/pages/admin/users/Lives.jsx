@@ -33,7 +33,6 @@ function Lives() {
   useEffect(() => {
     API.get("/admin/lives")
       .then((response) => {
-        console.log(response.data.lives)
         const livesWithTime = response.data.lives.map((live) => ({
           ...live,
           elapsedTime: formatDuration(
@@ -60,7 +59,7 @@ function Lives() {
       .catch((error) => {
         console.error("Erreur lors de la mise à jour du live", error);
       });
-  }
+  };
 
   return (
     <section className="container px-4 mx-auto">
@@ -128,14 +127,16 @@ function Lives() {
                         </div>
                       </td>
                       <td className="px-12 py-4 text-sm font-normal text-white whitespace-nowrap">
-                        <p
-                          className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center w-fit"
-                        >
+                        <p className="backdrop-blur-xl bg-slate-800/50 px-3 py-1 rounded-lg flex gap-2 items-center w-fit">
                           <span
-                            className={`absolute h-2 w-2 rounded-full ${!live?.end_time ? "bg-red-500 animate-ping" : ''}`}
+                            className={`absolute h-2 w-2 rounded-full ${
+                              !live?.end_time ? "bg-red-500 animate-ping" : ""
+                            }`}
                           ></span>
                           <span
-                            className={`relative h-2 w-2 rounded-full ${!live?.end_time ? "bg-red-500" : 'bg-slate-500'}`}
+                            className={`relative h-2 w-2 rounded-full ${
+                              !live?.end_time ? "bg-red-500" : "bg-slate-500"
+                            }`}
                           ></span>
                           {live.elapsedTime}
                         </p>
@@ -144,13 +145,14 @@ function Lives() {
                         {dayjs(live.created_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
-                        {live.end_time ? dayjs(live.end_time).format("DD/MM/YYYY HH:mm:ss") : "En cours"}
+                        {live.end_time
+                          ? dayjs(live.end_time).format("DD/MM/YYYY HH:mm:ss")
+                          : "En cours"}
                       </td>
                       <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                         @{live.user.username}
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap flex gap-2 items-center">
-
                         {!live.is_ended && (
                           <>
                             <a
@@ -182,4 +184,3 @@ function Lives() {
 }
 
 export default Lives;
-

@@ -39,7 +39,6 @@ function ListMedias() {
     if (!user) return;
     API.get(`/users/me/medias`)
       .then((response) => {
-        console.log(response);
         setMedias(response.data?.user?.medias);
       })
       .catch((error) => {
