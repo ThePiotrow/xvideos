@@ -9,7 +9,7 @@ RUN npm install
 
 COPY . .
 
-RUN useradd -u 1000 node
+RUN apk add --no-cache shadow && useradd -u 1000 node
 
 USER node
 
