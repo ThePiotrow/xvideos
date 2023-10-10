@@ -164,10 +164,16 @@ export class MediaController {
           const { duration, height } = await new Promise<{ duration: number; height: any }>((resolve, reject) => {
             ffmpeg.ffprobe(original.url, (err, metadata) => {
               if (err) reject(err);
-              else resolve({
-                duration: metadata.format.duration,
-                height: metadata.streams[0].height
-              });
+              else {
+                console.log(metadata.format)
+                const height = metadata.streams.find(stream => stream.height)?.height;
+                const duration = metadata.format.duration;
+
+                resolve({
+                  duration,
+                  height
+                })
+              };
             });
           });
 
@@ -179,12 +185,12 @@ export class MediaController {
           urls.thumbnail = thumbnail.url;
 
           const streams = [
-            1080,
-            720,
-            540,
-            360,
+            180,
             270,
-            180
+            360,
+            540,
+            720,
+            1080,
           ];
           const resolutions = streams.filter(stream => stream <= height);
           const videoData = await this.mediaService.generateVideo({ ...original, mimetype: body.media.mimetype }, resolutions);

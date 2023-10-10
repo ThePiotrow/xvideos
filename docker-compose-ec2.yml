@@ -2,7 +2,10 @@ version: '3.8'
 
 services:
     gateway:
-        build: ./gateway
+        build:
+            dockerfile: Dockerfile
+            context: ./gateway
+            target: production
         restart: always
         volumes:
           - ./gateway:/var/www/gateway
@@ -17,9 +20,13 @@ services:
             - live
             - token
             - user
+            - redis
 
     media:
-        build: ./media
+        build:
+            dockerfile: Dockerfile
+            context: ./media
+            target: production
         restart: always
         volumes:
           - ./media:/var/www/media
@@ -31,7 +38,10 @@ services:
             - backend
 
     live:
-        build: ./live
+        build:
+            dockerfile: Dockerfile
+            context: ./live
+            target: production
         restart: always
         volumes:
           - ./live:/var/www/live
@@ -43,7 +53,10 @@ services:
             - backend
 
     token:
-        build: ./token
+        build:
+            dockerfile: Dockerfile
+            context: ./token
+            target: production
         restart: always
         volumes:
           - ./token:/var/www/token
@@ -55,7 +68,10 @@ services:
             - backend
 
     user:
-        build: ./user
+        build:
+            dockerfile: Dockerfile
+            context: ./user
+            target: production
         restart: always
         volumes:
           - ./user:/var/www/user
@@ -67,17 +83,30 @@ services:
             - backend
 
     front:
-        build: ./front
+        build:
+            dockerfile: Dockerfile
+            context: ./front
+            target: production
         restart: always
         volumes:
-        - ./front:/var/www/front
-        - /var/www/front/node_modules
+            - ./front:/var/www/front
+            - /var/www/front/node_modules
         env_file:
-        - .env
+            - .env
         ports:
-        - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
+            - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
         networks:
-        - frontend
+            - frontend
+
+    redis:
+        image: redis:alpine
+        restart: always
+        volumes:
+            - redis:/data
+        ports:
+            - ${REDIS_PORT}:${REDIS_PORT}
+        networks:
+            - backend
 
 networks:
     backend:

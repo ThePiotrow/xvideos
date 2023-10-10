@@ -1,20 +1,44 @@
-# Utilisation d'une image basée sur Node.js avec Alpine pour réduire la taille de l'image
-FROM node:18-alpine
+# Development
+FROM node:18-alpine as development
 
-# Définir le répertoire de travail dans le conteneur
 WORKDIR /var/www/front
 
-# Copier les fichiers package.json et package-lock.json (ou yarn.lock si vous utilisez Yarn)
 COPY package*.json ./
 
-# Installer les dépendances
 RUN npm install
 
-# Copier le reste des fichiers de l'application dans le conteneur
 COPY . .
 
-# Si vous avez besoin de construire le projet pour la production, décommentez la ligne ci-dessous
-# RUN npm run build
+USER node
 
-# Lancer le serveur de développement Vite
-CMD [ "npm", "run", "dev" ]
+# Build
+FROM node:18-alpine as build
+
+WORKDIR /var/www/front
+
+COPY package*.json ./
+
+RUN npm install
+
+COPY . .
+
+RUN npm run build
+
+USER node
+
+# Production
+FROM node:18-alpine as production
+
+WORKDIR /var/www/front
+
+COPY package*.json ./
+
+RUN npm install --only=production
+
+COPY . .
+
+COPY --from=build /var/www/front/dist ./dist
+
+EXPOSE 3000
+
+CMD [ "npm", "run", "preview" ]

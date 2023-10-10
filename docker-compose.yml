@@ -2,10 +2,14 @@ version: '3.8'
 
 services:
     gateway:
-        build: ./gateway
+        build:
+            dockerfile: Dockerfile
+            context: ./gateway
+            target: development
         restart: always
         volumes:
           - ./gateway:/var/www/gateway
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -17,12 +21,17 @@ services:
             - live
             - token
             - user
+            - redis
 
     media:
-        build: ./media
+        build:
+            dockerfile: Dockerfile
+            context: ./media
+            target: development
         restart: always
         volumes:
           - ./media:/var/www/media
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -31,10 +40,14 @@ services:
             - backend
 
     live:
-        build: ./live
+        build:
+            dockerfile: Dockerfile
+            context: ./live
+            target: development
         restart: always
         volumes:
           - ./live:/var/www/live
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -43,10 +56,14 @@ services:
             - backend
 
     token:
-        build: ./token
+        build:
+            dockerfile: Dockerfile
+            context: ./token
+            target: development
         restart: always
         volumes:
           - ./token:/var/www/token
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -55,10 +72,14 @@ services:
             - backend
 
     user:
-        build: ./user
+        build:
+            dockerfile: Dockerfile
+            context: ./user
+            target: development
         restart: always
         volumes:
           - ./user:/var/www/user
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -67,17 +88,31 @@ services:
             - backend
 
     front:
-        build: ./front
+        build:
+            dockerfile: Dockerfile
+            context: ./front
+            target: development
         restart: always
         volumes:
-        - ./front:/var/www/front
-        - /var/www/front/node_modules
+            - ./front:/var/www/front
+            - /var/www/front/node_modules
+        command: npm run dev
         env_file:
-        - .env
+            - .env
         ports:
-        - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
+            - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
         networks:
-        - frontend
+            - frontend
+
+    redis:
+        image: redis:alpine
+        restart: always
+        volumes:
+            - redis:/data
+        ports:
+            - ${REDIS_PORT}:${REDIS_PORT}
+        networks:
+            - backend
 
 networks:
     backend:
@@ -87,7 +122,8 @@ networks:
         name: infrastructure
 
 volumes:
-    gateway: 
+    gateway:
     media:
     live:
     token:
+    redis:
