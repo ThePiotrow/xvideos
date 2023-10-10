@@ -9,10 +9,6 @@ RUN npm install
 
 COPY . .
 
-RUN id node &>/dev/null || (apk add --no-cache shadow && useradd -u 1000 node)
-
-
-USER node
 
 # Build
 FROM node:18-alpine as build
