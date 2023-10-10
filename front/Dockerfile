@@ -9,6 +9,8 @@ RUN npm install
 
 COPY . .
 
+RUN mkdir -p /var/www/front/node_modules/.vite && chmod -R 777 /var/www/front/node_modules/.vite
+
 
 # Build
 FROM node:18-alpine as build
