@@ -42,11 +42,11 @@ jobs:
             cd /home/ubuntu
             echo "${{ secrets.ENV }}" > .env
             echo "${{ secrets.ENV_FRONT }}" > ./front/.env
-            # mkdir -p ~/gateway/secrets/
-            # echo "${{ secrets.PUBLIC_CERTIFICATE }}" > ~/gateway/secrets/public-certificate.pem
-            # echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
-            # chmod 666 ~/gateway/secrets/public-certificate.pem
-            # chmod 666 ~/gateway/secrets/private-key.pem
+            mkdir -p ~/gateway/secrets/
+            echo "${{ secrets.PUBLIC_CERTIFICATE }}" > ~/gateway/secrets/public-certificate.pem
+            echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
+            chmod 666 ~/gateway/secrets/public-certificate.pem
+            chmod 666 ~/gateway/secrets/private-key.pem
             # make build
             # source ~/.nvm/nvm.sh
             # /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 start all
