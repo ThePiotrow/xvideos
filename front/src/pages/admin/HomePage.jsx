@@ -3,30 +3,23 @@ import API from "../../api";
 import Users from "./users/Users";
 import Medias from "./users/Medias";
 import Lives from "./users/Lives";
-import { useLocation } from "react-router-dom";
-
-function useQuery() {
-  const { search } = useLocation();
-  return useMemo(() => new URLSearchParams(search), [search]);
-}
+import { useLocation, useNavigate } from "react-router-dom";
 
 function HomePage() {
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("users");
-  const query = useQuery();
   const { hash } = useLocation();
-  const history = useHistory();
+  const navigate = useNavigate();
 
-  const resetPage = () => {
-    const newUrl = `${location.pathname}${hash}?page=1`;
-    history.replace(newUrl);
+  const handleTabClick = (tab) => {
+    setActiveTab(tab);
+    navigate(`${hash}?page=1offset=0`);
   };
 
   useEffect(() => {
     if (hash.slice(1)) {
       setActiveTab(hash.slice(1));
     }
-    resetPage();
   }, [hash]);
 
   return (
@@ -38,6 +31,7 @@ function HomePage() {
               activeTab === "users" ? "active" : ""
             }`}
             href="#users"
+            onClick={() => handleTabClick("users")}
           >
             Utilisateurs
           </a>
@@ -46,6 +40,7 @@ function HomePage() {
               activeTab === "media" ? "active" : ""
             }`}
             href="#medias"
+            onClick={() => handleTabClick("medias")}
           >
             Médias
           </a>
@@ -54,6 +49,7 @@ function HomePage() {
               activeTab === "lives" ? "active" : ""
             }`}
             href="#lives"
+            onClick={() => handleTabClick("lives")}
           >
             Lives
           </a>
