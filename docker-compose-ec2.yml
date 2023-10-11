@@ -5,7 +5,7 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./gateway
-            target: development
+            target: production
         restart: always
         volumes:
           - ./gateway:/var/www/gateway
@@ -26,7 +26,7 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./media
-            target: development
+            target: production
         restart: always
         volumes:
           - ./media:/var/www/media
@@ -42,7 +42,7 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./live
-            target: development
+            target: production
         restart: always
         volumes:
           - ./live:/var/www/live
@@ -58,7 +58,7 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./token
-            target: development
+            target: production
         restart: always
         volumes:
           - ./token:/var/www/token
@@ -74,7 +74,7 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./user
-            target: development
+            target: production
         restart: always
         volumes:
           - ./user:/var/www/user
