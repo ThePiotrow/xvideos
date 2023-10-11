@@ -13,6 +13,12 @@ function SignUp() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
+    if (username.length < 3) {
+      toast("Le nom d'utilisateur doit comporter au moins 3 caractères.");
+      return;
+    }
+
     if (password.length < 6) {
       toast("Le mot de passe doit comporter au moins 6 caractères.");
       return;
