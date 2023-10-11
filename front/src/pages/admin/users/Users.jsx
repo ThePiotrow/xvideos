@@ -19,11 +19,11 @@ function Users() {
   const query = useQuery();
   const page = Number(query.get("page")) || 1;
   const [total, setTotal] = useState(0);
-  const itemsPerPage = 20;
-  const totalPages = Math.ceil(total / itemsPerPage);
+  const limit = 20;
+  const totalPages = Math.ceil(total / limit);
 
   const getUSers = async () => {
-    API.get("/admin/users")
+    API.get(`/admin/users?limit=${limit}&page=${page}`)
       .then((response) => {
         console.log(total);
         setUsers(response.data.users);

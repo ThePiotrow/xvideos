@@ -15,12 +15,14 @@ import Trash from "../../components/icons/Trash";
 import UploadMediaForm from "../../components/forms/UploadMediaForm";
 import DeleteMediaForm from "../../components/forms/DeleteMediaForm";
 import UpdateMediaForm from "../../components/forms/UpdateMediaForm";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPencil, faRotateRight } from "@fortawesome/free-solid-svg-icons";
 
 function ListMedias() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
   const { token, user } = useAuth();
-  const [selectMediaId, setSelectMediaId] = useState(new Set());
+  const [selectMediaId, setSelectMediaId] = useState(null);
   const [updateMediaData, setUpdateMediaData] = useState(null);
   const [modals, setModals] = useState({
     upload: false,
@@ -29,6 +31,7 @@ function ListMedias() {
   });
 
   const toggleModal = (modalId) => {
+    setSelectMediaId(null);
     setModals({
       ...modals,
       [modalId]: !modals[modalId],
@@ -51,14 +54,19 @@ function ListMedias() {
     fetchMedias();
   }, [token, navigate, user]);
 
-  const handleCheckboxChange = (event, mediaId) => {
-    const newSelectedMediaIds = new Set(selectMediaId);
-    if (event.target.checked) {
-      newSelectedMediaIds.add(mediaId);
-    } else {
-      newSelectedMediaIds.delete(mediaId);
-    }
-    setSelectMediaId(newSelectedMediaIds);
+  const restoreMedia = (mediaId) => {
+    API.put(`/medias/${mediaId}`, { is_deleted: false })
+      .then((response) => {
+        setMedias([
+          ...medias.filter((m) => m.id !== mediaId),
+          response.data.media,
+        ]);
+        toast.success("Média restauré avec succès");
+      })
+      .catch((error) => {
+        toast.error("Erreur lors de la restauration du média");
+        console.error(error);
+      });
   };
 
   return (
@@ -76,13 +84,6 @@ function ListMedias() {
             <Uploads />
             <span>Ajouter</span>
           </button>
-          <button
-            onClick={() => toggleModal("delete")}
-            className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-red-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 dark:hover:bg-red-500 dark:bg-red-800"
-          >
-            <Trash />
-            <span>Supprimer</span>
-          </button>
         </div>
       </div>
 
@@ -98,10 +99,6 @@ function ListMedias() {
                       className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
-                        <input
-                          type="checkbox"
-                          className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
-                        />
                         <span>Nom du fichier</span>
                       </div>
                     </th>
@@ -111,10 +108,6 @@ function ListMedias() {
                       className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
-                        <input
-                          type="checkbox"
-                          className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
-                        />
                         <span>Status</span>
                       </div>
                     </th>
@@ -159,14 +152,6 @@ function ListMedias() {
                         <tr key={media.id}>
                           <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                             <div className="inline-flex items-center gap-x-3">
-                              <input
-                                type="checkbox"
-                                onChange={(e) =>
-                                  handleCheckboxChange(e, media.id)
-                                }
-                                className="text-blue-500 border-gray-300 rounded dark:bg-gray-900 dark:ring-offset-gray-900 dark:border-gray-700"
-                              />
-
                               <div className="flex items-center gap-x-2">
                                 <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
                                   <MediaIcon type={media.type} />
@@ -179,9 +164,9 @@ function ListMedias() {
                                   <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
                                     {media.description
                                       ? media.description
-                                        .split(" ")
-                                        .splice(0, 5)
-                                        .join(" ") + "..."
+                                          .split(" ")
+                                          .splice(0, 5)
+                                          .join(" ") + "..."
                                       : "N/A"}
                                   </p>
                                 </div>
@@ -191,22 +176,25 @@ function ListMedias() {
 
                           <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                             <div
-                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${!media.is_deleted
+                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                                !media.is_deleted
                                   ? "bg-emerald-600/60"
                                   : "bg-red-400/40"
-                                }`}
+                              }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${!media.is_deleted
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  !media.is_deleted
                                     ? "bg-emerald-500"
                                     : "bg-red-500"
-                                  }`}
+                                }`}
                               ></span>
                               <h2
-                                className={`text-sm font-normal ${!media.is_deleted
+                                className={`text-sm font-normal ${
+                                  !media.is_deleted
                                     ? "text-emerald-500"
                                     : "text-red-500"
-                                  }`}
+                                }`}
                               >
                                 {!media.is_deleted
                                   ? "En ligne"
@@ -232,7 +220,30 @@ function ListMedias() {
                           <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
                             {user.username}
                           </td>
-                          <td className="px-4 py-4 text-sm whitespace-nowrap">
+
+                          <td className="flex gap-2 px-4 py-4 text-sm whitespace-nowrap">
+                            <button
+                              onClick={() => {
+                                if (!media.is_deleted) {
+                                  console.log(media.id);
+                                  toggleModal("delete");
+                                  setSelectMediaId(media.id);
+                                } else restoreMedia(media.id);
+                              }}
+                              className={`text-slate-500 transition-colors duration-200 ${
+                                media.is_deleted
+                                  ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
+                                  : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
+                              }
+                                focus:outline-none`}
+                            >
+                              {!media.is_deleted ? (
+                                <Trash />
+                              ) : (
+                                <FontAwesomeIcon icon={faRotateRight} />
+                              )}
+                            </button>
+
                             <button
                               onClick={() => {
                                 toggleModal("update");
@@ -242,9 +253,9 @@ function ListMedias() {
                                   description: media.description,
                                 });
                               }}
-                              className="px-1 py-1 text-gray-500 transition-colors duration-200 rounded-lg dark:text-gray-300 hover:bg-gray-100"
+                              className="max-h-11 text-gray-500 transition-colors duration-200 rounded-lg hover:bg-gray-100"
                             >
-                              <Details />
+                              <FontAwesomeIcon icon={faPencil} />
                             </button>
                           </td>
                         </tr>
@@ -328,7 +339,7 @@ function ListMedias() {
             <DeleteMediaForm
               toggleModal={toggleModal}
               fetchMedias={fetchMedias}
-              selectedMediaIds={selectMediaId}
+              selectedMediaId={selectMediaId}
             />
           </div>
         </div>

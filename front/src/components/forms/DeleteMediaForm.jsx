@@ -2,22 +2,16 @@ import API from "../../api";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-function DeleteMediaForm({ toggleModal, fetchMedias, selectedMediaIds }) {
+function DeleteMediaForm({ toggleModal, fetchMedias, selectedMediaId }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!selectedMediaIds || selectedMediaIds.size === 0) {
+    if (!selectedMediaId) {
       toast.error("Aucun média sélectionné !");
       return;
     }
 
-    const mediaIdsStr = Array.from(selectedMediaIds).join(",");
-
-    API.delete(`/medias/${mediaIdsStr}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")} `,
-      },
-    })
+    API.delete(`/medias/${selectedMediaId}`)
       .then((response) => {
         toast("Votre vidéo a bien été supprimée!");
         toggleModal("delete");
