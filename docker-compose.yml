@@ -86,9 +86,30 @@ services:
         networks:
             - backend
 
+    front:
+        build:
+            dockerfile: Dockerfile
+            context: ./front
+            target: development
+        user: "1000"
+        restart: always
+        volumes:
+            - ./front:/var/www/front
+            - /var/www/front/node_modules
+        command: npm run dev
+        env_file:
+            - .env
+        ports:
+            - ${FRONT_SERVICE_PORT}:${FRONT_SERVICE_PORT}
+        networks:
+            - frontend
+
 networks:
     backend:
         driver: bridge
+    frontend:
+        external: true
+        name: infrastructure
 
 volumes:
     gateway:
