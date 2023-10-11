@@ -13,4 +13,5 @@ export interface IUser extends Document {
   deleted_at?: number;
   compareEncryptedPassword: (password: string) => boolean;
   getEncryptedPassword: (password: string) => string;
+  total?: number;
 }
