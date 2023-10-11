@@ -9,6 +9,8 @@ import { faEye, faHand, faStop } from "@fortawesome/free-solid-svg-icons";
 import { useAuth } from "../../../contexts/authContext";
 import MediaIcon from "../../../components/MediaIcon";
 import { faStopCircle } from "@fortawesome/free-regular-svg-icons";
+import LeftArrow from "../../../components/icons/LeftArrow";
+import RightArrow from "../../../components/icons/RightArrows";
 
 function Lives() {
   const { user } = useAuth();
@@ -177,6 +179,32 @@ function Lives() {
               </table>
             </div>
           </div>
+        </div>
+        <div className="flex items-center justify-between mt-6">
+          <a
+            href="#"
+            className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+          >
+            <LeftArrow />
+            <span>précédent</span>
+          </a>
+
+          <div className="items-center hidden md:flex gap-x-3">
+            <a
+              href="#"
+              className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
+            >
+              1
+            </a>
+          </div>
+
+          <a
+            href="#"
+            className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+          >
+            <span>Suivant</span>
+            <RightArrow />
+          </a>
         </div>
       </div>
     </section>

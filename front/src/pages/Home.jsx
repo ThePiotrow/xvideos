@@ -1,43 +1,26 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 import { formatDuration, formatCreatedAt } from "../utils/mediaUtils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faUser } from "@fortawesome/free-solid-svg-icons";
 import dayjs from "dayjs";
+import LeftArrow from "../components/icons/LeftArrow";
+import RightArrow from "../components/icons/RightArrows";
 
 function Home() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
-  const [page, setPage] = useState(1);
-  const itemsPerPage = 20;
-
-  const handleScroll = useCallback(() => {
-    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
-      setPage((page) => page + 1);
-    }
-  }, []);
 
   useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [handleScroll]);
-
-  useEffect(() => {
-    API.get(`/medias?limit=${itemsPerPage}&page=${page}`)
+    API.get("/medias")
       .then((response) => {
-        setMedias((prevMedia) => [
-          ...prevMedia,
-          ...(response.data?.medias ?? []),
-        ]);
+        setMedias(response.data?.medias ?? []);
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des médias", error);
       });
-  }, [page]);
-
-  console.log("page : ", page);
-  console.log("items par page : ", itemsPerPage);
+  }, []);
 
   return (
     <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 ">
@@ -72,6 +55,7 @@ function Home() {
           </div>
         </div>
       ))}
+
       {!medias.length && (
         <div className="flex flex-col items-center justify-center col-span-full mt-12">
           <p className="text-slate-200 text-lg font-medium mb-2">
@@ -80,6 +64,33 @@ function Home() {
           <p className="text-slate-400 text-sm">Revenez plus tard !</p>
         </div>
       )}
+
+      <div className="flex items-center justify-between mt-6">
+        <a
+          href="#"
+          className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          <LeftArrow />
+          <span>précédent</span>
+        </a>
+
+        <div className="items-center hidden md:flex gap-x-3">
+          <a
+            href="#"
+            className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
+          >
+            1
+          </a>
+        </div>
+
+        <a
+          href="#"
+          className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+        >
+          <span>Suivant</span>
+          <RightArrow />
+        </a>
+      </div>
     </div>
   );
 }

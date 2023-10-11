@@ -9,6 +9,7 @@ function useQuery() {
   const { search } = useLocation();
   return useMemo(() => new URLSearchParams(search), [search]);
 }
+
 function HomePage() {
   const [users, setUsers] = useState([]);
   const [activeTab, setActiveTab] = useState("users");
@@ -16,6 +17,9 @@ function HomePage() {
   const { hash } = useLocation();
 
   useEffect(() => {
+    console.log(query);
+    const page = query.get("page") || 1;
+    console.log("page : ", page);
     if (hash.slice(1)) {
       setActiveTab(hash.slice(1));
     }

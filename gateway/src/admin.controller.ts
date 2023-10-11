@@ -330,8 +330,8 @@ export class AdminController {
   public async getUsers(
     @Query() body: { limit?: number; page?: number; },
   ): Promise<any> {
-    const limit = Math.max(1, body.limit)
-    const offset = limit * (Math.max(1, body.page) - 1);
+    const limit = Math.max(1, body.limit ?? 1)
+    const offset = limit * (Math.max(1, body.page ?? 1) - 1);
 
     const usersResponse: any =
       await firstValueFrom(
