@@ -9,6 +9,7 @@ import LeftArrow from "../../components/icons/LeftArrow";
 import RightArrow from "../../components/icons/RightArrows";
 import { useLocation, Link } from "react-router-dom";
 import AdminTabs from "./AdminTabs";
+import { toast } from "react-toastify";
 
 //import { toast } from "react-toastify";
 //import "react-toastify/dist/ReactToastify.css";
@@ -34,7 +35,7 @@ function Medias() {
         setPages(Math.ceil(response.data.total / limit));
       })
       .catch((error) => {
-        console.log(error);
+        toast.error("Il y a un problème avec la récupération des médias");
       });
   };
 
@@ -48,14 +49,13 @@ function Medias() {
         response.data.media,
       ]);
     } catch (error) {
-      console.log("Il y a un problème avec la récupération des médias" + error);
+      toast.error("Il y a un problème avec la récupération des médias");
     }
   };
 
   useEffect(() => {
     getMedias();
   }, [query]);
-
 
   return (
     <>
@@ -68,8 +68,8 @@ function Medias() {
           <select
             value={limit}
             onChange={(e) => setLimit(e.target.value)}
-
-            className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full">
+            className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full"
+          >
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -141,9 +141,9 @@ function Medias() {
                                 <p className="text-xs font-normal text-slate-400">
                                   {media.description
                                     ? media.description
-                                      .split(" ")
-                                      .splice(0, 5)
-                                      .join(" ") + "..."
+                                        .split(" ")
+                                        .splice(0, 5)
+                                        .join(" ") + "..."
                                     : "N/A"}
                                 </p>
                               </div>
@@ -156,10 +156,14 @@ function Medias() {
                             : "N/A"}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-300 whitespace-nowrap">
-                          {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}
+                          {dayjs(media.created_at).format(
+                            "DD/MM/YYYY HH:mm:ss"
+                          )}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-300 whitespace-nowrap">
-                          {dayjs(media.updated_at).format("DD/MM/YYYY HH:mm:ss")}
+                          {dayjs(media.updated_at).format(
+                            "DD/MM/YYYY HH:mm:ss"
+                          )}
                         </td>
                         <td className="px-4 py-4 text-sm text-slate-300 whitespace-nowrap">
                           {media.user.username}
@@ -167,10 +171,11 @@ function Medias() {
                         <td className="px-4 py-4 text-sm whitespace-nowrap">
                           <button
                             onClick={() => toggleBlock(media)}
-                            className={`text-slate-500 transition-colors duration-200 ${media.is_deleted
-                              ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
-                              : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
-                              }
+                            className={`text-slate-500 transition-colors duration-200 ${
+                              media.is_deleted
+                                ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
+                                : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
+                            }
                             focus:outline-none`}
                           >
                             {!media.is_deleted ? "Supprimer" : "Récupérer"}
@@ -193,9 +198,7 @@ function Medias() {
             </Link>
 
             <div className="items-center hidden md:flex gap-x-3">
-              <span
-                className="px-2 py-1 text-sm text-blue-500 rounded-md bg-slate-800"
-              >
+              <span className="px-2 py-1 text-sm text-blue-500 rounded-md bg-slate-800">
                 Page {page} / {pages}
               </span>
             </div>

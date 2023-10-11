@@ -7,6 +7,7 @@ import { useLocation, Link } from "react-router-dom";
 import AdminTabs from "./AdminTabs";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBan, faRotateRight } from "@fortawesome/free-solid-svg-icons";
+import { toast } from "react-toastify";
 
 //import { toast } from "react-toastify";
 //import "react-toastify/dist/ReactToastify.css";
@@ -28,13 +29,12 @@ function Users() {
   const getUSers = async () => {
     API.get(`/admin/users?limit=${limit}&page=${page}`)
       .then((response) => {
-        console.log(total);
         setUsers(response.data.users.sort((a, b) => a.username - b.username));
         setTotal(response.data.total);
         setPages(Math.ceil(response.data.total / limit));
       })
       .catch((error) => {
-        console.log(error);
+        toast.error("Il y a un problème avec la récupération des utilisateurs");
       });
   };
 
@@ -43,11 +43,13 @@ function Users() {
       const response = await API.put(`/admin/users/${_user.id}`, {
         is_confirmed: !_user.is_confirmed,
       });
-      setUsers([...users.filter((u) => u.id !== _user.id), response.data.user].sort((a, b) => a.username - b.username));
-    } catch (error) {
-      console.log(
-        "Il y a un problème avec la récupération des utilisateurs" + error
+      setUsers(
+        [...users.filter((u) => u.id !== _user.id), response.data.user].sort(
+          (a, b) => a.username - b.username
+        )
       );
+    } catch (error) {
+      toast.error("Il y a un problème avec la récupération des utilisateurs");
     }
   };
 
@@ -66,8 +68,8 @@ function Users() {
           <select
             value={limit}
             onChange={(e) => setLimit(e.target.value)}
-
-            className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full">
+            className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full"
+          >
             <option value="5">5</option>
             <option value="10">10</option>
             <option value="20">20</option>
@@ -194,22 +196,25 @@ function Users() {
 
                           <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                             <div
-                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${_user.is_confirmed
-                                ? "bg-emerald-600/60"
-                                : "bg-red-400/40"
-                                }`}
+                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                                _user.is_confirmed
+                                  ? "bg-emerald-600/60"
+                                  : "bg-red-400/40"
+                              }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${_user.is_confirmed
-                                  ? "bg-emerald-500"
-                                  : "bg-red-500"
-                                  }`}
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  _user.is_confirmed
+                                    ? "bg-emerald-500"
+                                    : "bg-red-500"
+                                }`}
                               ></span>
                               <h2
-                                className={`text-sm font-normal ${_user.is_confirmed
-                                  ? "text-emerald-500"
-                                  : "text-red-500"
-                                  }`}
+                                className={`text-sm font-normal ${
+                                  _user.is_confirmed
+                                    ? "text-emerald-500"
+                                    : "text-red-500"
+                                }`}
                               >
                                 {_user.is_confirmed ? "Actif" : "Inactif"}
                               </h2>
@@ -229,12 +234,17 @@ function Users() {
                               {_user.id !== user.id && (
                                 <button
                                   onClick={() => toggleBlock(_user)}
-                                  className={`transition-colors duration-200 focus:outline-none ${_user.is_confirmed
-                                    ? "text-red-500"
-                                    : "text-emerald-500"
-                                    }`}
+                                  className={`transition-colors duration-200 focus:outline-none ${
+                                    _user.is_confirmed
+                                      ? "text-red-500"
+                                      : "text-emerald-500"
+                                  }`}
                                 >
-                                  {_user.is_confirmed ? <FontAwesomeIcon icon={faBan} /> : <FontAwesomeIcon icon={faRotateRight} />}
+                                  {_user.is_confirmed ? (
+                                    <FontAwesomeIcon icon={faBan} />
+                                  ) : (
+                                    <FontAwesomeIcon icon={faRotateRight} />
+                                  )}
                                 </button>
                               )}
                             </div>
@@ -258,9 +268,7 @@ function Users() {
           </Link>
 
           <div className="items-center hidden md:flex gap-x-3">
-            <span
-              className="px-2 py-1 text-sm text-blue-500 rounded-md bg-slate-800"
-            >
+            <span className="px-2 py-1 text-sm text-blue-500 rounded-md bg-slate-800">
               Page {page} / {pages}
             </span>
           </div>

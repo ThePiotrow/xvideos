@@ -26,7 +26,6 @@ function Login() {
         navigate("/");
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Un problème est survenu !");
       });
   };

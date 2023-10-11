@@ -16,7 +16,11 @@ import UploadMediaForm from "../../components/forms/UploadMediaForm";
 import DeleteMediaForm from "../../components/forms/DeleteMediaForm";
 import UpdateMediaForm from "../../components/forms/UpdateMediaForm";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPencil, faRotateRight, faTrashAlt } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPencil,
+  faRotateRight,
+  faTrashAlt,
+} from "@fortawesome/free-solid-svg-icons";
 
 function ListMedias() {
   const navigate = useNavigate();
@@ -72,9 +76,7 @@ function ListMedias() {
   return (
     <section className="container px-4 mx-auto">
       <div className="sm:flex sm:items-center sm:justify-between">
-        <h2 className="text-lg font-medium text-white">
-          Mes médias
-        </h2>
+        <h2 className="text-lg font-medium text-white">Mes médias</h2>
 
         <div className="flex items-center mt-4 gap-x-3">
           <button
@@ -164,9 +166,9 @@ function ListMedias() {
                                   <p className="text-xs font-normal text-slate-400">
                                     {media.description
                                       ? media.description
-                                        .split(" ")
-                                        .splice(0, 5)
-                                        .join(" ") + "..."
+                                          .split(" ")
+                                          .splice(0, 5)
+                                          .join(" ") + "..."
                                       : "N/A"}
                                   </p>
                                 </div>
@@ -176,22 +178,25 @@ function ListMedias() {
 
                           <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                             <div
-                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${!media.is_deleted
-                                ? "bg-emerald-600/60"
-                                : "bg-red-400/40"
-                                }`}
+                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                                !media.is_deleted
+                                  ? "bg-emerald-600/60"
+                                  : "bg-red-400/40"
+                              }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${!media.is_deleted
-                                  ? "bg-emerald-500"
-                                  : "bg-red-500"
-                                  }`}
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  !media.is_deleted
+                                    ? "bg-emerald-500"
+                                    : "bg-red-500"
+                                }`}
                               ></span>
                               <h2
-                                className={`text-sm font-normal ${!media.is_deleted
-                                  ? "text-emerald-500"
-                                  : "text-red-500"
-                                  }`}
+                                className={`text-sm font-normal ${
+                                  !media.is_deleted
+                                    ? "text-emerald-500"
+                                    : "text-red-500"
+                                }`}
                               >
                                 {!media.is_deleted
                                   ? "En ligne"
@@ -222,15 +227,15 @@ function ListMedias() {
                             <button
                               onClick={() => {
                                 if (!media.is_deleted) {
-                                  console.log(media.id);
                                   toggleModal("delete");
                                   setSelectMediaId(media.id);
                                 } else restoreMedia(media.id);
                               }}
-                              className={`text-slate-500 transition-colors duration-200 ${media.is_deleted
-                                ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
-                                : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
-                                }
+                              className={`text-slate-500 transition-colors duration-200 ${
+                                media.is_deleted
+                                  ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
+                                  : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
+                              }
                                 focus:outline-none`}
                             >
                               {!media.is_deleted ? (

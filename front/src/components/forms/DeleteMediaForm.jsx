@@ -13,12 +13,11 @@ function DeleteMediaForm({ toggleModal, fetchMedias, selectedMediaId }) {
 
     API.delete(`/medias/${selectedMediaId}`)
       .then((response) => {
-        toast("Votre vidéo a bien été supprimée!");
+        toast.success("Votre vidéo a bien été supprimée!");
         toggleModal("delete");
         fetchMedias();
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Un problème est survenu !");
       });
   };
@@ -30,7 +29,10 @@ function DeleteMediaForm({ toggleModal, fetchMedias, selectedMediaId }) {
       </h2>
       <form>
         <div className="mt-6 flex justify-center gap-6">
-          <button onClick={() => toggleModal("delete")} className="right-0 bg-slate-600">
+          <button
+            onClick={() => toggleModal("delete")}
+            className="right-0 bg-slate-600"
+          >
             Fermer
           </button>
           <button

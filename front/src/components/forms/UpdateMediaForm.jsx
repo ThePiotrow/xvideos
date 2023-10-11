@@ -22,12 +22,11 @@ function UpdateMediaForm({ toggleModal, fetchMedias, selectedMediaData }) {
       },
     })
       .then((response) => {
-        toast("Votre vidéo a bien été modifiée!");
+        toast.success("Votre vidéo a bien été modifiée!");
         toggleModal("update");
         fetchMedias();
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Un problème est survenu !");
       });
   };

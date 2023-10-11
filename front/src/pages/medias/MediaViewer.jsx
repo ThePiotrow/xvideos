@@ -25,11 +25,6 @@ function MediaViewer() {
     const player = playerRef.current;
     if (player && player.getInternalPlayer) {
       const internalPlayer = player.getInternalPlayer();
-
-      if (internalPlayer && internalPlayer.on) {
-        internalPlayer.on("waiting", () => console.log("player is waiting"));
-        internalPlayer.on("dispose", () => console.log("player will dispose"));
-      }
     }
   };
 

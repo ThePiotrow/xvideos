@@ -1,14 +1,16 @@
 import axios from "axios";
+import { toast } from "react-toastify";
 
 const API = axios.create({
-  baseURL: `${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT
-    }`, // l'URL de base de vos requêtes API
+  baseURL: `${import.meta.env.VITE_BASE_URI}:${
+    import.meta.env.VITE_API_GATEWAY_PORT
+  }`, // l'URL de base de vos requêtes API
   timeout: 10000, // spécifie le nombre de millisecondes avant que la requête n'expire
   headers: {
     "Content-Type": "application/json",
   },
   httpsAgent: {
-    rejectUnauthorized: false
+    rejectUnauthorized: false,
   },
 });
 
@@ -36,16 +38,16 @@ API.interceptors.response.use(
     // Faire quelque chose avec les erreurs de requête
     if (error.response) {
       if (error.response.status === 401) {
-        console.log(
+        toast.error(
           "Erreur d'authentification. Veuillez vous connecter à nouveau."
         );
         // Vous pourriez vouloir faire une redirection vers la page de connexion ici
       }
     } else if (error.request) {
-      console.log("No response was received", error.request);
+      toast.error("No response was received", error.request);
     } else {
       // Quelque chose s'est mal passé lors de la configuration de la requête
-      console.log("Error", error.message);
+      toast.error("Error", error.message);
     }
 
     return Promise.reject(error);

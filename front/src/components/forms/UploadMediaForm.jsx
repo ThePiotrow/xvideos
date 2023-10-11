@@ -32,7 +32,9 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
         const p = (progressEvent.loaded / progressEvent.total) * 100;
         setProgress(p.toFixed(2));
         if (!(p < 100)) {
-          toast("Votre média est en cours de conversion ! Il sera bientôt disponible");
+          toast.success(
+            "Votre média est en cours de conversion ! Il sera bientôt disponible"
+          );
           toggleModal();
           fetchMedias();
           setLoading(false);
@@ -41,15 +43,13 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
       },
     })
       .then((response) => {
-        console.log("Response from server:", response);
-        toast("Votre media a bien été uploadée!");
+        toast.success("Votre media a bien été uploadée!");
         toggleModal();
         fetchMedias();
         setLoading(false);
         toggleModal("upload");
       })
       .catch((error) => {
-        console.log(error);
         toast.error("Un problème est survenu !");
         setLoading(false);
       });
@@ -91,7 +91,10 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
         </div>
         <div className="mt-6">
           <div className="flex justify-between mb-2">
-            <label htmlFor="media" className="text-slate-700 dark:text-slate-200">
+            <label
+              htmlFor="media"
+              className="text-slate-700 dark:text-slate-200"
+            >
               Fichier
             </label>
           </div>

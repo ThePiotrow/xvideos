@@ -64,6 +64,16 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.Toastify__toast {
+  background-color: rgb(2 6 23 / 30%);
+  backdrop-filter: blur(30px);
+  box-shadow: 0 5px 30px 0 rgb(0 0 0 / 20%);
+  border-radius: 16px;
+}
+
+.Toastify__toast-body {
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
