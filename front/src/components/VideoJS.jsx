@@ -346,7 +346,10 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
                 {currentLevel === -1 ? 'Auto' : levels[currentLevel].height}
               </button>
             </div>
-            <button onClick={toggleFullscreen} className='backdrop-blur-xl bg-slate-500/10 w-10 h-10 aspect-square text-sm text-center p-0 outline-none border-none focus:outline-none focus:border-none'>
+            <button
+              onClick={toggleFullscreen}
+              onTouchEnd={toggleFullscreen}
+              className='backdrop-blur-xl bg-slate-500/10 w-10 h-10 aspect-square text-sm text-center p-0 outline-none border-none focus:outline-none focus:border-none'>
               {!isFullscreen ?
                 <FontAwesomeIcon icon={['fa', 'expand']} /> :
                 <FontAwesomeIcon icon={['fa', 'compress']} />
