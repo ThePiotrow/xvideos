@@ -21,6 +21,7 @@ export class UserService {
   }
 
   async searchUserById({ id, all, is_deleted, media }: { id: string, all?: boolean, is_deleted?: boolean, media?: boolean }): Promise<IUser> {
+
     const match = (all ?? false) ?
       {
         _id: new mongoose.Types.ObjectId(id),
@@ -125,6 +126,124 @@ export class UserService {
 
     if (result && result.length > 0) {
       return result[0];
+    } else {
+      return null;
+    }
+  }
+
+  async searchUserAll({ all, limit, offset, is_deleted, media }: { all?: boolean, limit: number; offset: number; is_deleted?: boolean, media?: boolean }): Promise<IUser[]> {
+
+    const match = (all ?? false) ?
+      {
+      } :
+      {
+        is_deleted: is_deleted ?? false,
+      };
+
+    media = media ?? false;
+
+    let pipeline: any[] = [
+      {
+        $match: match,
+      },
+      {
+        $addFields: {
+          id: "$_id"
+        }
+      },
+      {
+        $lookup: {
+          from: "lives",
+          let: { user_id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$user_id", "$$user_id"] },
+                    { $eq: ["$end_time", null] }
+                  ]
+                }
+              }
+            },
+            {
+              $sort: { start_time: -1 }
+            },
+            {
+              $limit: 1
+            }
+          ],
+          as: "live"
+        }
+      },
+      {
+        $unwind: {
+          path: "$live",
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $addFields: {
+          "live.id": "$live._id",
+          "live.user_id": "$live.user_id",
+          "live.title": "$live.title",
+          "live.start_time": "$live.start_time",
+          "live.end_time": "$live.end_time",
+          "live.created_at": "$live.created_at",
+          "live.updated_at": "$live.updated_at",
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          id: 1,
+          username: 1,
+          email: 1,
+          is_confirmed: 1,
+          role: 1,
+          live: 1
+        }
+      }
+
+    ];
+
+    const project = media ?
+      {
+        _id: 0,
+        id: 1,
+        username: 1,
+        email: 1,
+        is_confirmed: 1,
+        role: 1,
+        live: 1,
+        media: 1
+      } :
+      {
+        id: 1,
+        username: 1,
+        email: 1,
+        is_confirmed: 1,
+        role: 1,
+        live: 1
+      };
+
+    pipeline.push({
+      $project: project
+    });
+
+    pipeline.push(
+      {
+        $skip: Number(offset)
+      },
+      {
+        $limit: Number(limit)
+      }
+    );
+
+    let result = await this.userModel.aggregate(pipeline).exec();
+
+    if (result && result.length > 0) {
+      return result
     } else {
       return null;
     }
@@ -318,5 +437,9 @@ export class UserService {
     return `${this.configService.get('baseUri')}:${this.configService.get(
       'gatewayPort',
     )}/users/confirm/${link}`;
+  }
+
+  public async count() {
+    return await this.userModel.countDocuments({}).exec();
   }
 }

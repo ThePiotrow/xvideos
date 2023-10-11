@@ -17,6 +17,7 @@ export class GetAllUsersResponseDto {
   })
   data: {
     users: IUser[];
+    total?: number;
   };
   @ApiProperty({ example: null, nullable: true })
   errors: { [key: string]: any };

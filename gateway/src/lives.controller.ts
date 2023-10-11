@@ -13,6 +13,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   Patch,
+  Query,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -48,14 +49,16 @@ export class LivesController {
     type: GetLivesResponseDto,
   })
   public async getLives(
-    @Body() body: { limit?: number; offset?: number },
+    @Query() body: { limit?: number; page?: number },
   ): Promise<GetLivesResponseDto> {
+    const limit = Math.max(1, body.limit);
+    const offset = limit * (Math.max(1, body.page) - 1);
 
     const livesResponse: IServiceLiveSearchByUserIdResponse =
       await firstValueFrom(
         this.liveServiceClient.send('get_all_lives', {
-          limit: body.limit,
-          offset: body.offset,
+          limit: limit,
+          offset: offset,
         }),
       );
 

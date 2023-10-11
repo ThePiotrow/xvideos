@@ -231,10 +231,10 @@ export class AdminController {
     type: GetMediaResponseDto,
   })
   public async getMedias(
-    @Query() { limit, page }: any,
+    @Query() body: { limit, page },
   ): Promise<any> {
-    limit = Math.max(0, limit)
-    const offset = limit * (Math.max(1, page) - 1);
+    const limit = Math.max(1, body.limit)
+    const offset = limit * (Math.max(1, body.page) - 1);
     const mediasResponse: any =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all',
@@ -330,7 +330,7 @@ export class AdminController {
   public async getUsers(
     @Query() body: { limit?: number; page?: number; },
   ): Promise<any> {
-    const limit = Math.max(0, body.limit)
+    const limit = Math.max(1, body.limit)
     const offset = limit * (Math.max(1, body.page) - 1);
 
     const usersResponse: any =
@@ -338,9 +338,9 @@ export class AdminController {
         this.userServiceClient.send('user_get_all', {
           offset: offset,
           limit: limit,
+          all: true
         }),
       );
-
 
     if (usersResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -366,10 +366,10 @@ export class AdminController {
   @Authorization()
   @Admin()
   public async getAdminLives(
-    @Query() { limit, page }: any,
+    @Query() body: { limit?: number; page?: number; },
   ): Promise<any> {
-    limit = Math.max(0, limit)
-    const offset = limit * (Math.max(1, page) - 1);
+    const limit = Math.max(1, body.limit)
+    const offset = limit * (Math.max(1, body.page) - 1);
 
     const livesResponse: any =
       await firstValueFrom(

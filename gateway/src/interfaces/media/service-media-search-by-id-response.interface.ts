@@ -4,4 +4,5 @@ export interface IServiceMediaSearchByIdResponse {
   status: number;
   message: string;
   media: IMedia;
+  total?: number;
 }

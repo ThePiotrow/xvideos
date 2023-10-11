@@ -80,16 +80,24 @@ export class UsersController {
   })
   public async getAllUsers(
     @Req() request: IAuthorizedRequest,
+    @Query() body: { limit, page }
   ): Promise<GetAllUsersResponseDto> {
+    const limit = Math.max(1, body.limit)
+    const offset = limit * (Math.max(1, body.page) - 1);
 
     const usersResponse: IUserGetAllResponse = await firstValueFrom(
-      this.userServiceClient.send('user_get_all', {}),
+      this.userServiceClient.send('user_get_all', {
+        limit: limit,
+        offset: offset,
+        media: false,
+      }),
     );
 
     return {
       message: usersResponse.message,
       data: {
         users: usersResponse.users,
+        total: usersResponse.total,
       },
       errors: null,
     };
@@ -327,9 +335,11 @@ export class UsersController {
   })
   public async getMeWithMedias(
     @Req() request: IAuthorizedRequest,
-    @Query() { limit, page }: any
+    @Query() body: { limit?: number; page?: number; },
   ): Promise<GetUserByTokenResponseDto> {
-    const offset = limit * (page - 1);
+    const limit = Math.max(1, body.limit);
+    const offset = limit * (Math.max(1, body.page) - 1);
+
     const { user } = request;
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
@@ -351,7 +361,8 @@ export class UsersController {
         user: {
           ...userResponse.user,
           medias: mediaResponse.medias
-        }
+        },
+        total: mediaResponse.total,
       },
       errors: null,
     };
@@ -364,9 +375,12 @@ export class UsersController {
   })
   public async getUserByIdWithMedias(
     @Param() params: GetUserByIdDto,
-    @Query() { limit, page }: any
+    @Query() body: { limit?: number; page?: number; },
   ): Promise<GetUserByTokenResponseDto> {
-    const offset = limit * (page - 1);
+
+    const limit = Math.max(1, body.limit);
+    const offset = limit * (Math.max(1, body.page) - 1);
+
 
     const userResponse: IServiceUserGetByIdResponse = await firstValueFrom(
       this.userServiceClient.send('user_get_by_id', { id: params.id, media: true }),
@@ -385,8 +399,9 @@ export class UsersController {
       data: {
         user: {
           ...userResponse.user,
-          medias: mediaResponse.medias
-        }
+          medias: mediaResponse.medias,
+        },
+        total: mediaResponse.total,
       },
       errors: null,
     };

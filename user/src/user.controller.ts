@@ -9,6 +9,7 @@ import { IUserConfirmResponse } from './interfaces/user-confirm-response.interfa
 import { IUserUsernameCheckAvailabilityResponse } from './interfaces/user-username-check-availability-response.interface';
 import { firstValueFrom } from 'rxjs';
 import { IUserGetAllResponse } from './interfaces/user-get-all-response.interface';
+import { off } from 'process';
 
 @Controller('user')
 export class UserController {
@@ -17,8 +18,24 @@ export class UserController {
   ) { }
 
   @MessagePattern('user_get_all')
-  public async getAllUsers(): Promise<IUserGetAllResponse> {
-    let users: IUser[] = await this.userService.getAllUsers();
+  public async getAllUsers(
+    params: {
+      all?: boolean;
+      offset?: number;
+      limit?: number;
+      is_deleted?: boolean;
+      media?: boolean;
+    }
+  ): Promise<IUserGetAllResponse> {
+    let users: IUser[] = await this.userService.searchUserAll(
+      {
+        all: params.all,
+        offset: params.offset,
+        limit: params.limit,
+        is_deleted: params.is_deleted,
+        media: params.media,
+      }
+    );
 
 
     if (users) {

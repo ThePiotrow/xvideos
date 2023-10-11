@@ -75,8 +75,9 @@ export class MediasController {
     @Query() body: { limit?: number; page?: number; },
   ): Promise<GetMediasResponseDto> {
 
-    const limit = Math.max(0, body.limit)
+    const limit = Math.max(1, body.limit)
     const offset = limit * (Math.max(1, body.page) - 1);
+
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all', {

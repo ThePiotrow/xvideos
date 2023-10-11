@@ -22,6 +22,7 @@ export class GetUserByTokenResponseDto {
 
   data: {
     user: IUser;
+    total?: number;
   };
 
   @ApiProperty({ example: null, nullable: true })
