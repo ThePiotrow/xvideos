@@ -248,6 +248,7 @@ function Viewer() {
                   id="video"
                   ref={videoRef}
                   autoPlay={true}
+                  playsInline={true}
                   className="aspect-video w-full bg-black"
                 ></video>
                 <div className="absolute top-3 left-4 right-4 flex gap-2 items-center justify-between">
