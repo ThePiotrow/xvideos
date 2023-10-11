@@ -231,10 +231,10 @@ export class AdminController {
     type: GetMediaResponseDto,
   })
   public async getMedias(
-    @Query() body: { limit, page },
+    @Query() body: { limit?: number; page?: number; },
   ): Promise<any> {
-    const limit = Math.max(1, body.limit)
-    const offset = limit * (Math.max(1, body.page) - 1);
+    const limit = Math.max(1, body.limit ?? 1)
+    const offset = limit * (Math.max(1, body.page ?? 1) - 1);
     const mediasResponse: any =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all',
