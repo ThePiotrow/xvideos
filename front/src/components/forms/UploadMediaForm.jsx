@@ -36,7 +36,7 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
         toggleModal("upload");
       })
       .catch((error) => {
-        console.log("Error from server:", error);
+        console.log(error);
         toast.error("Un problème est survenu !");
         setLoading(false);
       });
@@ -116,7 +116,10 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
             {!loading && "Ajouter"}
             {loading && (
               <span>
-                <FontAwesomeIcon className="z-30 text-lg self-start mr-2 animate-spin" icon={faCircleNotch} />
+                <FontAwesomeIcon
+                  className="z-30 text-lg self-start mr-2 animate-spin"
+                  icon={faCircleNotch}
+                />
                 Ajout en cours
               </span>
             )}

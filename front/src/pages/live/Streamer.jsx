@@ -64,16 +64,10 @@ function Streamer() {
   }, [token, navigate]);
 
   useEffect(() => {
-    console.log(users);
-  }, [users]);
-
-  useEffect(() => {
     API.get("/users/me")
       .then((response) => {
         const currentLive = response.data?.user?.live;
         localUser.current = response.data?.user;
-
-        console.log(response.data.user);
 
         if (currentLive?.start_time) {
           const elapsedTime = formatDuration(

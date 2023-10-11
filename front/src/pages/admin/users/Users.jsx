@@ -12,7 +12,6 @@ function Users() {
   const getUSers = async () => {
     API.get("/users")
       .then((response) => {
-        console.log(response.data.users)
         setUsers(response.data.users);
       })
       .catch((error) => {
@@ -179,22 +178,25 @@ function Users() {
 
                         <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                           <div
-                            className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${_user.is_confirmed
-                              ? "bg-emerald-600/60"
-                              : "bg-red-400/40"
-                              }`}
+                            className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
+                              _user.is_confirmed
+                                ? "bg-emerald-600/60"
+                                : "bg-red-400/40"
+                            }`}
                           >
                             <span
-                              className={`h-1.5 w-1.5 rounded-full ${_user.is_confirmed
-                                ? "bg-emerald-500"
-                                : "bg-red-500"
-                                }`}
+                              className={`h-1.5 w-1.5 rounded-full ${
+                                _user.is_confirmed
+                                  ? "bg-emerald-500"
+                                  : "bg-red-500"
+                              }`}
                             ></span>
                             <h2
-                              className={`text-sm font-normal ${_user.is_confirmed
-                                ? "text-emerald-500"
-                                : "text-red-500"
-                                }`}
+                              className={`text-sm font-normal ${
+                                _user.is_confirmed
+                                  ? "text-emerald-500"
+                                  : "text-red-500"
+                              }`}
                             >
                               {_user.is_confirmed ? "Actif" : "Inactif"}
                             </h2>
