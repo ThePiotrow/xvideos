@@ -263,7 +263,7 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
       onMouseMove={() => toggleControlsVisibility(true)}
       onDoubleClick={toggleFullscreen}
     >
-      <video ref={videoRef} poster={thumbnail} width="100%" height="100%" crossOrigin='anonymous' className='aspect-video z-10' />
+      <video ref={videoRef} poster={thumbnail} width="100%" height="100%" crossOrigin='anonymous' className='aspect-video z-10' playsInline={true} />
 
       <div className={`video-controls z-50 absolute bottom-0 right-0 left-0 w-full p-3 flex flex-col group bg-gradient-to-t from-black/80 pt-24 duration-500 ${isControlsVisible ?
         'visible opacity-100' : 'opacity-0 bottom-[-50px]'} ${styles.fadeEffect}`}>

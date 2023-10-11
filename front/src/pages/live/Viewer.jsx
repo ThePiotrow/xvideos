@@ -85,7 +85,7 @@ function Viewer() {
     } catch (e) {
       console.error(`getUserMedia error: ${e}`);
     }
-  }, []);
+  }, [live.id]);
 
 
   const createPeerConnection = useCallback(
@@ -114,7 +114,7 @@ function Viewer() {
 
   useEffect(() => {
     socketRef.current = io.connect(
-      `wss://${process.env.VITE_BASE_URI}:${process.env.VITE_API_GATEWAY_PORT}`,
+      `wss://api.webdealer.fr:3000`,
       {
         query: {
           token: token ?? null

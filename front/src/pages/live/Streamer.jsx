@@ -135,6 +135,7 @@ function Streamer() {
           dayjs(dayjs()).diff(currentLive.start_time, "seconds")
         );
         setLive({ ...currentLive, elapsedTime });
+        window.location.reload();
       })
       .catch((error) => {
         console.error("Erreur lors du lancement du live", error);
@@ -148,6 +149,8 @@ function Streamer() {
       room: localUser.current.username,
       live_id: live.id,
     });
+
+    window.location.reload();
   };
 
   const getLocalStream = useCallback(async () => {
@@ -205,7 +208,7 @@ function Streamer() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io.connect(`wss://${import.meta.env.VITE_BASE_URI}:${import.meta.env.VITE_API_GATEWAY_PORT}`, {
+    socketRef.current = io.connect(`wss://api.webdealer.fr:3000`, {
       query: {
         token: token ?? null,
       },
@@ -404,8 +407,8 @@ function Streamer() {
             </div>
           </div>
 
-          <div className="min-w-[400px] bg-slate-800 rounded-xl flex flex-col">
-            <div className="flex basis-14 rounded-t-xl items-center px-4 border-b border-slate-600">
+          <div className="min-w-[400px] bg-slate-800 rounded-xl flex flex-col 2xl:-mx-4 mt-4 gap-6">
+            <div className="flex basis-14 rounded-t-xl items-center  py-4 px-4 border-b border-slate-600">
               <h2 className="font-semibold">Chat</h2>
             </div>
             <div
@@ -415,7 +418,7 @@ function Streamer() {
               {messages.map((message, index) => (
                 <div
                   key={index}
-                  className="flex flex-col w-full px-4 pt-2 pb-3 bg-slate-300/20 gap-2 rounded-lg shadow-xl"
+                  className="flex flex-col w-full  py-4 px-4 pb-3 bg-slate-300/20 gap-2 rounded-lg shadow-xl"
                 >
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">@{message.username}</p>
@@ -423,7 +426,7 @@ function Streamer() {
                       {dayjs(message.timestamp).format("HH:mm")}
                     </p>
                   </div>
-                  <p className="text-sm pl-2">{message.message}</p>
+                  <p className="text-sm pl-2 break-words">{message.message}</p>
                 </div>
               ))}
             </div>
@@ -469,20 +472,20 @@ function Streamer() {
             <div className="flex flex-col bg-slate-800 rounded-xl 2xl:-mx-4 mt-4 py-4 px-4 gap-6">
               <h3 className="font-semibold text-white">Actions</h3>
               <div className="gap-x-5 flex self-center">
-                {!live?.id && (
-                  <button
-                    type="button"
-                    onClick={handleLiveStart}
-                    disabled={!title}
-                    className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
-                  >
-                    <FontAwesomeIcon
-                      className="text-sm pt-[2px]"
-                      icon={fasPlay}
-                    />
-                    <span>Lancer</span>
-                  </button>
-                )}
+
+                <button
+                  type="button"
+                  onClick={handleLiveStart}
+                  disabled={!title || live?.id}
+                  className="w-full flex gap-2 items-center px-5 py-3 disabled:bg-green-700/30 disabled:text-white/30 disabled:cursor-not-allowed border-none focus:border-none outline-none focus:outline-none leading-5 text-white transition-colors duration-300 transform bg-green-700 rounded-lg hover:bg-green-600 focus:bg-green-600"
+                >
+                  <FontAwesomeIcon
+                    className="text-sm pt-[2px]"
+                    icon={fasPlay}
+                  />
+                  <span>Lancer</span>
+                </button>
+
 
                 <button
                   type="button"
