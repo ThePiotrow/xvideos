@@ -31,24 +31,18 @@
         const socket = io('ws://localhost:3000');
 
         socket.emit('live.viewer.connect', { streamer: 'admin' }, (data) => {
-            console.log(data)
         })
         socket.on('live.viewer.connect', (data) => {
-            console.log(data)
         })
 
         socket.on('connect', () => {
-            console.log('Connected to the server');
         });
         socket.on('disconnect', (reason) => {
-            console.log('Disconnected from the server:', reason);
         });
         socket.on('connect_error', (error) => {
-            console.error('Connect error:', error);
         });
 
         socket.on('live.stream', ({ stream }) => {
-            console.log(stream)
             const blob = new Blob([stream], { type: "video/webm" });  // Convert ArrayBuffer to Blob
             const url = URL.createObjectURL(blob);  // Convert Blob to Object URL
 

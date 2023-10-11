@@ -81,7 +81,6 @@
                 return;
 
             socket.on('nb_viewers', (data) => {
-                console.log('data', data.value)
                 document.getElementById("nbViewers").innerHTML = data.value;
             });
 
@@ -126,7 +125,6 @@
                 mediaRecorder.onstop = () => {
                     let audioBlob = new Blob(audioBuffer, { type: 'audio/wav' });
                     let audioUrl = URL.createObjectURL(audioBlob);
-                    console.log(audioUrl);
                     fetch(audioUrl)
                         .then(res => res.arrayBuffer())
                         .then(buffer => {

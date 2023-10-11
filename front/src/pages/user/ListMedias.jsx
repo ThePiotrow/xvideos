@@ -56,7 +56,6 @@ function ListMedias() {
     if (!user) return;
     API.get(`/users/me/medias?limit=${limit}&page=${page}`)
       .then((response) => {
-        console.log(response.data.total)
         setMedias(response.data?.user?.medias.sort((a, b) => a.created_at - b.created_at));
         setPages(Math.ceil(response.data.total / limit));
         setTotal(response.data.total);
