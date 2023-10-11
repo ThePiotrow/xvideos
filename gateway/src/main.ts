@@ -25,7 +25,7 @@ async function bootstrap() {
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('api', app, document);
+  // SwaggerModule.setup('api', app, document);
   await app.listen(new ConfigService().get('port'));
   app.use(compression());
 }

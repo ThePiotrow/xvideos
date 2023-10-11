@@ -33,11 +33,11 @@ jobs:
           REMOTE_HOST: ${{ secrets.EC2_HOST }}
           REMOTE_USER: ${{ secrets.EC2_USER }}
           TARGET: "/home/ubuntu"
-          EXCLUDE: "/dist/, /node_modules/, /db/"
+          EXCLUDE: "/dist/, /node_modules/, /db/, /front/, /.github/, /.git/, /.gitignore"
           SCRIPT_BEFORE: |
             cd /home/ubuntu
-            # source ~/.nvm/nvm.sh
-            # /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 stop all
+            docker compose down
+
           SCRIPT_AFTER: |
             cd /home/ubuntu
             echo "${{ secrets.ENV }}" > .env
@@ -47,6 +47,3 @@ jobs:
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem
             chmod 666 ~/gateway/secrets/private-key.pem
-            # make build
-            # source ~/.nvm/nvm.sh
-            # /home/ubuntu/.nvm/versions/node/v18.18.0/bin/pm2 start all
