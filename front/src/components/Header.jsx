@@ -63,7 +63,7 @@ export default function Header({
                   x-cloak="true"
                   onClick={() => setIsOpen(!isOpen)}
                   type="button"
-                  className="text-slate-500 dark:text-slate-200 hover:text-slate-600 dark:hover:text-slate-400 focus:outline-none focus:text-slate-600 dark:focus:text-slate-400"
+                  className="text-slate-200 hover:text-slate-400 focus:outline-none focus:text-slate-400"
                   aria-label="toggle menu"
                 >
                   <svg
