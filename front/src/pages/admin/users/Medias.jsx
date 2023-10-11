@@ -60,13 +60,13 @@ function Medias() {
       <div className="flex flex-col mt-6">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+            <div className="overflow-hidden border border-gray-700 md:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-700">
+                <thead className="bg-gray-800">
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="py-3.5 px-4 text-sm font-normal text-left text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
                         <span>Nom du fichier</span>
@@ -75,28 +75,28 @@ function Medias() {
 
                     <th
                       scope="col"
-                      className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="px-12 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Durée
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Date d'ajout
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Dernière modification
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-500 dark:text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Ajouter par
                     </th>
@@ -106,21 +106,21 @@ function Medias() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-gray-700 bg-gray-900">
                   {medias.map((media) => (
                     <tr key={media.id}>
                       <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                         <div className="inline-flex items-center gap-x-3">
                           <div className="flex items-center gap-x-2">
-                            <div className="flex items-center justify-center w-8 h-8 text-blue-500 bg-blue-100 rounded-full dark:bg-gray-800">
+                            <div className="flex items-center justify-center w-8 h-8 text-blue-500 rounded-full bg-gray-800">
                               <MediaIcon type={media.type} />
                             </div>
 
                             <div>
-                              <h2 className="font-normal text-gray-800 dark:text-white ">
+                              <h2 className="font-normal text-white ">
                                 {media.title}
                               </h2>
-                              <p className="text-xs font-normal text-gray-500 dark:text-gray-400">
+                              <p className="text-xs font-normal text-gray-400">
                                 {media.description
                                   ? media.description
                                       .split(" ")
@@ -137,13 +137,13 @@ function Medias() {
                           ? formatDuration(media.duration)
                           : "N/A"}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                      <td className="px-4 py-4 text-sm text-gray-300 whitespace-nowrap">
                         {dayjs(media.created_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                      <td className="px-4 py-4 text-sm text-gray-300 whitespace-nowrap">
                         {dayjs(media.updated_at).format("DD/MM/YYYY HH:mm:ss")}
                       </td>
-                      <td className="px-4 py-4 text-sm text-gray-500 dark:text-gray-300 whitespace-nowrap">
+                      <td className="px-4 py-4 text-sm text-gray-300 whitespace-nowrap">
                         {media.user.username}
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
@@ -169,7 +169,7 @@ function Medias() {
         <div className="flex items-center justify-between mt-6">
           <Link
             to={`?page=${page - 1}`}
-            className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+            className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
           >
             <LeftArrow />
             <span>précédent</span>
@@ -178,7 +178,7 @@ function Medias() {
           <div className="items-center hidden md:flex gap-x-3">
             <a
               href="#"
-              className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
+              className="px-2 py-1 text-sm text-blue-500 rounded-md bg-gray-800"
             >
               Page {page} / {totalPages}
             </a>
@@ -186,7 +186,7 @@ function Medias() {
 
           <Link
             to={`?page=${page + 1}`}
-            className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+            className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
           >
             <span>Suivant</span>
             <RightArrow />

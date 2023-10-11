@@ -85,7 +85,7 @@ function Lives() {
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right text-gray-400"
+                      className="py-3.5 px-4 text-sm font-normal text-left text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
                         <span>Titre du live</span>
@@ -94,28 +94,28 @@ function Lives() {
 
                     <th
                       scope="col"
-                      className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-400"
+                      className="px-12 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Durée
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Commencé à
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Arrêté à
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-gray-400"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-gray-400"
                     >
                       Streamer
                     </th>
@@ -125,7 +125,7 @@ function Lives() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 divide-gray-700 bg-gray-900">
+                <tbody className="divide-y divide-gray-200 divide-gray-700 bg-gray-900">
                   {lives.map((live) => (
                     <tr key={live.id}>
                       <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
@@ -203,7 +203,7 @@ function Lives() {
           <div className="items-center hidden md:flex gap-x-3">
             <a
               href="#"
-              className="px-2 py-1 text-sm text-blue-500 rounded-md bg-gray-800 bg-blue-100/60"
+              className="px-2 py-1 text-sm text-blue-500 rounded-md bg-gray-800"
             >
               Page {page} / {totalPages}
             </a>

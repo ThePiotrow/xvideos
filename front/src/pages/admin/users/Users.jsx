@@ -77,13 +77,13 @@ function Users() {
       <div className="flex flex-col mt-6">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-gray-200 dark:border-gray-700 md:rounded-lg">
-              <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                <thead className="bg-gray-50 dark:bg-gray-800">
+            <div className="overflow-hidden border border-gray-700 md:rounded-lg">
+              <table className="min-w-full divide-y divide-gray-700">
+                <thead className="bg-gray-800">
                   <tr>
                     <th
                       scope="col"
-                      className="py-3.5 px-4 text-sm font-normal text-left rtl:text-right  text-gray-500 dark:text-gray-400"
+                      className="py-3.5 px-4 text-sm font-normal text-left text-gray-400"
                     >
                       <div className="flex items-center gap-x-3">
                         <span>Name</span>
@@ -92,7 +92,7 @@ function Users() {
 
                     <th
                       scope="col"
-                      className="px-12 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
+                      className="px-12 py-3.5 text-sm font-normal text-left text-slate-500"
                     >
                       <div className="flex items-center gap-x-2">
                         <span>Status</span>
@@ -127,7 +127,7 @@ function Users() {
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-slate-500"
                     >
                       <div className="flex items-center gap-x-2">
                         <span>Role</span>
@@ -151,27 +151,27 @@ function Users() {
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-slate-500"
                     >
                       Email address
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-slate-500"
                     >
                       Teams
                     </th>
 
                     <th
                       scope="col"
-                      className="px-4 py-3.5 text-sm font-normal text-left rtl:text-right text-slate-500"
+                      className="px-4 py-3.5 text-sm font-normal text-left text-slate-500"
                     >
                       Edit
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200 dark:divide-gray-700 dark:bg-gray-900">
+                <tbody className="divide-y divide-gray-700 bg-gray-900">
                   {users.map((_user) => {
                     return (
                       <tr key={_user.id}>
@@ -184,7 +184,7 @@ function Users() {
                                 alt=""
                               ></img>
                               <div>
-                                <h2 className="font-normal text-gray-800 dark:text-white">
+                                <h2 className="font-normal text-white">
                                   @{_user.username}
                                 </h2>
                               </div>
@@ -251,7 +251,7 @@ function Users() {
       <div className="flex items-center justify-between mt-6">
         <Link
           to={`?page=${page - 1}`}
-          className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
         >
           <LeftArrow />
           <span>précédent</span>
@@ -260,7 +260,7 @@ function Users() {
         <div className="items-center hidden md:flex gap-x-3">
           <a
             href="#"
-            className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
+            className="px-2 py-1 text-sm text-blue-500 rounded-md bg-gray-800"
           >
             Page {page} / {totalPages}
           </a>
@@ -268,7 +268,7 @@ function Users() {
 
         <Link
           to={`?page=${page + 1}`}
-          className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
+          className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-gray-900 text-gray-200 border-gray-700 hover:bg-gray-800"
         >
           <span>Suivant</span>
           <RightArrow />
