@@ -54,16 +54,15 @@ function MediaViewer() {
           ) : (
             <p>Format non pris en charge</p>
           )}
-
-          <h2 className="mt-5 text-2xl font-medium text-gray-100">
+          <h2 className="mt-5 text-2xl font-medium text-slate-100">
             {media.title}
           </h2>
           {media.user && (
-            <p className="mt-4 text-gray-600">
+            <p className="mt-4 text-slate-600">
               Publié par : {media.user.username}
             </p>
           )}
-          <p className="mt-2 text-gray-500">{media.description}</p>
+          <p className="mt-2 text-slate-500">{media.description}</p>
         </>
       ) : (
         <p>Ce Média n'est pas disponible...</p>
