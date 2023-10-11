@@ -88,7 +88,6 @@ export class MediasController {
           isConfirmed: true,
         }),
       );
-    Math.ceil(total / limit)
     return {
       message: mediasResponse.message,
       data: {
