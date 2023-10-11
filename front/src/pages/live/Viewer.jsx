@@ -114,7 +114,7 @@ function Viewer() {
 
   useEffect(() => {
     socketRef.current = io.connect(
-      "wss://13.38.18.223:3000",
+      `wss://${process.env.VITE_BASE_URI}:${process.env.VITE_API_GATEWAY_PORT}`,
       {
         query: {
           token: token ?? null

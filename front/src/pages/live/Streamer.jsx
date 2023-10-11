@@ -205,7 +205,7 @@ function Streamer() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io.connect("wss://13.38.18.223:3000", {
+    socketRef.current = io.connect(`wss://${process.env.VITE_BASE_URI}:${process.env.VITE_API_GATEWAY_PORT}`, {
       query: {
         token: token ?? null,
       },
