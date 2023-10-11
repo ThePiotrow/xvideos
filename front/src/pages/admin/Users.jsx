@@ -196,25 +196,22 @@ function Users() {
 
                           <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                             <div
-                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
-                                _user.is_confirmed
+                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${_user.is_confirmed
                                   ? "bg-emerald-600/60"
                                   : "bg-red-400/40"
-                              }`}
+                                }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  _user.is_confirmed
+                                className={`h-1.5 w-1.5 rounded-full ${_user.is_confirmed
                                     ? "bg-emerald-500"
                                     : "bg-red-500"
-                                }`}
+                                  }`}
                               ></span>
                               <h2
-                                className={`text-sm font-normal ${
-                                  _user.is_confirmed
+                                className={`text-sm font-normal ${_user.is_confirmed
                                     ? "text-emerald-500"
                                     : "text-red-500"
-                                }`}
+                                  }`}
                               >
                                 {_user.is_confirmed ? "Actif" : "Inactif"}
                               </h2>
@@ -234,11 +231,10 @@ function Users() {
                               {_user.id !== user.id && (
                                 <button
                                   onClick={() => toggleBlock(_user)}
-                                  className={`transition-colors duration-200 focus:outline-none ${
-                                    _user.is_confirmed
+                                  className={`transition-colors duration-200 focus:outline-none ${_user.is_confirmed
                                       ? "text-red-500"
                                       : "text-emerald-500"
-                                  }`}
+                                    }`}
                                 >
                                   {_user.is_confirmed ? (
                                     <FontAwesomeIcon icon={faBan} />
@@ -264,7 +260,7 @@ function Users() {
             className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-slate-900 text-slate-200 border-slate-700 hover:bg-slate-800"
           >
             <LeftArrow />
-            <span>précédent</span>
+            <span>Précédent</span>
           </Link>
 
           <div className="items-center hidden md:flex gap-x-3">

@@ -141,9 +141,9 @@ function Medias() {
                                 <p className="text-xs font-normal text-slate-400">
                                   {media.description
                                     ? media.description
-                                        .split(" ")
-                                        .splice(0, 5)
-                                        .join(" ") + "..."
+                                      .split(" ")
+                                      .splice(0, 5)
+                                      .join(" ") + "..."
                                     : "N/A"}
                                 </p>
                               </div>
@@ -171,11 +171,10 @@ function Medias() {
                         <td className="px-4 py-4 text-sm whitespace-nowrap">
                           <button
                             onClick={() => toggleBlock(media)}
-                            className={`text-slate-500 transition-colors duration-200 ${
-                              media.is_deleted
+                            className={`text-slate-500 transition-colors duration-200 ${media.is_deleted
                                 ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
                                 : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
-                            }
+                              }
                             focus:outline-none`}
                           >
                             {!media.is_deleted ? "Supprimer" : "Récupérer"}
@@ -194,7 +193,7 @@ function Medias() {
               className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-slate-900 text-slate-200 border-slate-700 hover:bg-slate-800"
             >
               <LeftArrow />
-              <span>précédent</span>
+              <span>Précédent</span>
             </Link>
 
             <div className="items-center hidden md:flex gap-x-3">

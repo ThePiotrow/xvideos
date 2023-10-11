@@ -217,7 +217,7 @@ function Lives() {
               className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-slate-900 text-slate-200 border-slate-700 hover:bg-slate-800"
             >
               <LeftArrow />
-              <span>précédent</span>
+              <span>Précédent</span>
             </Link>
 
             <div className="items-center hidden md:flex gap-x-3">

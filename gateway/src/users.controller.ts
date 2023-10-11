@@ -362,7 +362,7 @@ export class UsersController {
           ...userResponse.user,
           medias: mediaResponse.medias
         },
-        total: mediaResponse.total,
+        total: mediaResponse.length,
       },
       errors: null,
     };

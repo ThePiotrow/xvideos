@@ -1,6 +1,6 @@
 //import React from "react";
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import API from "../../api";
 import { useAuth } from "../../contexts/authContext";
 import { toast } from "react-toastify";
@@ -22,6 +22,11 @@ import {
   faTrashAlt,
 } from "@fortawesome/free-solid-svg-icons";
 
+function useQuery() {
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+}
+
 function ListMedias() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
@@ -33,6 +38,11 @@ function ListMedias() {
     delete: false,
     update: false,
   });
+  const query = useQuery();
+  const page = Number(query.get("page")) || 1;
+  const [total, setTotal] = useState(0);
+  const [pages, setPages] = useState(0);
+  const [limit, setLimit] = useState(10);
 
   const toggleModal = (modalId) => {
     setSelectMediaId(null);
@@ -44,19 +54,20 @@ function ListMedias() {
 
   const fetchMedias = () => {
     if (!user) return;
-    API.get(`/users/me/medias`)
+    API.get(`/users/me/medias?limit=${limit}&page=${page}`)
       .then((response) => {
-        setMedias(response.data?.user?.medias);
+        console.log(response.data)
+        setMedias(response.data?.user?.medias.sort((a, b) => a.created_at - b.created_at));
+        setPages(Math.ceil(response.data.total / limit));
       })
       .catch((error) => {
         toast.error("Erreur lors de la récupération des médias");
-        console.error(error);
       });
   };
 
   useEffect(() => {
     fetchMedias();
-  }, [token, navigate, user]);
+  }, [query, limit]);
 
   const restoreMedia = (mediaId) => {
     API.put(`/medias/${mediaId}`, { is_deleted: false })
@@ -69,7 +80,6 @@ function ListMedias() {
       })
       .catch((error) => {
         toast.error("Erreur lors de la restauration du média");
-        console.error(error);
       });
   };
 
@@ -79,6 +89,20 @@ function ListMedias() {
         <h2 className="text-lg font-medium text-white">Mes médias</h2>
 
         <div className="flex items-center mt-4 gap-x-3">
+          <div className="relative flex items-center gap-x-3 justify-between mt-5">
+            <span className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full">
+              {medias.length} / {total} utilisateurs
+            </span>
+            <select
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+              className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full"
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="20">20</option>
+            </select>
+          </div>
           <button
             onClick={() => toggleModal("upload")}
             className="flex items-center justify-center w-1/2 px-5 py-2 text-sm tracking-wide text-white transition-colors duration-200 bg-blue-500 rounded-lg sm:w-auto gap-x-2 hover:bg-blue-600 hover:bg-blue-500 bg-blue-800"
@@ -92,9 +116,9 @@ function ListMedias() {
       <div className="flex flex-col mt-6">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-            <div className="overflow-hidden border border-slate-200 border-slate-700 md:rounded-lg">
-              <table className="min-w-full divide-y divide-slate-200 divide-slate-700">
-                <thead className="bg-slate-50 bg-slate-800">
+            <div className="overflow-hidden border border-slate-700 md:rounded-lg">
+              <table className="min-w-full divide-y divide-slate-700">
+                <thead className="bg-slate-800">
                   <tr>
                     <th
                       scope="col"
@@ -166,9 +190,9 @@ function ListMedias() {
                                   <p className="text-xs font-normal text-slate-400">
                                     {media.description
                                       ? media.description
-                                          .split(" ")
-                                          .splice(0, 5)
-                                          .join(" ") + "..."
+                                        .split(" ")
+                                        .splice(0, 5)
+                                        .join(" ") + "..."
                                       : "N/A"}
                                   </p>
                                 </div>
@@ -178,25 +202,22 @@ function ListMedias() {
 
                           <td className="px-12 py-4 text-sm font-medium text-slate-700 whitespace-nowrap">
                             <div
-                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${
-                                !media.is_deleted
-                                  ? "bg-emerald-600/60"
-                                  : "bg-red-400/40"
-                              }`}
+                              className={`inline-flex items-center px-3 py-1 rounded-full gap-x-2 ${!media.is_deleted
+                                ? "bg-emerald-600/60"
+                                : "bg-red-400/40"
+                                }`}
                             >
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  !media.is_deleted
-                                    ? "bg-emerald-500"
-                                    : "bg-red-500"
-                                }`}
+                                className={`h-1.5 w-1.5 rounded-full ${!media.is_deleted
+                                  ? "bg-emerald-500"
+                                  : "bg-red-500"
+                                  }`}
                               ></span>
                               <h2
-                                className={`text-sm font-normal ${
-                                  !media.is_deleted
-                                    ? "text-emerald-500"
-                                    : "text-red-500"
-                                }`}
+                                className={`text-sm font-normal ${!media.is_deleted
+                                  ? "text-emerald-500"
+                                  : "text-red-500"
+                                  }`}
                               >
                                 {!media.is_deleted
                                   ? "En ligne"
@@ -231,11 +252,10 @@ function ListMedias() {
                                   setSelectMediaId(media.id);
                                 } else restoreMedia(media.id);
                               }}
-                              className={`text-slate-500 transition-colors duration-200 ${
-                                media.is_deleted
-                                  ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
-                                  : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
-                              }
+                              className={`text-slate-500 transition-colors duration-200 ${media.is_deleted
+                                ? "bg-green-600 text-white hover:bg-green-500 hover:text-white "
+                                : "bg-red-600 text-white hover:bg-red-500 hover:text-white "
+                                }
                                 focus:outline-none`}
                             >
                               {!media.is_deleted ? (
@@ -283,30 +303,27 @@ function ListMedias() {
       </div>
 
       <div className="flex items-center justify-between mt-6">
-        <a
-          href="#"
+        <Link
+          to={`?page=${Math.max(1, page - 1)}`}
           className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-slate-900 text-slate-200 border-slate-700 hover:bg-slate-800"
         >
           <LeftArrow />
-          <span>précédent</span>
-        </a>
+          <span>Précédent</span>
+        </Link>
 
         <div className="items-center hidden md:flex gap-x-3">
-          <a
-            href="#"
-            className="px-2 py-1 text-sm text-blue-500 rounded-md bg-slate-800 bg-blue-100/60"
-          >
-            1
-          </a>
+          <span className="px-2 py-1 text-sm text-blue-500 rounded-md bg-slate-800">
+            Page {page} / {pages}
+          </span>
         </div>
 
-        <a
-          href="#"
+        <Link
+          to={`?page=${Math.min(pages, page + 1)}`}
           className="flex items-center px-5 py-2 text-sm capitalize transition-colors duration-200 border rounded-md gap-x-2 bg-slate-900 text-slate-200 border-slate-700 hover:bg-slate-800"
         >
           <span>Suivant</span>
           <RightArrow />
-        </a>
+        </Link>
       </div>
 
       {/* MODAL ADD */}

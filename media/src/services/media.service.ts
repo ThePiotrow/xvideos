@@ -460,7 +460,9 @@ export class MediaService {
     }
   }
 
-  public async count() {
-    return await this.mediaModel.countDocuments({}).exec();
+  public async count({ user_id }: { user_id?: string }) {
+    return await this.mediaModel.countDocuments({
+      user_id: user_id ? new mongoose.Types.ObjectId(user_id) : { $exists: true }
+    }).exec();
   }
 }

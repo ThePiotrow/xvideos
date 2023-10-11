@@ -250,7 +250,7 @@ export class MediaController {
         isConfirmed: params.isConfirmed ?? true,
         userId: params.userId ?? null,
       });
-      const total = await this.mediaService.count()
+      const total = await this.mediaService.count({ user_id: params.userId ?? null })
       return {
         status: HttpStatus.OK,
         message: '✅ Medias found',
