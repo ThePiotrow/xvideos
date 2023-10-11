@@ -47,7 +47,7 @@ function MediaViewer() {
             />
           ) : media.type === "image" ? (
             <img
-              className="w-full rounded-lg"
+              className="max-h-96 rounded-lg mx-auto"
               src={media.urls.original}
               alt={media.title}
             />
