@@ -131,7 +131,7 @@ export class UserService {
     }
   }
 
-  async searchUserAll({ all, limit, offset, is_deleted, media }: { all?: boolean, limit: number; offset: number; is_deleted?: boolean, media?: boolean }): Promise<IUser[]> {
+  async searchUserAll({ all, limit, offset, is_deleted }: { all?: boolean, limit: number; offset: number; is_deleted?: boolean }): Promise<IUser[]> {
 
     const match = (all ?? false) ?
       {
@@ -139,8 +139,6 @@ export class UserService {
       {
         is_deleted: is_deleted ?? false,
       };
-
-    media = media ?? false;
 
     let pipeline: any[] = [
       {
@@ -206,30 +204,6 @@ export class UserService {
       }
 
     ];
-
-    const project = media ?
-      {
-        _id: 0,
-        id: 1,
-        username: 1,
-        email: 1,
-        is_confirmed: 1,
-        role: 1,
-        live: 1,
-        media: 1
-      } :
-      {
-        id: 1,
-        username: 1,
-        email: 1,
-        is_confirmed: 1,
-        role: 1,
-        live: 1
-      };
-
-    pipeline.push({
-      $project: project
-    });
 
     pipeline.push(
       {
