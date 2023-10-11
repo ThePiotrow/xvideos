@@ -195,11 +195,11 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
     e.stopPropagation();
 
     try {
-      if (!document.fullscreenElement) {
-        const requestFullscreen = videoContainerRef.current.requestFullscreen || videoContainerRef.current.webkitRequestFullscreen || videoContainerRef.current.mozRequestFullScreen || videoContainerRef.current.msRequestFullscreen;
-        await requestFullscreen.call(videoContainerRef.current);
+      if (!document.fullscreenElement && !document.webkitIsFullScreen) {
+        const requestFullscreen = videoRef.current.requestFullscreen || videoRef.current.webkitEnterFullScreen;
+        await requestFullscreen.call(videoRef.current);
       } else {
-        const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.webkitCancelFullScreen;
         await exitFullscreen.call(document);
       }
     } catch (error) {
