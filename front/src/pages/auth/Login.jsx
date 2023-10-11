@@ -55,7 +55,7 @@ function Login() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="current-password"
-              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
             />
           </div>
 
@@ -73,7 +73,7 @@ function Login() {
               placeholder="*********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
             />
           </div>
 

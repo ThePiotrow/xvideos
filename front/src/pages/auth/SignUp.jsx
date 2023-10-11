@@ -61,7 +61,7 @@ function SignUp() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="current-password"
-              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
             />
           </div>
           <div className="flex flex-col gap-3 w-full">
@@ -75,7 +75,7 @@ function SignUp() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="current-password"
-              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
             />
           </div>
 
@@ -91,13 +91,13 @@ function SignUp() {
               placeholder="*********"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+              className="block text-lg font-semibold w-full px-4 py-2 rounded-lg bg-slate-700 text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
             />
           </div>
 
           <div className="flex flex-col gap-3 w-full mt-4">
             <div>
-              <button className=" px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600">S'inscrire</button>
+              <button className=" px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-slate-700 rounded-md hover:bg-slate-600 focus:outline-none focus:bg-slate-600">S'inscrire</button>
             </div>
             <a
               href="/login"
@@ -114,7 +114,7 @@ function SignUp() {
           <div className="fixed z-10 inset-0 overflow-y-auto">
             <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div className="fixed inset-0 transition-opacity">
-                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+                <div className="absolute inset-0 bg-slate-500 opacity-75"></div>
               </div>
 
               <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
@@ -123,16 +123,16 @@ function SignUp() {
                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                   <div className="sm:flex sm:items-start">
                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900">Compte actif !</h3>
+                      <h3 className="text-lg leading-6 font-medium text-slate-900">Compte actif !</h3>
                       <div className="mt-2">
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-slate-500">
                           Il s'agit d'un projet étudiant, vous pouvez vous connecter avec votre compte.
                         </p>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                <div className="bg-slate-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button onClick={handleCloseModal} className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
                     J'ai compris
                   </button>

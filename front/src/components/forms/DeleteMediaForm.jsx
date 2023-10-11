@@ -25,19 +25,19 @@ function DeleteMediaForm({ toggleModal, fetchMedias, selectedMediaId }) {
 
   return (
     <div>
-      <h2 className="mb-4 text-gray-700 dark:text-gray-200">
+      <h2 className="text-slate-200 text-lg font-bold text-center mt-4 mb-8">
         Voulez-vous vraiment supprimer ce média ?
       </h2>
       <form>
-        <div className="mt-6">
+        <div className="mt-6 flex justify-center gap-6">
+          <button onClick={() => toggleModal("delete")} className="right-0 bg-slate-600">
+            Fermer
+          </button>
           <button
             onClick={handleSubmit}
-            className="mr-5 px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-gray-700 rounded-md hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
+            className="px-8 py-2.5 leading-5 text-white transition-colors duration-300 transform bg-red-700 rounded-md hover:bg-red-600 border-none focus:outline-none focus:bg-red-600"
           >
-            confirmer
-          </button>
-          <button onClick={() => toggleModal("delete")} className="right-0">
-            Fermer
+            Confirmer
           </button>
         </div>
       </form>

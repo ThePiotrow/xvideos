@@ -266,12 +266,12 @@ function Viewer() {
                 ></video>
                 <div className="absolute top-3 left-4 right-4 flex gap-2 items-center justify-between">
                   <h3
-                    className="block text-lg font-semibold px-4 py-2 rounded-lg bg-slate-800/50 backdrop-blur-xl text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+                    className="block text-lg font-semibold px-4 py-2 rounded-lg bg-slate-800/50 backdrop-blur-xl text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
                   >
                     {live.title}
                   </h3>
                   <h3
-                    className="block  font-semibold text-gray-300 border-gray-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
+                    className="block  font-semibold text-slate-300 border-slate-600 focus:ring-blue-300 focus:ring-opacity-40 focus:border-blue-300 focus:outline-none focus:ring"
                   >
                     @{live.username}
                   </h3>
@@ -304,11 +304,11 @@ function Viewer() {
                     className="mb-4 font-semibold text-white"
                   >Périphériques audio</h3>
                   <ul
-                    className="text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-xl dark:bg-slate-700 dark:border-gray-600 dark:text-white"
+                    className="text-sm font-medium text-slate-900 bg-white border border-slate-200 rounded-xl dark:bg-slate-700 dark:border-slate-600 dark:text-white"
                   >
                     {devices.audio.map(device => (
                       <li
-                        className="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600"
+                        className="w-full border-b border-slate-200 rounded-t-lg dark:border-slate-600"
                         key={device.deviceId}>
                         <div
                           className="flex items-center pl-3"
@@ -318,10 +318,10 @@ function Viewer() {
                             disabled={storedAudioDevices.find(stream => stream.deviceId === device.deviceId)}
                             onClick={() => handeStoreSource(device.deviceId, 'audio')}
                             name="audio" id={`pre-${device.deviceId}`}
-                            className="w-6 h-6 text-blue-600 bg-slate-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 focus:ring-1"
+                            className="w-6 h-6 text-blue-600 bg-slate-100 border-slate-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 focus:ring-1"
                           />
                           <label htmlFor={`pre-${device.deviceId}`}
-                            className="w-full py-3 ml-2 text-sm font-medium text-gray-300"
+                            className="w-full py-3 ml-2 text-sm font-medium text-slate-300"
                           >{device.label}</label>
                         </div>
                       </li>
@@ -341,7 +341,7 @@ function Viewer() {
                 <div key={index} className="flex flex-col w-full px-4 pt-2 pb-3 bg-slate-300/20 gap-2 rounded-lg shadow-xl">
                   <div className="flex items-center justify-between">
                     <p className="font-semibold">@{message.username}</p>
-                    <p className="text-xs text-gray-400">{dayjs(message.timestamp).format("HH:mm")}</p>
+                    <p className="text-xs text-slate-400">{dayjs(message.timestamp).format("HH:mm")}</p>
                   </div>
                   <p className="text-sm pl-2">{message.message}</p>
                 </div>

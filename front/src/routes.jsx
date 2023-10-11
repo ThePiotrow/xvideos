@@ -1,10 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/auth/Login";
-import HomePage from "./pages/admin/HomePage";
 import AuthGuard from "./guards/AuthGuard";
 import AdminGuard from "./guards/AdminGuard";
-import Users from "./pages/admin/users/Users";
+import Users from "./pages/admin/Users";
 import useToken from "./hooks/useToken";
 import SignUp from "./pages/auth/SignUp";
 import Live from "./pages/live/Live";
@@ -14,6 +13,8 @@ import MediaViewer from "./pages/medias/MediaViewer";
 import Viewer from "./pages/live/Viewer";
 import Streamer from "./pages/live/Streamer";
 import NotFoundPage from "./pages/NotFoundPage";
+import Medias from "./pages/admin/Medias";
+import Lives from "./pages/admin/Lives";
 
 function AppRoutes() {
   const token = localStorage.getItem("token");
@@ -51,21 +52,31 @@ function AppRoutes() {
 
         {/* IS AUTHENTICATED && IS ADMIN */}
         <Route
-          path="/admin"
-          element={
-            <AuthGuard>
-              <AdminGuard>
-                <HomePage />
-              </AdminGuard>
-            </AuthGuard>
-          }
-        />
-        <Route
           path="/admin/users"
           element={
             <AuthGuard>
               <AdminGuard>
                 <Users />
+              </AdminGuard>
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/medias"
+          element={
+            <AuthGuard>
+              <AdminGuard>
+                <Medias />
+              </AdminGuard>
+            </AuthGuard>
+          }
+        />
+        <Route
+          path="/admin/lives"
+          element={
+            <AuthGuard>
+              <AdminGuard>
+                <Lives />
               </AdminGuard>
             </AuthGuard>
           }

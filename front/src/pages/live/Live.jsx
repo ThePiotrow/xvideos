@@ -53,10 +53,9 @@ function Live() {
           key={live.id}
           onClick={() =>
             navigate(
-              `/live${
-                live.user.username === user?.username
-                  ? ""
-                  : `/${live.user.username}`
+              `/live${live.user.username === user?.username
+                ? ""
+                : `/${live.user.username}`
               }`
             )
           }
@@ -64,7 +63,7 @@ function Live() {
         >
           <div className="relative group-hover:scale-[1.02] duration-500 aspect-video w-full">
             <img
-              className=" bg-gray-300 bg-center bg-cover rounded-xl transition-all aspect-video hover:duration-700 easy-in-out shadow-lg group-hover:shadow-xl object-cover"
+              className=" bg-slate-300 bg-center bg-cover rounded-xl transition-all aspect-video hover:duration-700 easy-in-out shadow-lg group-hover:shadow-xl object-cover"
               src={""}
               preload="metadata"
             />
