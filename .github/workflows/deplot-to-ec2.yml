@@ -50,4 +50,4 @@ jobs:
             mkdir -p ~/media/videos
             mkdir -p ~/media/thumbnails
             docker compose build
-            docker compose up -d
+            docker compose -f docker-compose-ec2.yml up -d

@@ -5,10 +5,11 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./gateway
-            target: production
+            target: development
         restart: always
         volumes:
           - ./gateway:/var/www/gateway
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -20,15 +21,16 @@ services:
             - live
             - token
             - user
- 
+
     media:
         build:
             dockerfile: Dockerfile
             context: ./media
-            target: production
+            target: development
         restart: always
         volumes:
           - ./media:/var/www/media
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -40,10 +42,11 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./live
-            target: production
+            target: development
         restart: always
         volumes:
           - ./live:/var/www/live
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -55,10 +58,11 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./token
-            target: production
+            target: development
         restart: always
         volumes:
           - ./token:/var/www/token
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -70,10 +74,11 @@ services:
         build:
             dockerfile: Dockerfile
             context: ./user
-            target: production
+            target: development
         restart: always
         volumes:
           - ./user:/var/www/user
+        command: npm run start:dev
         env_file:
             - .env
         ports:
@@ -84,3 +89,9 @@ services:
 networks:
     backend:
         driver: bridge
+
+volumes:
+    gateway:
+    media:
+    live:
+    token:
