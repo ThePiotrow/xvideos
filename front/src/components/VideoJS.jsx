@@ -190,30 +190,20 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
     setVolume(newVolume * 1.02 * 100);
   };
 
-  const toggleFullscreen = (e) => {
+  const toggleFullscreen = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    const container = videoContainerRef.current;
-    if (!document.fullscreenElement) {
-      if (container.requestFullscreen) {
-        container.requestFullscreen();
-      } else if (container.mozRequestFullScreen) { /* Firefox */
-        container.mozRequestFullScreen();
-      } else if (container.webkitRequestFullscreen) { /* Chrome, Safari, Opera */
-        container.webkitRequestFullscreen();
-      } else if (container.msRequestFullscreen) { /* IE/Edge */
-        container.msRequestFullscreen();
+
+    try {
+      if (!document.fullscreenElement) {
+        const requestFullscreen = videoContainerRef.current.requestFullscreen || videoContainerRef.current.webkitRequestFullscreen || videoContainerRef.current.mozRequestFullScreen || videoContainerRef.current.msRequestFullscreen;
+        await requestFullscreen.call(videoContainerRef.current);
+      } else {
+        const exitFullscreen = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        await exitFullscreen.call(document);
       }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.mozCancelFullScreen) { /* Firefox */
-        document.mozCancelFullScreen();
-      } else if (document.webkitExitFullscreen) { /* Chrome, Safari, Opera */
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) { /* IE/Edge */
-        document.msExitFullscreen();
-      }
+    } catch (error) {
+      console.error("Failed to toggle fullscreen:", error);
     }
   };
 
