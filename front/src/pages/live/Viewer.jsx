@@ -332,11 +332,11 @@ function Viewer() {
             </div>
 
           </div>
-          <div className="min-w-[400px] bg-slate-800 rounded-xl flex flex-col">
+          <div className="lg:min-w-[400px] bg-slate-800 rounded-xl flex flex-col">
             <div className="flex basis-14 rounded-t-xl items-center px-4 border-b border-slate-600">
               <h2 className="font-semibold">Chat</h2>
             </div>
-            <div ref={chat} className="flex flex-col basis-full max-h-[500px] overflow-y-scroll gap-4 p-3">
+            <div ref={chat} className="flex flex-col basis-full max-h-[500px] min-h-[500px] overflow-y-scroll gap-4 p-3">
               {messages.map((message, index) => (
                 <div key={index} className="flex flex-col w-full px-4 pt-2 pb-3 bg-slate-300/20 gap-2 rounded-lg shadow-xl">
                   <div className="flex items-center justify-between">
