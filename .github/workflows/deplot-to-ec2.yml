@@ -47,3 +47,5 @@ jobs:
             echo "${{ secrets.PRIVATE_KEY }}" > ~/gateway/secrets/private-key.pem
             chmod 666 ~/gateway/secrets/public-certificate.pem
             chmod 666 ~/gateway/secrets/private-key.pem
+            docker compose build
+            docker compose up -d
