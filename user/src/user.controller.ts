@@ -37,6 +37,8 @@ export class UserController {
       }
     );
 
+    console.log("user limit : ", params.limit)
+
 
     if (users) {
       users = users.map((user) => {

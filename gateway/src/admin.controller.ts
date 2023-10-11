@@ -342,6 +342,8 @@ export class AdminController {
         }),
       );
 
+    console.log("user limit : ", limit)
+
     if (usersResponse.status !== HttpStatus.OK) {
       throw new HttpException(
         {
