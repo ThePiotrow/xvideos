@@ -88,8 +88,8 @@ function ListMedias() {
       <div className="sm:flex sm:items-center sm:justify-between">
         <h2 className="text-lg font-medium text-white">Mes médias</h2>
 
-        <div className="flex items-center mt-4 gap-x-3">
-          <div className="relative flex items-center gap-x-3 justify-between mt-5">
+        <div className="flex items-center mt-4 gap-x-3 mt-5">
+          <div className="relative flex items-center gap-x-3 justify-between">
             <span className="px-4 py-2 text-sm text-blue-600 bg-blue-100 rounded-full">
               {medias.length} / {total} utilisateurs
             </span>
