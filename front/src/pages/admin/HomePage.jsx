@@ -15,14 +15,18 @@ function HomePage() {
   const [activeTab, setActiveTab] = useState("users");
   const query = useQuery();
   const { hash } = useLocation();
+  const history = useHistory();
+
+  const resetPage = () => {
+    const newUrl = `${location.pathname}${hash}?page=1`;
+    history.replace(newUrl);
+  };
 
   useEffect(() => {
-    console.log(query);
-    const page = query.get("page") || 1;
-    console.log("page : ", page);
     if (hash.slice(1)) {
       setActiveTab(hash.slice(1));
     }
+    resetPage();
   }, [hash]);
 
   return (

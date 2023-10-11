@@ -1,6 +1,6 @@
 //import React from "react";
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useMemo } from "react";
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import API from "../../../api";
 import { formatDuration } from "../../../utils/mediaUtils";
 import dayjs from "dayjs";
@@ -12,10 +12,20 @@ import { faStopCircle } from "@fortawesome/free-regular-svg-icons";
 import LeftArrow from "../../../components/icons/LeftArrow";
 import RightArrow from "../../../components/icons/RightArrows";
 
+function useQuery() {
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+}
+
 function Lives() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [lives, setLives] = useState([]);
+  const query = useQuery();
+  const page = Number(query.get("page")) || 1;
+  const [total, setTotal] = useState(0);
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(total / itemsPerPage);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -33,7 +43,7 @@ function Lives() {
   }, []);
 
   useEffect(() => {
-    API.get("/admin/lives")
+    API.get(`/admin/lives?page=${page}`)
       .then((response) => {
         const livesWithTime = response.data.lives.map((live) => ({
           ...live,
@@ -42,6 +52,7 @@ function Lives() {
           ),
         }));
         setLives(livesWithTime);
+        setTotal(response.data.total);
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des lives", error);
@@ -181,30 +192,30 @@ function Lives() {
           </div>
         </div>
         <div className="flex items-center justify-between mt-6">
-          <a
-            href="#"
+          <Link
+            to={`?page=${page - 1}`}
             className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
           >
             <LeftArrow />
             <span>précédent</span>
-          </a>
+          </Link>
 
           <div className="items-center hidden md:flex gap-x-3">
             <a
               href="#"
               className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
             >
-              1
+              Page {page} / {totalPages}
             </a>
           </div>
 
-          <a
-            href="#"
+          <Link
+            to={`?page=${page + 1}`}
             className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
           >
             <span>Suivant</span>
             <RightArrow />
-          </a>
+          </Link>
         </div>
       </div>
     </section>

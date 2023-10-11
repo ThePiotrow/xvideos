@@ -1,20 +1,34 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import API from "../../../api";
 import { useAuth } from "../../../contexts/authContext";
 import LeftArrow from "../../../components/icons/LeftArrow";
 import RightArrow from "../../../components/icons/RightArrows";
+import { useLocation, Link } from "react-router-dom";
 
 //import { toast } from "react-toastify";
 //import "react-toastify/dist/ReactToastify.css";
 
+function useQuery() {
+  const { search } = useLocation();
+  return useMemo(() => new URLSearchParams(search), [search]);
+}
+
 function Users() {
   const [users, setUsers] = useState([]);
   const { user, token } = useAuth();
+  const query = useQuery();
+  const page = Number(query.get("page")) || 1;
+  const [total, setTotal] = useState(0);
+  const itemsPerPage = 20;
+  const totalPages = Math.ceil(total / itemsPerPage);
 
   const getUSers = async () => {
     API.get("/admin/users")
       .then((response) => {
+        console.log(total);
         setUsers(response.data.users);
+        setTotal(response.data.total);
+        console.log(total);
       })
       .catch((error) => {
         console.log(error);
@@ -235,30 +249,30 @@ function Users() {
         </div>
       </div>
       <div className="flex items-center justify-between mt-6">
-        <a
-          href="#"
+        <Link
+          to={`?page=${page - 1}`}
           className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
         >
           <LeftArrow />
           <span>précédent</span>
-        </a>
+        </Link>
 
         <div className="items-center hidden md:flex gap-x-3">
           <a
             href="#"
             className="px-2 py-1 text-sm text-blue-500 rounded-md dark:bg-gray-800 bg-blue-100/60"
           >
-            1
+            Page {page} / {totalPages}
           </a>
         </div>
 
-        <a
-          href="#"
+        <Link
+          to={`?page=${page + 1}`}
           className="flex items-center px-5 py-2 text-sm text-gray-700 capitalize transition-colors duration-200 bg-white border rounded-md gap-x-2 hover:bg-gray-100 dark:bg-gray-900 dark:text-gray-200 dark:border-gray-700 dark:hover:bg-gray-800"
         >
           <span>Suivant</span>
           <RightArrow />
-        </a>
+        </Link>
       </div>
     </section>
   );

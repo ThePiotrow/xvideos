@@ -10,6 +10,7 @@ import { IUserUsernameCheckAvailabilityResponse } from './interfaces/user-userna
 import { firstValueFrom } from 'rxjs';
 import { IUserGetAllResponse } from './interfaces/user-get-all-response.interface';
 import { off } from 'process';
+import { totalmem } from 'os';
 
 @Controller('user')
 export class UserController {
@@ -43,11 +44,12 @@ export class UserController {
         delete user.password;
         return user;
       });
-
+      const total = await this.userService.count();
       return {
         status: HttpStatus.OK,
         message: '✅ Users found',
         users,
+        total: total,
       };
     } else {
       return {
