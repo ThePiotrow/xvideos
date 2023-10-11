@@ -248,7 +248,20 @@ function Viewer() {
                   id="video"
                   ref={videoRef}
                   autoPlay={true}
-                  playsInline={true}
+                  controls={{
+                    autoHide: true,
+                    controlsList: "nodownload",
+                    disablePictureInPicture: true,
+                    disableRemotePlayback: true,
+                    hideControls: false,
+                    keyboard: false,
+                    loop: false,
+                    muted: false,
+                    playsinline: true,
+                    showPosterOnEnd: false,
+                    toggleFullscreenOnClick: false,
+                    togglePlayOnClick: false,
+                  }}
                   className="aspect-video w-full bg-black"
                 ></video>
                 <div className="absolute top-3 left-4 right-4 flex gap-2 items-center justify-between">
