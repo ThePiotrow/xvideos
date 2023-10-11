@@ -12,7 +12,7 @@ function Users() {
   const { user, token } = useAuth();
 
   const getUSers = async () => {
-    API.get("/users")
+    API.get("/admin/users")
       .then((response) => {
         setUsers(response.data.users);
       })
