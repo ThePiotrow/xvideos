@@ -39,8 +39,6 @@ export class EventsGateway {
                 };
             }
 
-            console.log('Verified Users', this.verifiedUsers);
-
             if (!this.verifiedUsers[id] || !this.verifiedUsers[id].connected) {
                 const t = await firstValueFrom(
                     this.tokenServiceClient.send('token_decode', {
@@ -137,8 +135,6 @@ export class EventsGateway {
 
             const users = this.users[room];
 
-            console.log(users);
-
             this.server.sockets.to(room).emit('room:users', { username, users, _user: { id: _id, username: _username }, messages: this.messages[room].slice(-100) || [] });
         }
         catch (e) {
@@ -152,7 +148,6 @@ export class EventsGateway {
         @MessageBody() { sdp, offerSendId, offerReceiveId, offerSendUsername }: { sdp: string, offerSendId: string, offerReceiveId: string, offerSendUsername: string },
     ): Promise<any> {
         try {
-            console.log(`[${this.socketRoom[offerSendId]}]: ${offerSendId} offer to ${offerReceiveId}`);
             client.to(offerReceiveId).emit('offer:get', { sdp, offerSendId, offerSendUsername });
         }
         catch (e) {
@@ -166,7 +161,6 @@ export class EventsGateway {
         @MessageBody() { sdp, answerSendId, answerReceiveId }: { sdp: string, answerSendId: string, answerReceiveId: string, },
     ): Promise<any> {
         try {
-            console.log(`[${this.socketRoom[answerSendId]}]: ${answerSendId} answer to ${answerReceiveId}`)
             client.to(answerReceiveId).emit('answer:get', { sdp, answerSendId });
         }
         catch (e) {
@@ -180,7 +174,6 @@ export class EventsGateway {
         @MessageBody() { candidate, candidateSendId, candidateReceiveId }: { candidate: any, candidateSendId: string, candidateReceiveId: string },
     ): Promise<any> {
         try {
-            console.log(`[${this.socketRoom[candidateSendId]}]: ${this.verifiedUsers[candidateSendId]} candidate to ${this.verifiedUsers[candidateReceiveId]}`)
             client.to(candidateReceiveId).emit('candidate:get', { candidate, candidateSendId });
         }
         catch (e) {
@@ -189,7 +182,6 @@ export class EventsGateway {
     }
 
     handleDisconnect(client: Socket) {
-        console.log(`[${this.socketRoom[client.id]}]: ${client.id} disconnect`);
         const roomId = this.socketRoom[client.id];
 
         let room = this.users[roomId];
@@ -211,9 +203,6 @@ export class EventsGateway {
     ) {
         const { _id, _username, _connected } = await this.validateUser(client);
         if (!_connected) return;
-        console.log('Live Message', `
-            [${room}] ${_username}: ${message}
-        `);
         this.messages[room].push({ username: _username, message, timestamp: +new Date() });
         this.server.sockets.to(room).emit('message:receive', { room, message, username: _username, timestamp: +new Date() });
     }
@@ -232,7 +221,6 @@ export class EventsGateway {
                 all: true,
             })
         )
-        console.log('Live Stop', room);
         this.server.sockets.to(room).emit('live:stop', { room, live });
 
 
