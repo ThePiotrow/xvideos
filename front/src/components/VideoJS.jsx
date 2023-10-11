@@ -130,6 +130,8 @@ export const VideoJS = ({ hls, thumbnail, duration }) => {
         }
 
       };
+    } else if (videoRef.current.canPlayType('application/vnd.apple.mpegurl')) {
+      videoRef.current.src = hls;
     }
   }, [hls]);
 
