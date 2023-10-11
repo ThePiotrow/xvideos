@@ -24,7 +24,6 @@ export class UserController {
       offset?: number;
       limit?: number;
       is_deleted?: boolean;
-      media?: boolean;
     }
   ): Promise<IUserGetAllResponse> {
     let users: IUser[] = await this.userService.searchUserAll(
@@ -33,7 +32,6 @@ export class UserController {
         offset: params.offset,
         limit: params.limit,
         is_deleted: params.is_deleted,
-        media: params.media,
       }
     );
 
