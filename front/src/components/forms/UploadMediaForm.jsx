@@ -84,6 +84,7 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
           </div>
           <input
             type="file"
+            accept="image/*,video/*"
             name="media"
             id="media"
             onChange={(e) => setMedia(e.target.files[0])}
@@ -101,6 +102,7 @@ function UploadMediaForm({ toggleModal, fetchMedias }) {
           </div>
           <input
             type="file"
+            accept="image/*"
             name="thumbnail"
             id="thumbnail"
             onChange={(e) => setThumbnail(e.target.files[0])}

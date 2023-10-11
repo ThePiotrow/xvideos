@@ -54,6 +54,7 @@ function MediaViewer() {
           ) : (
             <p>Format non pris en charge</p>
           )}
+
           <h2 className="mt-5 text-2xl font-medium text-gray-100">
             {media.title}
           </h2>
