@@ -21,6 +21,7 @@ export class GetMediasResponseDto {
   })
   data: {
     medias: IMedia[];
+    total?: number;
   };
   @ApiProperty({ example: 'null' })
   errors: { [key: string]: any };

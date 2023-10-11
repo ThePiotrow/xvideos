@@ -377,6 +377,9 @@ export class MediaService {
         is_deleted: is_deleted ?? false,
       };
 
+    console.log("limit : ", limit)
+    console.log("offset : ", offset)
+
     if (userId) {
       match = {
         ...match,
@@ -443,10 +446,10 @@ export class MediaService {
         }
       },
       {
-        $skip: offset
+        $skip: Number(offset)
       },
       {
-        $limit: limit
+        $limit: Number(limit)
       }
     ]).exec();
 
@@ -455,5 +458,9 @@ export class MediaService {
     } else {
       return null;
     }
+  }
+
+  public async count() {
+    return await this.mediaModel.countDocuments({}).exec();
   }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../api";
 import { formatDuration, formatCreatedAt } from "../utils/mediaUtils";
@@ -9,16 +9,35 @@ import dayjs from "dayjs";
 function Home() {
   const navigate = useNavigate();
   const [medias, setMedias] = useState([]);
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 20;
+
+  const handleScroll = useCallback(() => {
+    if (window.innerHeight + window.scrollY >= document.body.offsetHeight) {
+      setPage((page) => page + 1);
+    }
+  }, []);
 
   useEffect(() => {
-    API.get("/medias")
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [handleScroll]);
+
+  useEffect(() => {
+    API.get(`/medias?limit=${itemsPerPage}&page=${page}`)
       .then((response) => {
-        setMedias(response.data?.medias ?? []);
+        setMedias((prevMedia) => [
+          ...prevMedia,
+          ...(response.data?.medias ?? []),
+        ]);
       })
       .catch((error) => {
         console.error("Erreur lors de la récupération des médias", error);
       });
-  }, []);
+  }, [page]);
+
+  console.log("page : ", page);
+  console.log("items par page : ", itemsPerPage);
 
   return (
     <div className="grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 ">
@@ -58,9 +77,7 @@ function Home() {
           <p className="text-slate-200 text-lg font-medium mb-2">
             Aucun média trouvé
           </p>
-          <p className="text-slate-400 text-sm">
-            Revenez plus tard !
-          </p>
+          <p className="text-slate-400 text-sm">Revenez plus tard !</p>
         </div>
       )}
     </div>

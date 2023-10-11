@@ -31,11 +31,13 @@ export class LiveController {
         limit: body.limit ?? 10,
         offset: body.offset ?? 0,
       })
+      const totalDocuments = await this.liveService.count()
 
       return {
         status: HttpStatus.OK,
         message: '✅ Lives found',
-        lives
+        lives,
+        total: totalDocuments,
       }
     }
 

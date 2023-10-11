@@ -353,4 +353,8 @@ export class LiveService {
 
     return await this.findLiveById({ id: live.id, all });
   }
+
+  public async count() {
+    return await this.liveModel.countDocuments();
+  }
 }

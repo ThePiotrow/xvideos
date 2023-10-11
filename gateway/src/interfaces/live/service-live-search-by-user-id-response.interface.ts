@@ -4,4 +4,5 @@ export interface IServiceLiveSearchByUserIdResponse {
   status: number;
   message: string;
   lives: ILive[];
+  total?: number;
 }

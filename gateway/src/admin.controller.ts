@@ -233,8 +233,8 @@ export class AdminController {
   public async getMedias(
     @Query() { limit, page }: any,
   ): Promise<any> {
-    const offset = limit * (page - 1);
-
+    limit = Math.max(0, limit)
+    const offset = limit * (Math.max(1, page) - 1);
     const mediasResponse: any =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all',
@@ -250,6 +250,7 @@ export class AdminController {
       message: mediasResponse.message,
       data: {
         medias: mediasResponse.medias,
+        total: mediasResponse.total,
       },
       errors: null,
     };
@@ -326,11 +327,20 @@ export class AdminController {
   @Get('/users')
   @Authorization()
   @Admin()
-  public async getUsers(): Promise<any> {
+  public async getUsers(
+    @Query() body: { limit?: number; page?: number; },
+  ): Promise<any> {
+    const limit = Math.max(0, body.limit)
+    const offset = limit * (Math.max(1, body.page) - 1);
+
     const usersResponse: any =
       await firstValueFrom(
-        this.userServiceClient.send('user_get_all', {}),
+        this.userServiceClient.send('user_get_all', {
+          offset: offset,
+          limit: limit,
+        }),
       );
+
 
     if (usersResponse.status !== HttpStatus.OK) {
       throw new HttpException(
@@ -347,6 +357,7 @@ export class AdminController {
       errors: null,
       data: {
         users: usersResponse.users,
+        total: usersResponse.total,
       },
     };
   }
@@ -357,7 +368,8 @@ export class AdminController {
   public async getAdminLives(
     @Query() { limit, page }: any,
   ): Promise<any> {
-    const offset = limit * (page - 1);
+    limit = Math.max(0, limit)
+    const offset = limit * (Math.max(1, page) - 1);
 
     const livesResponse: any =
       await firstValueFrom(
@@ -374,6 +386,7 @@ export class AdminController {
       message: livesResponse.message,
       data: {
         lives: livesResponse.lives,
+        total: livesResponse.total,
       },
       errors: null,
     };

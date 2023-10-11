@@ -12,6 +12,7 @@ import {
   HttpStatus,
   UseInterceptors,
   UploadedFiles,
+  Query,
 } from '@nestjs/common';
 import { firstValueFrom } from 'rxjs';
 import { ClientProxy } from '@nestjs/microservices';
@@ -71,25 +72,28 @@ export class MediasController {
     type: GetMediasResponseDto,
   })
   public async getMedias(
-    @Param() body: { all?: boolean; limit?: number; offset?: number; },
+    @Query() body: { limit?: number; page?: number; },
   ): Promise<GetMediasResponseDto> {
 
+    const limit = Math.max(0, body.limit)
+    const offset = limit * (Math.max(1, body.page) - 1);
     const mediasResponse: IServiceMediaSearchByUserIdResponse =
       await firstValueFrom(
         this.mediaServiceClient.send('media_get_all', {
-          limit: body.limit,
-          offset: body.offset,
+          limit: limit,
+          offset: offset,
           all: false,
           is_deleted: false,
           allUser: false,
           isConfirmed: true,
         }),
       );
-
+    Math.ceil(total / limit)
     return {
       message: mediasResponse.message,
       data: {
         medias: mediasResponse.medias,
+        total: mediasResponse.total,
       },
       errors: null,
     };

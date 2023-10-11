@@ -22,6 +22,7 @@ export class GetLivesResponseDto {
   })
   data: {
     lives: ILive[];
+    total?: number;
   };
   @ApiProperty({ example: 'null' })
   errors: { [key: string]: any };

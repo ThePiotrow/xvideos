@@ -63,6 +63,7 @@ export class LivesController {
       message: livesResponse.message,
       data: {
         lives: livesResponse.lives,
+        total: livesResponse.total,
       },
       errors: null,
     };
